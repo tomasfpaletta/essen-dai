@@ -1,0 +1,98 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap');
+
+:root {
+  --color-teal:   #58A39D;
+  --color-aqua:   #89BCAF;
+  --color-lila:   #BB9EC5;
+  --color-texto:  #1A3330;
+  --color-fondo:  #F4FAF8;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background: var(--color-fondo);
+  color: var(--color-texto);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--color-fondo); }
+::-webkit-scrollbar-thumb { background: var(--color-teal); border-radius: 2px; }
+
+/* Heading font utility */
+.font-heading {
+  font-family: 'Fredoka One', cursive;
+}
+
+/* Display sizes */
+.display-number {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(56px, 9vw, 120px);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.display-hero {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(56px, 10vw, 140px);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+
+/* Bento card hover */
+.bento-card {
+  transition: box-shadow 0.25s, transform 0.25s;
+}
+.bento-card:hover {
+  box-shadow: 0 8px 32px rgba(88, 163, 157, 0.18);
+  transform: translateY(-2px);
+}
+
+/* Dash decoration (del manual) */
+.dash {
+  display: inline-block;
+  border-radius: 999px;
+  opacity: 0.18;
+}
+
+/* Reveal animation */
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Marquee */
+@keyframes marquee {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.animate-marquee      { animation: marquee 30s linear infinite; }
+.animate-marquee-slow { animation: marquee 50s linear infinite; }
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-up { animation: fade-up 0.6s ease-out forwards; }
