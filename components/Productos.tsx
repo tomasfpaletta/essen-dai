@@ -15,8 +15,8 @@ function BentoCard({ p, size = "normal" }: { p: Producto; size?: "large" | "norm
     <a href={waLink(p)} target="_blank" rel="noopener noreferrer"
       className={`bento-card group relative flex flex-col bg-fondo-card border border-teal/15 overflow-hidden rounded-2xl h-full ${isLarge ? "md:flex-row" : ""}`}>
 
-      {/* Teal accent line top */}
-      <div className="h-[3px] w-full bg-gradient-to-r from-teal via-aqua to-lila flex-shrink-0" />
+      {/* Teal accent line top — absolute para no romper el flex-row del card grande */}
+      <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-teal via-aqua to-lila z-10" />
 
       {/* Badges */}
       {p.badge && (
