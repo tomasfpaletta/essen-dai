@@ -160,7 +160,7 @@ export default function ClientePage() {
       const res = await fetch('/api/admin/submit-pr', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cliente: clienteData, descripcion }),
+        body: JSON.stringify({ cliente: clienteData, descripcion: description }),
       })
       const data = await res.json()
       if (res.ok) {
