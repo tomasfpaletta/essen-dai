@@ -4,9 +4,10 @@ import { usePathname, useRouter } from 'next/navigation'
 import { useState } from 'react'
 
 const NAV = [
-  { href: '/admin/dashboard',          label: 'Inicio',          icon: '🏠' },
-  { href: '/admin/dashboard/cliente',  label: 'Configuración',   icon: '⚙️' },
-  { href: '/admin/dashboard/productos',label: 'Productos',       icon: '📦' },
+  { href: '/admin/dashboard',           label: 'Inicio',        icon: '🏠' },
+  { href: '/admin/dashboard/contenido', label: 'Contenido web', icon: '✏️' },
+  { href: '/admin/dashboard/productos', label: 'Productos',     icon: '📦' },
+  { href: '/admin/dashboard/cliente',   label: 'Configuración', icon: '⚙️' },
 ]
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {

@@ -70,46 +70,46 @@ export default function Hero() {
         {/* Badge */}
         <div className="inline-flex items-center gap-2 bg-teal/10 border border-teal/20 rounded-full px-4 py-1.5 mb-8">
           <span className="w-1.5 h-1.5 bg-teal rounded-full" />
-          <span className="text-teal-dark text-xs font-semibold tracking-widest uppercase">Distribuidora Oficial · CABA</span>
+          <span className="text-teal-dark text-xs font-semibold tracking-widest uppercase">{Cliente.hero.badge}</span>
         </div>
 
         {/* Headline */}
         <h1 className="display-hero text-texto mb-3 leading-none">
-          COCINÁS
+          {Cliente.hero.titulo1}
         </h1>
         <h1 className="display-hero text-teal mb-3 leading-none">
-          MEJOR.
+          {Cliente.hero.titulo2}
         </h1>
         <h2 className="font-heading text-lila text-3xl sm:text-4xl mb-8 leading-tight">
-          Vivís mejor.
+          {Cliente.hero.subtitulo}
         </h2>
 
         <p className="text-texto-muted text-lg max-w-md mb-10 font-light leading-relaxed">
-          Productos Essen originales con entrega a todo Argentina.<br />
-          Atención de Daisy, directa y sin intermediarios.
+          {Cliente.hero.descripcion.split('\n').map((line, i) => (
+            <span key={i}>{line}{i < Cliente.hero.descripcion.split('\n').length - 1 && <br />}</span>
+          ))}
         </p>
 
         {/* Buttons */}
         <div className="flex flex-wrap gap-4">
           <a href="#productos"
             className="bg-teal text-white font-bold px-8 py-4 rounded-full hover:bg-teal-dark transition-all text-sm tracking-wide shadow-md shadow-teal/25">
-            Ver productos
+            {Cliente.hero.cta1Texto}
           </a>
           <a href={waHref} target="_blank" rel="noopener noreferrer"
             className="border-2 border-teal/40 text-teal font-semibold px-8 py-4 rounded-full hover:border-teal hover:bg-teal/5 transition-all text-sm">
-            Hablar con Daisy
+            {Cliente.hero.cta2Texto}
           </a>
         </div>
 
         {/* Stats */}
         <div className="flex items-center gap-4 mt-14 text-texto-light text-sm flex-wrap">
-          <span>150+ clientes</span>
-          <span className="w-1 h-1 bg-lila rounded-full" />
-          <span>5 años vendiendo Essen</span>
-          <span className="w-1 h-1 bg-lila rounded-full" />
-          <span>Envío gratis a todo el país</span>
-          <span className="w-1 h-1 bg-lila rounded-full" />
-          <span>2 años de garantía oficial</span>
+          {Cliente.hero.stats.map((stat, i) => (
+            <span key={i} className="flex items-center gap-4">
+              {stat}
+              {i < Cliente.hero.stats.length - 1 && <span className="w-1 h-1 bg-lila rounded-full" />}
+            </span>
+          ))}
         </div>
       </div>
 

@@ -64,6 +64,24 @@ export default function ProductosPage() {
     setHasChanges(true)
   }
 
+  function removeVariante(productId: string, idx: number) {
+    setItems(prev => prev.map(p => {
+      if (p.id !== productId) return p
+      const variantes = p.variantes.filter((_, i) => i !== idx)
+      return { ...p, variantes }
+    }))
+    setHasChanges(true)
+  }
+
+  function addVariante(productId: string) {
+    setItems(prev => prev.map(p => {
+      if (p.id !== productId) return p
+      const newVariante: VarianteEdit = { color: 'Nuevo', hex: '#CCCCCC', imagen: '' }
+      return { ...p, variantes: [...p.variantes, newVariante] }
+    }))
+    setHasChanges(true)
+  }
+
   async function handleImageUpload(file: File, productId: string, varIdx: number) {
     const product  = items.find(p => p.id === productId)
     if (!product) return
@@ -171,8 +189,8 @@ export default function ProductosPage() {
             {/* Panel de edición */}
             {expandedId === p.id && (
               <div className="border-t border-teal/10 p-5 bg-fondo/40 space-y-5">
-                {/* Nombre y badge */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Nombre, badge y categoría */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div>
                     <label className="text-xs font-medium text-texto-muted mb-1.5 block">Nombre</label>
                     <input
@@ -180,6 +198,18 @@ export default function ProductosPage() {
                       onChange={e => updateProduct(p.id, { nombre: e.target.value })}
                       className="w-full px-3 py-2 text-sm rounded-xl border border-teal/20 focus:outline-none focus:border-teal bg-white text-texto"
                     />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-texto-muted mb-1.5 block">Categoría</label>
+                    <select
+                      value={p.categoria}
+                      onChange={e => updateProduct(p.id, { categoria: e.target.value as Producto['categoria'] })}
+                      className="w-full px-3 py-2 text-sm rounded-xl border border-teal/20 focus:outline-none focus:border-teal bg-white text-texto"
+                    >
+                      {categorias.filter(c => c.value !== 'todos').map(c => (
+                        <option key={c.value} value={c.value}>{c.label}</option>
+                      ))}
+                    </select>
                   </div>
                   <div>
                     <label className="text-xs font-medium text-texto-muted mb-1.5 block">
@@ -254,62 +284,91 @@ export default function ProductosPage() {
                   </div>
                 </div>
 
-                {/* Imágenes por color */}
+                {/* Variantes / colores */}
                 <div>
                   <label className="text-xs font-medium text-texto-muted mb-3 block">
-                    Fotos por color
+                    Colores y fotos disponibles
                   </label>
-                  <div className="flex flex-wrap gap-4">
+                  <div className="space-y-3">
                     {p.variantes.map((v, idx) => (
-                      <div key={v.color} className="flex flex-col items-center gap-2">
-                        {/* Preview */}
-                        <div className="relative w-20 h-20 rounded-xl overflow-hidden bg-white border-2 border-teal/15 flex items-center justify-center">
+                      <div key={idx} className="flex gap-3 items-start bg-white rounded-xl p-3 border border-teal/10">
+                        {/* Preview imagen */}
+                        <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-fondo border border-teal/15 flex items-center justify-center flex-shrink-0">
                           {v.preview || v.imagen ? (
                             // eslint-disable-next-line @next/next/no-img-element
-                            <img
-                              src={v.preview || v.imagen}
-                              alt={v.color}
-                              className="w-full h-full object-contain"
-                            />
+                            <img src={v.preview || v.imagen} alt={v.color} className="w-full h-full object-contain" />
                           ) : (
-                            <span className="text-2xl text-texto-light">📷</span>
+                            <span className="text-xl text-texto-light">📷</span>
                           )}
                           {v.uploading && (
                             <div className="absolute inset-0 bg-white/85 flex items-center justify-center">
-                              <p className="text-xs text-teal font-medium">Subiendo...</p>
+                              <p className="text-xs text-teal font-medium">...</p>
                             </div>
                           )}
                         </div>
 
-                        {/* Color */}
-                        <div className="flex items-center gap-1">
-                          <span
-                            className="w-3 h-3 rounded-full border border-white shadow-sm flex-shrink-0"
-                            style={{ background: v.hex }}
-                          />
-                          <span className="text-xs text-texto-muted">{v.color}</span>
+                        {/* Datos del color */}
+                        <div className="flex-1 grid grid-cols-2 gap-2">
+                          <div>
+                            <label className="text-xs text-texto-light mb-1 block">Nombre del color</label>
+                            <input
+                              value={v.color}
+                              onChange={e => updateVariante(p.id, idx, { color: e.target.value })}
+                              className="w-full px-2 py-1.5 text-xs rounded-lg border border-teal/20 focus:outline-none focus:border-teal bg-fondo text-texto"
+                              placeholder="Rosa"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-xs text-texto-light mb-1 block">Color (hex)</label>
+                            <div className="flex gap-1.5">
+                              <input
+                                type="color"
+                                value={v.hex}
+                                onChange={e => updateVariante(p.id, idx, { hex: e.target.value })}
+                                className="w-8 h-8 rounded-lg border border-teal/20 cursor-pointer p-0.5 bg-white"
+                              />
+                              <input
+                                value={v.hex}
+                                onChange={e => updateVariante(p.id, idx, { hex: e.target.value })}
+                                className="flex-1 px-2 py-1.5 text-xs rounded-lg border border-teal/20 focus:outline-none focus:border-teal bg-fondo text-texto font-mono"
+                                placeholder="#FFB6C1"
+                              />
+                            </div>
+                          </div>
+                          <div className="col-span-2">
+                            <label className="cursor-pointer text-xs text-teal hover:text-teal-dark font-medium transition-colors">
+                              {v.imagen ? '📷 Cambiar foto' : '📷 Subir foto'}
+                              <input type="file" accept="image/*" className="hidden" disabled={v.uploading}
+                                onChange={e => {
+                                  const file = e.target.files?.[0]
+                                  if (file) handleImageUpload(file, p.id, idx)
+                                  e.target.value = ''
+                                }} />
+                            </label>
+                            {v.imagen && <span className="text-xs text-texto-light ml-2">{v.imagen.split('/').pop()}</span>}
+                          </div>
                         </div>
 
-                        {/* Upload */}
-                        <label className="cursor-pointer text-xs text-teal hover:text-teal-dark font-medium transition-colors">
-                          {v.imagen ? 'Cambiar foto' : '+ Subir foto'}
-                          <input
-                            type="file"
-                            accept="image/*"
-                            className="hidden"
-                            disabled={v.uploading}
-                            onChange={e => {
-                              const file = e.target.files?.[0]
-                              if (file) handleImageUpload(file, p.id, idx)
-                              e.target.value = ''
-                            }}
-                          />
-                        </label>
+                        {/* Eliminar variante */}
+                        <button
+                          onClick={() => removeVariante(p.id, idx)}
+                          className="text-red-400 hover:text-red-600 hover:bg-red-50 p-1.5 rounded-lg transition-colors flex-shrink-0 text-xs"
+                          title="Eliminar color"
+                        >
+                          ✕
+                        </button>
                       </div>
                     ))}
                   </div>
-                  <p className="text-xs text-texto-light mt-3">
-                    Las fotos se convierten automáticamente a .webp y se guardan al subirse.
+
+                  <button
+                    onClick={() => addVariante(p.id)}
+                    className="mt-3 text-xs text-teal hover:text-teal-dark font-medium transition-colors"
+                  >
+                    + Agregar color
+                  </button>
+                  <p className="text-xs text-texto-light mt-2">
+                    Las fotos se convierten a .webp automáticamente al subirse.
                   </p>
                 </div>
               </div>
