@@ -1,0 +1,60 @@
+// ─────────────────────────────────────────────────────────────────────────────
+//  Generators — producen el contenido de los archivos TypeScript del proyecto
+//  a partir de los datos editados en el panel admin
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Genera el contenido de config/cliente.ts */
+export function generateClienteTs(data: Record<string, unknown>): string {
+  return `// ─────────────────────────────────────────────────────────────────────────────
+//  CLIENTE — Configuración central del sitio
+//  Última actualización: panel de administración
+// ─────────────────────────────────────────────────────────────────────────────
+export const Cliente = ${JSON.stringify(data, null, 2)} as const;
+
+export type ClienteType = typeof Cliente;
+`
+}
+
+/** Genera el contenido de lib/products.ts */
+export function generateProductsTs(
+  hex: Record<string, string>,
+  productos: unknown[],
+  categorias: Array<{ value: string; label: string }>
+): string {
+  const catValues = categorias
+    .filter(c => c.value !== 'todos')
+    .map(c => `"${c.value}"`)
+    .join(' | ')
+
+  return `export type Categoria = "todos" | ${catValues};
+export type Variante = { color: string; hex: string; imagen: string };
+export type Producto = {
+  id: string;
+  nombre: string;
+  descripcion: string;
+  categoria: Exclude<Categoria, "todos">;
+  tags: string[];
+  variantes: Variante[];
+  descuento?: number;
+  ofertaEspecial?: boolean;
+  destacado?: boolean;
+  badge?: string;
+  stockBajo?: boolean;
+};
+
+export const HEX: Record<string, string> = ${JSON.stringify(hex, null, 2)};
+
+export const productos: Producto[] = ${JSON.stringify(productos, null, 2)};
+
+export function getProductoById(id: string): Producto | undefined {
+  return productos.find((p) => p.id === id);
+}
+
+export function getProductosByCategoria(cat: Categoria): Producto[] {
+  if (cat === "todos") return productos;
+  return productos.filter((p) => p.categoria === cat);
+}
+
+export const categorias: { value: Categoria; label: string }[] = ${JSON.stringify(categorias, null, 2)};
+`
+}
