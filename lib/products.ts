@@ -85,7 +85,7 @@ export const productos: Producto[] = [
   {
     "id": "flip-22",
     "nombre": "Testeando",
-    "categoria": "contemporanea",
+    "categoria": "bazar",
     "descripcion": "1Test",
     "tags": [
       "1Test"
