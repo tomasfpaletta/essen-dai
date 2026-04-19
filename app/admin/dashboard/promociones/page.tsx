@@ -1,5 +1,6 @@
 'use client'
-import { useState } from 'react'
+import { useState, useRef } from 'react'
+import Image from 'next/image'
 import { promocionesBanner, promocionesItems, type PromoItem, type PromocionesConfig } from '@/config/promociones'
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -72,6 +73,109 @@ function Textarea({ value, onChange, rows = 3 }: { value: string; onChange: (v: 
       rows={rows}
       className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm resize-none focus:outline-none focus:border-teal/50"
     />
+  )
+}
+
+// ── Image Uploader ────────────────────────────────────────────────────────────
+function PromoImageUploader({
+  itemId, value, onChange,
+}: {
+  itemId: string
+  value: string
+  onChange: (path: string) => void
+}) {
+  const inputRef = useRef<HTMLInputElement>(null)
+  const [uploading, setUploading] = useState(false)
+  const [error, setError] = useState('')
+
+  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploading(true)
+    setError('')
+    try {
+      const form = new FormData()
+      form.append('file', file)
+      form.append('filename', `promo-${itemId}-${file.name}`)
+      form.append('folder', 'promociones')
+      const res = await fetch('/api/admin/upload', { method: 'POST', body: form })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Error al subir')
+      onChange(data.path)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Error al subir imagen')
+    } finally {
+      setUploading(false)
+      if (inputRef.current) inputRef.current.value = ''
+    }
+  }
+
+  return (
+    <div>
+      <p className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-2">Imagen</p>
+      <div className="flex items-start gap-4">
+        {/* Preview */}
+        <div
+          className="w-24 h-24 rounded-xl border-2 border-dashed border-gray-200 flex items-center justify-center overflow-hidden flex-shrink-0 cursor-pointer hover:border-teal/40 transition-colors bg-gray-50"
+          onClick={() => inputRef.current?.click()}
+        >
+          {value ? (
+            <Image src={value} alt="preview" width={96} height={96} className="w-full h-full object-cover" />
+          ) : (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-8 h-8 text-gray-300">
+              <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
+              <polyline points="21 15 16 10 5 21"/>
+            </svg>
+          )}
+        </div>
+
+        {/* Buttons */}
+        <div className="flex flex-col gap-2 justify-center pt-1">
+          <button
+            type="button"
+            onClick={() => inputRef.current?.click()}
+            disabled={uploading}
+            className="inline-flex items-center gap-2 bg-teal/10 text-teal font-semibold px-4 py-2 rounded-xl text-sm hover:bg-teal/20 transition-colors disabled:opacity-50"
+          >
+            {uploading ? (
+              <>
+                <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48 2.83 2.83"/>
+                </svg>
+                Subiendo…
+              </>
+            ) : (
+              <>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+                {value ? 'Cambiar imagen' : 'Subir imagen'}
+              </>
+            )}
+          </button>
+          {value && (
+            <button
+              type="button"
+              onClick={() => onChange('')}
+              className="text-xs text-red-400 hover:text-red-600 text-left px-1 transition-colors"
+            >
+              Quitar imagen
+            </button>
+          )}
+          <p className="text-xs text-gray-400">PNG, JPG o WebP · máx. recomendado 2MB</p>
+        </div>
+      </div>
+
+      {error && <p className="text-xs text-red-500 mt-2">{error}</p>}
+
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleFile}
+      />
+    </div>
   )
 }
 
@@ -364,19 +468,11 @@ export default function PromocionesPage() {
                   {/* Mini preview */}
                   {/* Imagen */}
                   <div className="sm:col-span-2">
-                    <Field label="Imagen (ruta desde /public, ej: /images/promociones/nuit.webp)">
-                      <Input
-                        value={item.imagen}
-                        onChange={v => patchItem(item.id, 'imagen', v)}
-                        placeholder="/images/promociones/mi-imagen.webp"
-                      />
-                    </Field>
-                    {item.imagen && (
-                      <div className="mt-2 w-24 h-24 rounded-xl overflow-hidden border border-gray-200 relative">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={item.imagen} alt="preview" className="w-full h-full object-cover" />
-                      </div>
-                    )}
+                    <PromoImageUploader
+                      itemId={item.id}
+                      value={item.imagen}
+                      onChange={v => patchItem(item.id, 'imagen', v)}
+                    />
                   </div>
 
                   <div className="sm:col-span-2">
