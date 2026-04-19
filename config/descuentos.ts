@@ -14,7 +14,7 @@ export type Descuento = {
 export const descuentos: Descuento[] = [
   {
     banco: "Banco Nación",
-    logo: "🏦",
+    logo: "/images/bancos/Banco_Nación.svg.webp",
     descuento: "3 cuotas sin interés",
     condicion: "Todos los días",
     color: "#003087",
@@ -22,7 +22,7 @@ export const descuentos: Descuento[] = [
   },
   {
     banco: "Banco Galicia",
-    logo: "🟠",
+    logo: "/images/bancos/Banco_galicia_logo.webp",
     descuento: "15% OFF",
     condicion: "Jueves y viernes",
     color: "#FF6B00",
@@ -30,11 +30,59 @@ export const descuentos: Descuento[] = [
   },
   {
     banco: "BBVA",
-    logo: "🔵",
+    logo: "/images/bancos/png-clipart-bbva-los-molinos-logo-brand-product-honeywell-logo-blue-text-thumbnail.webp",
     descuento: "20% OFF",
     condicion: "Martes y miércoles",
     color: "#004481",
     activo: true,
+  },
+  {
+    banco: "Santander",
+    logo: "/images/bancos/Santander_Logo.webp",
+    descuento: "",
+    condicion: "",
+    color: "#EC0000",
+    activo: false,
+  },
+  {
+    banco: "Banco Macro",
+    logo: "/images/bancos/Logo_Banco_Macro.svg.webp",
+    descuento: "",
+    condicion: "",
+    color: "#FFD100",
+    activo: false,
+  },
+  {
+    banco: "Banco Provincia",
+    logo: "/images/bancos/Banco_Provincia.svg.webp",
+    descuento: "",
+    condicion: "",
+    color: "#0072BC",
+    activo: false,
+  },
+  {
+    banco: "ICBC",
+    logo: "/images/bancos/ICBC_Argentina.webp",
+    descuento: "",
+    condicion: "",
+    color: "#C8102E",
+    activo: false,
+  },
+  {
+    banco: "Mercado Pago",
+    logo: "/images/bancos/Mercado_Pago.svg.webp",
+    descuento: "",
+    condicion: "",
+    color: "#009EE3",
+    activo: false,
+  },
+  {
+    banco: "Naranja X",
+    logo: "/images/bancos/Naranja_X.webp",
+    descuento: "",
+    condicion: "",
+    color: "#FF5200",
+    activo: false,
   },
 ]
 
