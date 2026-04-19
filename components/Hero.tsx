@@ -1,7 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
 import { Cliente } from "@/config/cliente";
-import { categorias } from "@/lib/products";
 
 export default function Hero() {
   const [visible, setVisible] = useState(false);
@@ -41,26 +40,6 @@ export default function Hero() {
         style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
           backgroundSize: "200px" }} />
 
-      {/* ── Category pills (tipo Dribbble) ── */}
-      <div
-        className={`absolute top-28 left-0 right-0 flex justify-center gap-2 px-6 flex-wrap transition-all duration-700 delay-200 ${visible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"}`}
-      >
-        {categorias.filter(c => c.value !== "todos").map((c, i) => (
-          <a
-            key={c.value}
-            href="#productos"
-            className="px-4 py-1.5 rounded-full text-xs font-semibold border transition-all"
-            style={{
-              background: i === 0 ? "rgba(88,163,157,0.2)" : "rgba(255,255,255,0.05)",
-              borderColor: i === 0 ? "rgba(88,163,157,0.5)" : "rgba(255,255,255,0.1)",
-              color: i === 0 ? "#58A39D" : "rgba(255,255,255,0.5)",
-            }}
-          >
-            {c.label}
-          </a>
-        ))}
-      </div>
-
       {/* ── Main content — centrado ── */}
       <div className={`relative z-10 text-center px-6 sm:px-12 max-w-5xl mx-auto transition-all duration-700 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}>
 
@@ -84,7 +63,7 @@ export default function Hero() {
           {Cliente.hero.subtitulo}
         </h2>
 
-        <p className="text-base sm:text-lg max-w-lg mx-auto mb-10 font-light leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>
+        <p className="text-base sm:text-lg max-w-lg mx-auto mb-10 font-light leading-relaxed" style={{ color: "rgba(255,255,255,0.72)" }}>
           {Cliente.hero.descripcion.split('\n').map((line, i, arr) => (
             <span key={i}>{line}{i < arr.length - 1 && <br />}</span>
           ))}
@@ -108,7 +87,7 @@ export default function Hero() {
         <div className="flex items-center justify-center gap-3 sm:gap-6 mt-16 flex-wrap">
           {Cliente.hero.stats.map((stat, i) => (
             <span key={i} className="flex items-center gap-3 sm:gap-6">
-              <span className="text-sm font-medium" style={{ color: "rgba(255,255,255,0.35)" }}>{stat}</span>
+              <span className="text-sm font-medium" style={{ color: "rgba(255,255,255,0.65)" }}>{stat}</span>
               {i < Cliente.hero.stats.length - 1 && (
                 <span className="w-1 h-1 rounded-full flex-shrink-0" style={{ background: "rgba(187,158,197,0.4)" }} />
               )}
