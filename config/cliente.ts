@@ -6,7 +6,7 @@ export const Cliente = {
   "nombre": "Daisy Benítez",
   "marca": "Essen Dai",
   "slogan": "Cocinás mejor. Vivís mejor.",
-  "descripcionCorta": "Distribuidora oficial Essen en Buenos Aires",
+  "descripcionCorta": "sdf",
   "ciudad": "Ciudad Autónoma de Buenos Aires",
   "provincia": "Buenos Aires",
   "pais": "Argentina",
@@ -46,27 +46,6 @@ export const Cliente = {
     "secondary": "#89BCAF",
     "accent": "#BB9EC5",
     "dark": "#1A3330"
-  },
-  "hero": {
-    "badge": "Distribuidora Oficial · CABA",
-    "titulo1": "COCINÁS",
-    "titulo2": "MEJOR.",
-    "subtitulo": "Vivís mejor.",
-    "descripcion": "Productos Essen originales con entrega a todo Argentina.\nAtención de Daisy, directa y sin intermediarios.",
-    "cta1Texto": "Ver productos",
-    "cta2Texto": "Hablar con Daisy",
-    "stats": [
-      "150+ clientes",
-      "5 años vendiendo Essen",
-      "Envío gratis a todo el país",
-      "2 años de garantía oficial"
-    ],
-    "imagen": ""
-  },
-  "imagenes": {
-    "og": "",
-    "navbarLogo": "",
-    "favicon": ""
   }
 } as const;
 
