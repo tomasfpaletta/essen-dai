@@ -66,13 +66,24 @@ function ProductoCard({ p }: { p: Producto }) {
 
       <div className="bg-white rounded-2xl border border-teal/15 overflow-hidden flex flex-col group hover:shadow-xl hover:shadow-teal/10 hover:-translate-y-0.5 transition-all duration-300">
 
-        {/* Imagen */}
+        {/* Imagen — aspect-square con overflow-hidden garantiza que no salga del borde */}
         <div
-          className={`relative w-full bg-white ${tieneImagen ? "cursor-zoom-in" : ""}`}
-          style={{ paddingBottom: "100%" }}
+          className={`relative aspect-square overflow-hidden ${tieneImagen ? "cursor-zoom-in" : ""}`}
           onClick={() => tieneImagen && setLightbox(true)}
         >
-          {/* Badge */}
+          {tieneImagen ? (
+            <Image
+              src={variante.imagen}
+              alt={`${p.nombre} — ${variante.color}`}
+              fill
+              className="object-cover transition-transform duration-500 group-hover:scale-105"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            />
+          ) : (
+            <ImagenPlaceholder />
+          )}
+
+          {/* Badges sobre la imagen */}
           {p.badge && (
             <span className="absolute top-3 right-3 bg-teal text-white text-xs font-bold px-2.5 py-1 rounded-full z-10 shadow-sm">
               {p.badge}
@@ -84,24 +95,15 @@ function ProductoCard({ p }: { p: Producto }) {
             </span>
           )}
           {!p.badge && !p.descuento && p.stockBajo && (
-            <span className="absolute top-3 right-3 border border-teal/40 text-teal text-xs font-semibold px-2.5 py-1 rounded-full z-10 bg-white">
+            <span className="absolute top-3 right-3 border border-white/60 text-white text-xs font-semibold px-2.5 py-1 rounded-full z-10 bg-black/20 backdrop-blur-sm">
               Últimas unidades
             </span>
           )}
 
-          <div className="absolute inset-0">
-            {tieneImagen ? (
-              <Image
-                src={variante.imagen}
-                alt={`${p.nombre} — ${variante.color}`}
-                fill
-                className="object-cover"
-                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              />
-            ) : (
-              <ImagenPlaceholder />
-            )}
-          </div>
+          {/* Gradiente sutil inferior para que el contenido no choque */}
+          {tieneImagen && (
+            <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
+          )}
         </div>
 
         {/* Info */}
@@ -172,7 +174,7 @@ export default function Productos() {
   const filtered = cat === "todos" ? productos : productos.filter(p => p.categoria === cat);
 
   return (
-    <section id="productos" className="py-24 bg-white px-6 sm:px-12 lg:px-20">
+    <section id="productos" className="py-24 bg-gradient-to-b from-white via-fondo/40 to-white px-6 sm:px-12 lg:px-20">
       <div className="max-w-7xl mx-auto">
 
         {/* Header */}

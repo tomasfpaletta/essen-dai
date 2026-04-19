@@ -262,15 +262,45 @@ export default function ProductosPage() {
             {/* Encabezado del producto */}
             <button
               onClick={() => setExpandedId(expandedId === p.id ? null : p.id)}
-              className="w-full flex items-center gap-4 p-4 hover:bg-fondo transition-colors text-left"
+              className={`w-full flex items-center gap-4 p-4 transition-colors text-left ${expandedId === p.id ? 'bg-teal/5' : 'hover:bg-fondo'}`}
             >
-              <div className="w-10 h-10 bg-teal/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                <span className="text-teal font-bold text-sm">{p.nombre.slice(0, 2).toUpperCase()}</span>
+              {/* Thumbnail de la primera variante con imagen, o iniciales */}
+              <div className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0 border border-teal/15 bg-fondo">
+                {p.variantes.find(v => v.imagen) ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={p.variantes.find(v => v.imagen)!.imagen}
+                    alt={p.nombre}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-teal/10">
+                    <span className="text-teal font-bold text-sm">{p.nombre.slice(0, 2).toUpperCase()}</span>
+                  </div>
+                )}
               </div>
+
               <div className="flex-1 min-w-0">
-                <p className="font-semibold text-texto text-sm leading-tight">{p.nombre}</p>
-                <p className="text-texto-muted text-xs truncate mt-0.5">{p.descripcion}</p>
+                <div className="flex items-center gap-2 mb-0.5">
+                  <p className="font-semibold text-texto text-sm leading-tight">{p.nombre}</p>
+                  {expandedId === p.id && (
+                    <span className="text-xs bg-teal text-white px-2 py-0.5 rounded-full font-medium">
+                      Editando
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-xs text-texto-light capitalize">{p.categoria}</span>
+                  {/* Dots de colores disponibles */}
+                  <div className="flex gap-1">
+                    {p.variantes.slice(0, 4).map(v => (
+                      <span key={v.color} className="w-2.5 h-2.5 rounded-full border border-white shadow-sm" style={{ background: v.hex }} title={v.color} />
+                    ))}
+                    {p.variantes.length > 4 && <span className="text-xs text-texto-light">+{p.variantes.length - 4}</span>}
+                  </div>
+                </div>
               </div>
+
               <div className="flex items-center gap-2 flex-shrink-0">
                 {p.destacado && (
                   <span className="hidden sm:block text-xs bg-teal/10 text-teal px-2 py-0.5 rounded-full">
@@ -278,17 +308,27 @@ export default function ProductosPage() {
                   </span>
                 )}
                 {p.descuento && (
-                  <span className="hidden sm:block text-xs bg-lila/10 text-lila-dark px-2 py-0.5 rounded-full">
+                  <span className="hidden sm:block text-xs bg-lila/10 text-lila px-2 py-0.5 rounded-full">
                     -{p.descuento}%
                   </span>
                 )}
-                <span className="text-texto-light text-sm">{expandedId === p.id ? '▲' : '▼'}</span>
+                <svg viewBox="0 0 20 20" fill="currentColor" className={`w-4 h-4 text-texto-light transition-transform ${expandedId === p.id ? 'rotate-180' : ''}`}>
+                  <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd"/>
+                </svg>
               </div>
             </button>
 
             {/* Panel de edición */}
             {expandedId === p.id && (
-              <div className="border-t border-teal/10 p-5 bg-fondo/40 space-y-5">
+              <div className="border-t-2 border-teal/30 bg-fondo/40">
+                {/* Header del editor */}
+                <div className="px-5 py-3 bg-teal/5 border-b border-teal/10 flex items-center gap-2">
+                  <svg viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5 text-teal">
+                    <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zm-1.207 1.207L2 14.172V17h2.828l10.38-10.379-2.83-2.828z"/>
+                  </svg>
+                  <p className="text-xs font-semibold text-teal">Editando: <span className="text-texto">{p.nombre}</span></p>
+                </div>
+              <div className="p-5 space-y-5">
                 {/* Nombre, badge y categoría */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div>
@@ -473,6 +513,7 @@ export default function ProductosPage() {
                     Las fotos se convierten a .webp automáticamente al subirse.
                   </p>
                 </div>
+              </div>
               </div>
             )}
           </div>
