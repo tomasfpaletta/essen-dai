@@ -14,7 +14,7 @@ export type Descuento = {
 export const descuentos: Descuento[] = [
   {
     banco: "Banco Nación",
-    logo: "/images/bancos/Banco_Nación.svg.webp",
+    logo: "/images/bancos/banco-nacion.webp",
     descuento: "3 cuotas sin interés",
     condicion: "Todos los días",
     color: "#003087",
@@ -22,7 +22,7 @@ export const descuentos: Descuento[] = [
   },
   {
     banco: "Banco Galicia",
-    logo: "/images/bancos/Banco_galicia_logo.webp",
+    logo: "/images/bancos/banco-galicia.webp",
     descuento: "15% OFF",
     condicion: "Jueves y viernes",
     color: "#FF6B00",
@@ -30,7 +30,7 @@ export const descuentos: Descuento[] = [
   },
   {
     banco: "BBVA",
-    logo: "/images/bancos/png-clipart-bbva-los-molinos-logo-brand-product-honeywell-logo-blue-text-thumbnail.webp",
+    logo: "/images/bancos/bbva.webp",
     descuento: "20% OFF",
     condicion: "Martes y miércoles",
     color: "#004481",
@@ -38,7 +38,7 @@ export const descuentos: Descuento[] = [
   },
   {
     banco: "Santander",
-    logo: "/images/bancos/Santander_Logo.webp",
+    logo: "/images/bancos/santander.webp",
     descuento: "",
     condicion: "",
     color: "#EC0000",
@@ -46,7 +46,7 @@ export const descuentos: Descuento[] = [
   },
   {
     banco: "Banco Macro",
-    logo: "/images/bancos/Logo_Banco_Macro.svg.webp",
+    logo: "/images/bancos/banco-macro.webp",
     descuento: "",
     condicion: "",
     color: "#FFD100",
@@ -54,7 +54,7 @@ export const descuentos: Descuento[] = [
   },
   {
     banco: "Banco Provincia",
-    logo: "/images/bancos/Banco_Provincia.svg.webp",
+    logo: "/images/bancos/banco-provincia.webp",
     descuento: "",
     condicion: "",
     color: "#0072BC",
@@ -62,7 +62,7 @@ export const descuentos: Descuento[] = [
   },
   {
     banco: "ICBC",
-    logo: "/images/bancos/ICBC_Argentina.webp",
+    logo: "/images/bancos/icbc.webp",
     descuento: "",
     condicion: "",
     color: "#C8102E",
@@ -70,7 +70,7 @@ export const descuentos: Descuento[] = [
   },
   {
     banco: "Mercado Pago",
-    logo: "/images/bancos/Mercado_Pago.svg.webp",
+    logo: "/images/bancos/mercado-pago.webp",
     descuento: "",
     condicion: "",
     color: "#009EE3",
@@ -78,7 +78,7 @@ export const descuentos: Descuento[] = [
   },
   {
     banco: "Naranja X",
-    logo: "/images/bancos/Naranja_X.webp",
+    logo: "/images/bancos/naranja-x.webp",
     descuento: "",
     condicion: "",
     color: "#FF5200",
