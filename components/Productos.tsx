@@ -65,8 +65,8 @@ function ProductoCard({ p }: { p: Producto }) {
         {/* Barra de color superior */}
         <div className="h-[3px] bg-gradient-to-r from-teal via-aqua to-lila" />
 
-        {/* Badges */}
-        <div className="relative">
+        {/* Badges + imagen */}
+        <div className="relative overflow-hidden">
           {p.badge && (
             <span className="absolute top-3 right-3 bg-teal text-white text-xs font-bold px-2.5 py-1 rounded-full z-10 shadow-sm">
               {p.badge}
@@ -85,7 +85,7 @@ function ProductoCard({ p }: { p: Producto }) {
 
           {/* Imagen */}
           <div
-            className={`aspect-square w-full relative bg-fondo overflow-hidden ${tieneImagen ? "cursor-zoom-in" : ""}`}
+            className={`aspect-square w-full relative bg-fondo overflow-hidden rounded-none ${tieneImagen ? "cursor-zoom-in" : ""}`}
             onClick={() => tieneImagen && setLightbox(true)}
             title={tieneImagen ? "Ver imagen grande" : undefined}
           >
