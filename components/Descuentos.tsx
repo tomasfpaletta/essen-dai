@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import { descuentos, descuentosConfig, type Descuento } from "@/config/descuentos";
 
 function BancoCard({ d }: { d: Descuento }) {
@@ -8,19 +9,28 @@ function BancoCard({ d }: { d: Descuento }) {
       style={{ background: `linear-gradient(135deg, ${d.color} 0%, ${d.color}CC 100%)` }}
     >
       {/* Círculo decorativo de fondo */}
-      <div
-        className="absolute -top-6 -right-6 w-28 h-28 rounded-full opacity-20"
-        style={{ background: "white" }}
-      />
-      <div
-        className="absolute -bottom-8 -left-4 w-20 h-20 rounded-full opacity-10"
-        style={{ background: "white" }}
-      />
+      <div className="absolute -top-6 -right-6 w-28 h-28 rounded-full opacity-20 bg-white" />
+      <div className="absolute -bottom-8 -left-4 w-20 h-20 rounded-full opacity-10 bg-white" />
 
-      {/* Banco */}
-      <p className="text-xs font-semibold uppercase tracking-widest opacity-80 relative z-10">
-        {d.banco}
-      </p>
+      {/* Logo del banco */}
+      <div className="relative z-10 h-10 flex items-center">
+        {d.logo ? (
+          <div className="bg-white/15 backdrop-blur-sm rounded-xl px-3 py-1.5 inline-flex items-center">
+            <Image
+              src={d.logo}
+              alt={d.banco}
+              width={100}
+              height={32}
+              className="h-6 w-auto object-contain"
+              style={{ filter: "brightness(0) invert(1)" }}
+            />
+          </div>
+        ) : (
+          <p className="text-xs font-semibold uppercase tracking-widest opacity-80">
+            {d.banco}
+          </p>
+        )}
+      </div>
 
       {/* Descuento — el protagonista */}
       <p className="font-heading text-4xl font-bold leading-none relative z-10">
