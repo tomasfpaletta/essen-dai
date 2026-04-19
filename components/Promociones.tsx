@@ -1,16 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { promocionesBanner, promocionesItems } from "@/config/promociones";
 import { Cliente } from "@/config/cliente";
-
-// Devuelve si el contraste debe ser claro u oscuro según el fondo
-function getTextContrast(hex: string): "light" | "dark" {
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-  return luminance > 0.55 ? "dark" : "light";
-}
 
 function hexToRgba(hex: string, alpha: number) {
   const r = parseInt(hex.slice(1, 3), 16);
@@ -19,21 +11,28 @@ function hexToRgba(hex: string, alpha: number) {
   return `rgba(${r},${g},${b},${alpha})`;
 }
 
+function getTextContrast(hex: string): "light" | "dark" {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.55 ? "dark" : "light";
+}
+
 export default function Promociones() {
   const config = promocionesBanner;
   const items = promocionesItems.filter((i) => i.activo);
-
-  // Controla el índice del item destacado (cambia automáticamente)
   const [active, setActive] = useState(0);
+
   useEffect(() => {
     if (items.length <= 1) return;
-    const id = setInterval(() => setActive((a) => (a + 1) % items.length), 4000);
+    const id = setInterval(() => setActive((a) => (a + 1) % items.length), 5000);
     return () => clearInterval(id);
   }, [items.length]);
 
   if (!config.visible || items.length === 0) return null;
 
   const activeItem = items[active];
+  const contrast = getTextContrast(activeItem.colorFondo);
   const waMsg = encodeURIComponent(
     `Hola Daisy! Vi la promo "${activeItem.titulo}" y me interesa saber más.`
   );
@@ -41,180 +40,173 @@ export default function Promociones() {
   return (
     <section
       id="promociones"
-      className="relative overflow-hidden"
+      className="relative overflow-hidden py-20"
       style={{
         background: `linear-gradient(${config.gradienteDireccion}, ${config.gradienteDesde}, ${config.gradienteHasta})`,
       }}
     >
-      {/* Subtle noise texture overlay */}
-      <div
-        className="absolute inset-0 opacity-[0.04] pointer-events-none"
-        style={{
-          backgroundImage:
-            "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
-          backgroundSize: "200px",
-        }}
-      />
+      {/* Background orbs */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-[600px] h-[600px] rounded-full blur-3xl opacity-20"
+          style={{ background: config.gradienteHasta }} />
+        <div className="absolute -bottom-40 -left-40 w-[400px] h-[400px] rounded-full blur-3xl opacity-15"
+          style={{ background: config.gradienteDesde }} />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full blur-3xl opacity-5 bg-white" />
+      </div>
 
-      {/* Decorative circle */}
-      <div
-        className="absolute -right-32 -top-32 w-[500px] h-[500px] rounded-full opacity-10 pointer-events-none"
-        style={{ background: config.gradienteHasta }}
-      />
-      <div
-        className="absolute -left-20 bottom-0 w-[300px] h-[300px] rounded-full opacity-10 pointer-events-none"
-        style={{ background: config.gradienteDesde }}
-      />
+      <div className="relative z-10 max-w-7xl mx-auto px-6 sm:px-12 lg:px-20">
 
-      <div className="relative z-10 max-w-7xl mx-auto px-6 sm:px-12 lg:px-20 py-20">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+        {/* ── Section label ── */}
+        <div className="flex items-center gap-3 mb-10">
+          <span className="inline-flex items-center gap-2 border rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-white"
+            style={{ borderColor: hexToRgba("#FFFFFF", 0.25), background: hexToRgba("#FFFFFF", 0.1) }}>
+            <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+            {config.badge}
+          </span>
+        </div>
 
-          {/* ── Left: Banner copy ── */}
-          <div>
-            <span
-              className="inline-block text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full mb-6 border"
+        <div className="grid lg:grid-cols-5 gap-6 items-stretch">
+
+          {/* ── Featured card (active item) ── */}
+          <div className="lg:col-span-3">
+            <div
+              key={activeItem.id}
+              className="relative rounded-3xl overflow-hidden h-full min-h-[340px] flex flex-col justify-between p-8 transition-all duration-500"
               style={{
-                background: hexToRgba("#FFFFFF", 0.12),
-                borderColor: hexToRgba("#FFFFFF", 0.25),
-                color: "#FFFFFF",
+                background: activeItem.colorFondo,
+                boxShadow: `0 32px 64px ${hexToRgba(activeItem.colorFondo, 0.5)}`,
               }}
             >
-              {config.badge}
-            </span>
+              {/* Glow ring */}
+              <div className="absolute inset-0 rounded-3xl"
+                style={{ boxShadow: `inset 0 1px 0 ${hexToRgba("#FFFFFF", 0.2)}` }} />
 
-            <h2 className="font-heading text-white text-4xl sm:text-5xl leading-tight mb-2">
-              {config.titulo}
-            </h2>
-            <p
-              className="text-2xl sm:text-3xl font-bold mb-5"
-              style={{ color: hexToRgba("#FFFFFF", 0.75) }}
-            >
-              {config.subtitulo}
-            </p>
-            <p
-              className="text-base leading-relaxed mb-8 max-w-md"
-              style={{ color: hexToRgba("#FFFFFF", 0.65) }}
-            >
-              {config.descripcion}
-            </p>
+              {/* Image — fondo decorativo si hay imagen */}
+              {activeItem.imagen && (
+                <div className="absolute inset-0 pointer-events-none">
+                  <Image
+                    src={activeItem.imagen}
+                    alt={activeItem.titulo}
+                    fill
+                    className="object-cover object-center opacity-20"
+                  />
+                  <div className="absolute inset-0"
+                    style={{ background: `linear-gradient(135deg, ${activeItem.colorFondo}FF 40%, ${activeItem.colorFondo}80 100%)` }} />
+                </div>
+              )}
 
-            <div className="flex flex-wrap gap-3">
-              <a
-                href={`${Cliente.whatsapp.link}?text=${waMsg}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-white text-[#1A3330] font-bold px-6 py-3 rounded-xl text-sm hover:scale-105 transition-transform shadow-lg"
-                style={{ color: config.gradienteDesde }}
-              >
-                Consultar por WhatsApp
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
-                  <path d="M11.99 2C6.477 2 2 6.477 2 12c0 1.99.583 3.842 1.591 5.393L2.046 22l4.726-1.515A9.96 9.96 0 0 0 11.99 22c5.523 0 10-4.477 10-10S17.513 2 11.99 2zm0 18c-1.71 0-3.3-.47-4.661-1.283l-3.265 1.046.997-3.181A7.942 7.942 0 0 1 4 12c0-4.411 3.589-8 7.99-8C16.41 4 20 7.589 20 12s-3.589 8-8.01 8z"/>
-                </svg>
-              </a>
-              <a
-                href={config.ctaLink}
-                className="inline-flex items-center gap-2 font-semibold px-6 py-3 rounded-xl text-sm border transition-all hover:bg-white/10"
-                style={{ color: "white", borderColor: hexToRgba("#FFFFFF", 0.3) }}
-              >
-                {config.ctaTexto} →
-              </a>
+              {/* Decorative circles */}
+              <div className="absolute -top-10 -right-10 w-48 h-48 rounded-full opacity-10 bg-white pointer-events-none" />
+              <div className="absolute -bottom-6 -left-6 w-32 h-32 rounded-full opacity-10 bg-white pointer-events-none" />
+
+              {/* Content */}
+              <div className="relative z-10">
+                <span
+                  className="inline-block text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-4"
+                  style={{
+                    background: hexToRgba("#FFFFFF", 0.2),
+                    color: contrast === "light" ? "#FFFFFF" : "#1A1A1A",
+                  }}
+                >
+                  {activeItem.badge}
+                </span>
+                <h3
+                  className="font-heading text-3xl sm:text-4xl leading-tight mb-3"
+                  style={{ color: contrast === "light" ? "#FFFFFF" : "#1A1A1A" }}
+                >
+                  {activeItem.titulo}
+                </h3>
+                <p
+                  className="text-base leading-relaxed max-w-sm"
+                  style={{ color: contrast === "light" ? hexToRgba("#FFFFFF", 0.75) : hexToRgba("#000000", 0.6) }}
+                >
+                  {activeItem.descripcion}
+                </p>
+              </div>
+
+              <div className="relative z-10 flex flex-wrap gap-3 mt-8">
+                <a
+                  href={`${Cliente.whatsapp.link}?text=${waMsg}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 bg-white font-bold px-5 py-2.5 rounded-xl text-sm hover:scale-105 transition-transform shadow-lg"
+                  style={{ color: activeItem.colorFondo }}
+                >
+                  Consultar →
+                </a>
+                <a
+                  href={config.ctaLink}
+                  className="inline-flex items-center gap-2 font-semibold px-5 py-2.5 rounded-xl text-sm border transition-all hover:bg-white/10"
+                  style={{
+                    color: contrast === "light" ? "white" : "#1A1A1A",
+                    borderColor: hexToRgba(contrast === "light" ? "#FFFFFF" : "#000000", 0.3),
+                  }}
+                >
+                  {config.ctaTexto}
+                </a>
+              </div>
             </div>
           </div>
 
-          {/* ── Right: Promo cards ── */}
-          <div className="flex flex-col gap-4">
-            {items.map((item, idx) => {
-              const isActive = idx === active;
-              const contrast = getTextContrast(item.colorFondo);
-              const textCol = contrast === "light" ? "#FFFFFF" : "#1A1A1A";
-              const subCol = contrast === "light"
-                ? hexToRgba("#FFFFFF", 0.7)
-                : hexToRgba("#000000", 0.55);
+          {/* ── Right: banner copy + item list ── */}
+          <div className="lg:col-span-2 flex flex-col justify-between gap-6">
 
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => setActive(idx)}
-                  className="text-left rounded-2xl p-5 transition-all duration-300 border"
-                  style={{
-                    background: isActive
-                      ? item.colorFondo
-                      : hexToRgba(item.colorFondo, 0.25),
-                    borderColor: isActive
-                      ? hexToRgba(item.colorFondo, 0.0)
-                      : hexToRgba("#FFFFFF", 0.15),
-                    transform: isActive ? "scale(1.02)" : "scale(1)",
-                    boxShadow: isActive
-                      ? `0 8px 32px ${hexToRgba(item.colorFondo, 0.4)}`
-                      : "none",
-                  }}
-                >
-                  <div className="flex items-start justify-between gap-4">
+            {/* Copy */}
+            <div>
+              <h2 className="font-heading text-white text-3xl sm:text-4xl leading-tight mb-2">
+                {config.titulo}
+              </h2>
+              <p className="font-bold text-xl mb-3" style={{ color: hexToRgba("#FFFFFF", 0.7) }}>
+                {config.subtitulo}
+              </p>
+              <p className="text-sm leading-relaxed" style={{ color: hexToRgba("#FFFFFF", 0.55) }}>
+                {config.descripcion}
+              </p>
+            </div>
+
+            {/* Item selector list */}
+            <div className="flex flex-col gap-2">
+              {items.map((item, idx) => {
+                const isActive = idx === active;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => setActive(idx)}
+                    className="text-left rounded-2xl px-4 py-3 transition-all duration-300 flex items-center gap-3"
+                    style={{
+                      background: isActive ? hexToRgba("#FFFFFF", 0.15) : hexToRgba("#FFFFFF", 0.05),
+                      borderLeft: `3px solid ${isActive ? "#FFFFFF" : hexToRgba("#FFFFFF", 0.2)}`,
+                    }}
+                  >
+                    {/* Color dot */}
+                    <div
+                      className="w-3 h-3 rounded-full flex-shrink-0 border-2 border-white/30"
+                      style={{ background: item.colorFondo }}
+                    />
                     <div className="flex-1 min-w-0">
-                      <span
-                        className="inline-block text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full mb-2"
-                        style={{
-                          background: hexToRgba("#FFFFFF", isActive ? 0.2 : 0.1),
-                          color: isActive ? textCol : "#FFFFFF",
-                        }}
-                      >
+                      <p className="text-sm font-semibold text-white truncate">{item.titulo}</p>
+                      <p className="text-xs truncate" style={{ color: hexToRgba("#FFFFFF", 0.5) }}>
                         {item.badge}
-                      </span>
-                      <h3
-                        className="font-heading text-lg leading-tight mb-1 transition-colors"
-                        style={{ color: isActive ? textCol : "#FFFFFF" }}
-                      >
-                        {item.titulo}
-                      </h3>
-                      <p
-                        className="text-sm leading-relaxed transition-colors"
-                        style={{ color: isActive ? subCol : hexToRgba("#FFFFFF", 0.6) }}
-                      >
-                        {item.descripcion}
                       </p>
                     </div>
+                    {isActive && (
+                      <div className="w-1.5 h-1.5 rounded-full bg-white flex-shrink-0 animate-pulse" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
 
-                    {/* Active indicator */}
-                    <div
-                      className="w-2 h-2 rounded-full flex-shrink-0 mt-1.5 transition-all"
-                      style={{
-                        background: isActive ? (contrast === "light" ? "#FFFFFF" : item.colorFondo) : hexToRgba("#FFFFFF", 0.3),
-                        boxShadow: isActive ? `0 0 8px ${hexToRgba("#FFFFFF", 0.6)}` : "none",
-                      }}
-                    />
-                  </div>
-
-                  {/* Progress bar when active */}
-                  {isActive && (
-                    <div
-                      className="mt-4 h-0.5 rounded-full overflow-hidden"
-                      style={{ background: hexToRgba("#FFFFFF", 0.2) }}
-                    >
-                      <div
-                        className="h-full rounded-full animate-progress"
-                        style={{ background: hexToRgba("#FFFFFF", 0.7) }}
-                      />
-                    </div>
-                  )}
-                </button>
-              );
-            })}
-
-            {/* Pagination dots */}
+            {/* Progress dots */}
             {items.length > 1 && (
-              <div className="flex gap-2 justify-center mt-2">
+              <div className="flex gap-2">
                 {items.map((_, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => setActive(idx)}
-                    className="rounded-full transition-all"
+                  <button key={idx} onClick={() => setActive(idx)}
+                    className="rounded-full transition-all duration-300"
                     style={{
-                      width: idx === active ? 20 : 6,
+                      width: idx === active ? 24 : 6,
                       height: 6,
-                      background: idx === active
-                        ? "rgba(255,255,255,0.9)"
-                        : "rgba(255,255,255,0.3)",
+                      background: idx === active ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.25)",
                     }}
                   />
                 ))}

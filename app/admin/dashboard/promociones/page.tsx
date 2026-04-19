@@ -362,6 +362,23 @@ export default function PromocionesPage() {
                     </Field>
                   </div>
                   {/* Mini preview */}
+                  {/* Imagen */}
+                  <div className="sm:col-span-2">
+                    <Field label="Imagen (ruta desde /public, ej: /images/promociones/nuit.webp)">
+                      <Input
+                        value={item.imagen}
+                        onChange={v => patchItem(item.id, 'imagen', v)}
+                        placeholder="/images/promociones/mi-imagen.webp"
+                      />
+                    </Field>
+                    {item.imagen && (
+                      <div className="mt-2 w-24 h-24 rounded-xl overflow-hidden border border-gray-200 relative">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={item.imagen} alt="preview" className="w-full h-full object-cover" />
+                      </div>
+                    )}
+                  </div>
+
                   <div className="sm:col-span-2">
                     <p className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-2">Vista previa</p>
                     <div
