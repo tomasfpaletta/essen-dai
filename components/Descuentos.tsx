@@ -29,13 +29,13 @@ function BancoCard({ d }: { d: Descuento }) {
       {/* Logo */}
       <div className="relative z-10">
         {d.logo ? (
-          <div className="bg-white rounded-xl px-3 py-2 inline-flex items-center shadow-md">
+          <div className="bg-white rounded-xl shadow-md w-32 h-10 flex items-center justify-center px-3 py-1.5">
             <Image
               src={d.logo}
               alt={d.banco}
               width={110}
-              height={36}
-              className="h-7 w-auto object-contain"
+              height={32}
+              className="max-h-7 max-w-full w-auto object-contain"
             />
           </div>
         ) : (
