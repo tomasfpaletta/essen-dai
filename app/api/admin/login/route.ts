@@ -12,6 +12,11 @@ export async function POST(req: Request) {
   }
 
   if (!password || password !== validPassword) {
+    console.error('[admin/login] Fallo —', {
+      passwordLen: password?.length,
+      validPasswordLen: validPassword?.length,
+      match: password === validPassword,
+    })
     await new Promise(r => setTimeout(r, 600))
     return NextResponse.json({ error: 'Contraseña incorrecta' }, { status: 401 })
   }

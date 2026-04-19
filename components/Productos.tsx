@@ -34,11 +34,15 @@ function Lightbox({ src, alt, onClose }: { src: string; alt: string; onClose: ()
 }
 
 // ── Placeholder cuando no hay imagen ─────────────────────────────────────────
-function ImagenPlaceholder({ categoria }: { categoria: string }) {
-  const emoji = categoria === "nuit" ? "🖤" : categoria === "bazar" ? "☕" : "🍳";
+function ImagenPlaceholder() {
   return (
-    <div className="w-full h-full flex items-center justify-center text-6xl bg-fondo">
-      {emoji}
+    <div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-teal/5 to-lila/5">
+      <svg viewBox="0 0 48 48" fill="none" className="w-12 h-12 text-teal/20">
+        <rect x="4" y="8" width="40" height="32" rx="4" stroke="currentColor" strokeWidth="2"/>
+        <circle cx="17" cy="20" r="4" stroke="currentColor" strokeWidth="2"/>
+        <path d="M4 36l10-10 8 8 8-10 14 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+      <span className="text-xs text-teal/30 font-medium">Sin foto</span>
     </div>
   );
 }
@@ -60,13 +64,15 @@ function ProductoCard({ p }: { p: Producto }) {
         />
       )}
 
-      <div className="bg-white rounded-2xl border border-teal/15 overflow-hidden flex flex-col group hover:shadow-lg hover:shadow-teal/10 transition-shadow duration-300">
+      <div className="bg-white rounded-2xl border border-teal/15 overflow-hidden flex flex-col group hover:shadow-xl hover:shadow-teal/10 hover:-translate-y-0.5 transition-all duration-300">
 
-        {/* Barra de color superior */}
-        <div className="h-[3px] bg-gradient-to-r from-teal via-aqua to-lila" />
-
-        {/* Badges + imagen */}
-        <div className="relative overflow-hidden">
+        {/* Imagen */}
+        <div
+          className={`relative w-full bg-white ${tieneImagen ? "cursor-zoom-in" : ""}`}
+          style={{ paddingBottom: "100%" }}
+          onClick={() => tieneImagen && setLightbox(true)}
+        >
+          {/* Badge */}
           {p.badge && (
             <span className="absolute top-3 right-3 bg-teal text-white text-xs font-bold px-2.5 py-1 rounded-full z-10 shadow-sm">
               {p.badge}
@@ -83,22 +89,17 @@ function ProductoCard({ p }: { p: Producto }) {
             </span>
           )}
 
-          {/* Imagen */}
-          <div
-            className={`aspect-square w-full relative bg-fondo overflow-hidden rounded-none ${tieneImagen ? "cursor-zoom-in" : ""}`}
-            onClick={() => tieneImagen && setLightbox(true)}
-            title={tieneImagen ? "Ver imagen grande" : undefined}
-          >
+          <div className="absolute inset-0">
             {tieneImagen ? (
               <Image
                 src={variante.imagen}
                 alt={`${p.nombre} — ${variante.color}`}
                 fill
-                className="object-contain p-4 transition-transform duration-300 group-hover:scale-105"
+                className="object-cover"
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
               />
             ) : (
-              <ImagenPlaceholder categoria={p.categoria} />
+              <ImagenPlaceholder />
             )}
           </div>
         </div>
