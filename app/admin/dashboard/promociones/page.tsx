@@ -1,0 +1,389 @@
+'use client'
+import { useState } from 'react'
+import { promocionesBanner, promocionesItems, type PromoItem, type PromocionesConfig } from '@/config/promociones'
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+function uid() {
+  return `promo-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
+}
+
+const GRADIENT_DIRECTIONS = [
+  { label: '↗ Diagonal', value: '135deg' },
+  { label: '→ Horizontal', value: '90deg' },
+  { label: '↓ Vertical', value: '180deg' },
+  { label: '↙ Diagonal inv.', value: '225deg' },
+]
+
+// ── Subcomponents ─────────────────────────────────────────────────────────────
+function ColorSwatch({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  return (
+    <div className="flex items-center gap-2">
+      <div
+        className="w-7 h-7 rounded-lg border border-gray-200 flex-shrink-0 cursor-pointer"
+        style={{ background: value }}
+        onClick={() => (document.getElementById('__cp__' + value) as HTMLInputElement)?.click()}
+      />
+      <input
+        id={'__cp__' + value}
+        type="color"
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        className="sr-only"
+      />
+      <input
+        type="text"
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm font-mono"
+        placeholder="#000000"
+      />
+    </div>
+  )
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <label className="block text-xs font-semibold text-gray-500 uppercase tracking-widest mb-1.5">
+        {label}
+      </label>
+      {children}
+    </div>
+  )
+}
+
+function Input({ value, onChange, placeholder }: { value: string; onChange: (v: string) => void; placeholder?: string }) {
+  return (
+    <input
+      type="text"
+      value={value}
+      onChange={e => onChange(e.target.value)}
+      placeholder={placeholder}
+      className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-teal/50"
+    />
+  )
+}
+
+function Textarea({ value, onChange, rows = 3 }: { value: string; onChange: (v: string) => void; rows?: number }) {
+  return (
+    <textarea
+      value={value}
+      onChange={e => onChange(e.target.value)}
+      rows={rows}
+      className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm resize-none focus:outline-none focus:border-teal/50"
+    />
+  )
+}
+
+// ── Main page ─────────────────────────────────────────────────────────────────
+export default function PromocionesPage() {
+  const [banner, setBanner] = useState<PromocionesConfig>({ ...promocionesBanner })
+  const [items, setItems] = useState<PromoItem[]>(promocionesItems.map(i => ({ ...i })))
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
+  const [error, setError] = useState('')
+
+  // Banner helpers
+  function patchBanner(key: keyof PromocionesConfig, val: string | boolean) {
+    setBanner(b => ({ ...b, [key]: val }))
+  }
+
+  // Items helpers
+  function patchItem(id: string, key: keyof PromoItem, val: string | boolean) {
+    setItems(prev => prev.map(i => i.id === id ? { ...i, [key]: val } : i))
+  }
+
+  function addItem() {
+    const newItem: PromoItem = {
+      id: uid(),
+      titulo: 'Nueva promoción',
+      descripcion: 'Descripción de la promoción.',
+      badge: 'Nuevo',
+      colorFondo: '#58A39D',
+      colorTexto: '#FFFFFF',
+      imagen: '',
+      activo: true,
+    }
+    setItems(prev => [...prev, newItem])
+    setEditingId(newItem.id)
+  }
+
+  function removeItem(id: string) {
+    setItems(prev => prev.filter(i => i.id !== id))
+    if (editingId === id) setEditingId(null)
+  }
+
+  function moveItem(id: string, dir: -1 | 1) {
+    setItems(prev => {
+      const idx = prev.findIndex(i => i.id === id)
+      if (idx < 0) return prev
+      const next = idx + dir
+      if (next < 0 || next >= prev.length) return prev
+      const arr = [...prev]
+      ;[arr[idx], arr[next]] = [arr[next], arr[idx]]
+      return arr
+    })
+  }
+
+  // Save
+  async function handleSave() {
+    setSaving(true)
+    setError('')
+    setSaved(false)
+    try {
+      const res = await fetch('/api/admin/submit-pr', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          promociones: { banner, items },
+          descripcion: 'Actualización de la sección de Promociones / Ediciones limitadas.',
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Error al guardar')
+      setSaved(true)
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Error desconocido')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const editingItem = editingId ? items.find(i => i.id === editingId) : null
+
+  return (
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-texto">Promociones</h1>
+          <p className="text-texto-muted text-sm mt-1">
+            Ediciones limitadas, ofertas y banners especiales.
+          </p>
+        </div>
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className="flex items-center gap-2 bg-teal text-white font-semibold px-5 py-2.5 rounded-xl text-sm hover:bg-teal-dark transition-colors disabled:opacity-50 flex-shrink-0"
+        >
+          {saving ? (
+            <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48 2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48 2.83-2.83"/></svg>
+          ) : (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          )}
+          {saving ? 'Guardando…' : 'Guardar cambios'}
+        </button>
+      </div>
+
+      {saved && (
+        <div className="bg-green-50 border border-green-200 text-green-800 rounded-xl px-4 py-3 text-sm flex items-center gap-2">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12"/></svg>
+          ¡PR creado! Los cambios se publicarán después de la revisión.
+        </div>
+      )}
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm">{error}</div>
+      )}
+
+      {/* ── Sección: Configuración del banner ── */}
+      <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-6">
+        <div className="flex items-center justify-between">
+          <h2 className="font-bold text-texto">Banner principal</h2>
+          {/* Toggle visible */}
+          <button
+            onClick={() => patchBanner('visible', !banner.visible)}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${banner.visible ? 'bg-teal' : 'bg-gray-200'}`}
+          >
+            <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${banner.visible ? 'translate-x-6' : 'translate-x-1'}`} />
+          </button>
+        </div>
+
+        {!banner.visible && (
+          <p className="text-sm text-amber-600 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
+            La sección de Promociones está <strong>oculta</strong> en el sitio.
+          </p>
+        )}
+
+        <div className="grid sm:grid-cols-2 gap-4">
+          <Field label="Badge">
+            <Input value={banner.badge} onChange={v => patchBanner('badge', v)} placeholder="Tiempo limitado" />
+          </Field>
+          <Field label="Título">
+            <Input value={banner.titulo} onChange={v => patchBanner('titulo', v)} placeholder="Colección Invierno" />
+          </Field>
+          <Field label="Subtítulo">
+            <Input value={banner.subtitulo} onChange={v => patchBanner('subtitulo', v)} placeholder="Hasta 30% OFF…" />
+          </Field>
+          <Field label="Descripción">
+            <Textarea value={banner.descripcion} onChange={v => patchBanner('descripcion', v)} rows={2} />
+          </Field>
+          <Field label="Texto del CTA">
+            <Input value={banner.ctaTexto} onChange={v => patchBanner('ctaTexto', v)} placeholder="Ver ofertas" />
+          </Field>
+          <Field label="Link del CTA">
+            <Input value={banner.ctaLink} onChange={v => patchBanner('ctaLink', v)} placeholder="#productos" />
+          </Field>
+        </div>
+
+        {/* Gradiente */}
+        <div className="border-t border-gray-100 pt-4">
+          <p className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-4">Gradiente del fondo</p>
+          <div className="grid sm:grid-cols-3 gap-4">
+            <Field label="Color inicio">
+              <ColorSwatch value={banner.gradienteDesde} onChange={v => patchBanner('gradienteDesde', v)} />
+            </Field>
+            <Field label="Color final">
+              <ColorSwatch value={banner.gradienteHasta} onChange={v => patchBanner('gradienteHasta', v)} />
+            </Field>
+            <Field label="Dirección">
+              <select
+                value={banner.gradienteDireccion}
+                onChange={e => patchBanner('gradienteDireccion', e.target.value)}
+                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-teal/50"
+              >
+                {GRADIENT_DIRECTIONS.map(d => (
+                  <option key={d.value} value={d.value}>{d.label}</option>
+                ))}
+              </select>
+            </Field>
+          </div>
+          {/* Preview */}
+          <div
+            className="mt-3 h-10 rounded-xl border border-white/20"
+            style={{
+              background: `linear-gradient(${banner.gradienteDireccion}, ${banner.gradienteDesde}, ${banner.gradienteHasta})`,
+            }}
+          />
+        </div>
+      </div>
+
+      {/* ── Sección: Items de promo ── */}
+      <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="font-bold text-texto">Items de la sección</h2>
+          <button
+            onClick={addItem}
+            className="flex items-center gap-2 bg-teal/10 text-teal font-semibold px-4 py-2 rounded-xl text-sm hover:bg-teal/20 transition-colors"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Agregar
+          </button>
+        </div>
+
+        {items.length === 0 && (
+          <p className="text-sm text-texto-muted text-center py-8">
+            No hay items. Agregá uno con el botón de arriba.
+          </p>
+        )}
+
+        {/* List */}
+        <div className="space-y-2">
+          {items.map((item, idx) => (
+            <div key={item.id} className="border border-gray-100 rounded-xl overflow-hidden">
+              {/* Row header */}
+              <div
+                className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors"
+                onClick={() => setEditingId(editingId === item.id ? null : item.id)}
+              >
+                {/* Color swatch */}
+                <div
+                  className="w-5 h-5 rounded-md flex-shrink-0 border border-white/20 shadow-sm"
+                  style={{ background: item.colorFondo }}
+                />
+
+                {/* Name */}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-texto truncate">{item.titulo}</p>
+                  <p className="text-xs text-texto-muted truncate">{item.badge}</p>
+                </div>
+
+                {/* Active toggle */}
+                <button
+                  onClick={e => { e.stopPropagation(); patchItem(item.id, 'activo', !item.activo) }}
+                  className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors flex-shrink-0 ${item.activo ? 'bg-teal' : 'bg-gray-200'}`}
+                >
+                  <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform ${item.activo ? 'translate-x-4.5' : 'translate-x-0.5'}`} />
+                </button>
+
+                {/* Move up/down */}
+                <div className="flex gap-0.5 flex-shrink-0">
+                  <button
+                    onClick={e => { e.stopPropagation(); moveItem(item.id, -1) }}
+                    disabled={idx === 0}
+                    className="p-1 rounded hover:bg-gray-100 disabled:opacity-30 text-texto-muted"
+                  >
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="18 15 12 9 6 15"/></svg>
+                  </button>
+                  <button
+                    onClick={e => { e.stopPropagation(); moveItem(item.id, 1) }}
+                    disabled={idx === items.length - 1}
+                    className="p-1 rounded hover:bg-gray-100 disabled:opacity-30 text-texto-muted"
+                  >
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                  </button>
+                </div>
+
+                {/* Delete */}
+                <button
+                  onClick={e => { e.stopPropagation(); removeItem(item.id) }}
+                  className="p-1 rounded hover:bg-red-50 hover:text-red-500 text-texto-muted transition-colors flex-shrink-0"
+                >
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6m4-6v6"/><path d="M9 6V4h6v2"/></svg>
+                </button>
+
+                {/* Expand chevron */}
+                <svg
+                  className={`flex-shrink-0 text-gray-400 transition-transform ${editingId === item.id ? 'rotate-180' : ''}`}
+                  width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
+                >
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+              </div>
+
+              {/* Editor expandido */}
+              {editingId === item.id && editingItem && (
+                <div className="border-t border-gray-100 bg-gray-50/50 p-4 grid sm:grid-cols-2 gap-4">
+                  <Field label="Título">
+                    <Input value={item.titulo} onChange={v => patchItem(item.id, 'titulo', v)} />
+                  </Field>
+                  <Field label="Badge">
+                    <Input value={item.badge} onChange={v => patchItem(item.id, 'badge', v)} />
+                  </Field>
+                  <Field label="Descripción">
+                    <Textarea value={item.descripcion} onChange={v => patchItem(item.id, 'descripcion', v)} rows={2} />
+                  </Field>
+                  <div className="space-y-4">
+                    <Field label="Color de fondo">
+                      <ColorSwatch value={item.colorFondo} onChange={v => patchItem(item.id, 'colorFondo', v)} />
+                    </Field>
+                    <Field label="Color de texto">
+                      <ColorSwatch value={item.colorTexto} onChange={v => patchItem(item.id, 'colorTexto', v)} />
+                    </Field>
+                  </div>
+                  {/* Mini preview */}
+                  <div className="sm:col-span-2">
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-2">Vista previa</p>
+                    <div
+                      className="rounded-xl p-4 border border-white/20"
+                      style={{ background: item.colorFondo }}
+                    >
+                      <span
+                        className="inline-block text-xs font-bold px-2 py-0.5 rounded-full mb-2"
+                        style={{ background: 'rgba(255,255,255,0.2)', color: item.colorTexto }}
+                      >
+                        {item.badge}
+                      </span>
+                      <p className="font-heading text-base" style={{ color: item.colorTexto }}>{item.titulo}</p>
+                      <p className="text-sm mt-0.5" style={{ color: item.colorTexto, opacity: 0.7 }}>{item.descripcion}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
