@@ -131,3 +131,10 @@ body {
   50%       { transform: translateY(-12px); }
 }
 .animate-float { animation: float 6s ease-in-out infinite; }
+
+/* Promo card progress bar */
+@keyframes progress {
+  from { width: 0%; }
+  to   { width: 100%; }
+}
+.animate-progress { animation: progress 4s linear forwards; }

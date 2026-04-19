@@ -2,6 +2,7 @@ import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import Descuentos from "@/components/Descuentos";
 import Productos from "@/components/Productos";
+import Promociones from "@/components/Promociones";
 import Editorial from "@/components/Editorial";
 import Testimonios from "@/components/Testimonios";
 import SumateEquipo from "@/components/SumateEquipo";
@@ -18,6 +19,7 @@ export default function Home() {
       <Hero />
       <Descuentos />
       <Productos />
+      <Promociones />
       <Editorial />
       <Testimonios />
       <SumateEquipo />
