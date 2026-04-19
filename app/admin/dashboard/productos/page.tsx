@@ -36,6 +36,12 @@ export default function ProductosPage() {
   const [description, setDescription] = useState('')
   const [result, setResult] = useState<{ ok: boolean; prUrl?: string; error?: string } | null>(null)
 
+  // Filtros
+  const [filterCategoria, setFilterCategoria] = useState<string>('todos')
+  const [filterColor, setFilterColor] = useState<string>('')
+  const [filterCaracteristica, setFilterCaracteristica] = useState<string>('')
+  const [filterTexto, setFilterTexto] = useState<string>('')
+
   // Cargar borrador
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY)
@@ -140,32 +146,126 @@ export default function ProductosPage() {
     }
   }
 
+  // Colores únicos en todo el catálogo
+  const allColors = Array.from(new Set(items.flatMap(p => p.variantes.map(v => v.color)))).sort()
+
+  // Características únicas (tags)
+  const allTags = Array.from(new Set(items.flatMap(p => p.tags))).sort()
+
+  // Items filtrados
+  const filtered = items.filter(p => {
+    if (filterCategoria !== 'todos' && p.categoria !== filterCategoria) return false
+    if (filterColor && !p.variantes.some(v => v.color.toLowerCase().includes(filterColor.toLowerCase()))) return false
+    if (filterCaracteristica && !p.tags.some(t => t.toLowerCase().includes(filterCaracteristica.toLowerCase()))) return false
+    if (filterTexto && !p.nombre.toLowerCase().includes(filterTexto.toLowerCase()) && !p.descripcion.toLowerCase().includes(filterTexto.toLowerCase())) return false
+    return true
+  })
+
+  const activeFilters = [
+    filterCategoria !== 'todos' && filterCategoria,
+    filterColor,
+    filterCaracteristica,
+    filterTexto,
+  ].filter(Boolean).length
+
   return (
     <div className="space-y-5">
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-texto">Productos</h1>
-          <p className="text-texto-muted text-sm mt-1">{items.length} productos en el catálogo</p>
+          <p className="text-texto-muted text-sm mt-1">
+            {filtered.length === items.length
+              ? `${items.length} productos en el catálogo`
+              : `${filtered.length} de ${items.length} productos`}
+          </p>
         </div>
         {hasChanges && (
           <span className="text-xs bg-amber-100 text-amber-700 px-3 py-1.5 rounded-full font-medium flex-shrink-0">
-            ● Sin enviar
+            Sin enviar
           </span>
         )}
       </div>
 
+      {/* Filtros */}
+      <div className="bg-white rounded-2xl border border-teal/10 p-4 space-y-3">
+        <div className="flex items-center justify-between">
+          <p className="text-xs font-semibold text-texto-muted uppercase tracking-wide">Filtrar productos</p>
+          {activeFilters > 0 && (
+            <button
+              onClick={() => { setFilterCategoria('todos'); setFilterColor(''); setFilterCaracteristica(''); setFilterTexto('') }}
+              className="text-xs text-teal hover:text-teal-dark transition-colors"
+            >
+              Limpiar filtros ({activeFilters})
+            </button>
+          )}
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          {/* Búsqueda por texto */}
+          <div>
+            <label className="text-xs text-texto-light mb-1 block">Buscar</label>
+            <input
+              value={filterTexto}
+              onChange={e => setFilterTexto(e.target.value)}
+              placeholder="Nombre o descripción..."
+              className="w-full px-3 py-2 text-sm rounded-xl border border-teal/20 focus:outline-none focus:border-teal bg-fondo text-texto"
+            />
+          </div>
+          {/* Categoría */}
+          <div>
+            <label className="text-xs text-texto-light mb-1 block">Categoría</label>
+            <select
+              value={filterCategoria}
+              onChange={e => setFilterCategoria(e.target.value)}
+              className="w-full px-3 py-2 text-sm rounded-xl border border-teal/20 focus:outline-none focus:border-teal bg-fondo text-texto"
+            >
+              {categorias.map(c => (
+                <option key={c.value} value={c.value}>{c.label}</option>
+              ))}
+            </select>
+          </div>
+          {/* Color */}
+          <div>
+            <label className="text-xs text-texto-light mb-1 block">Color disponible</label>
+            <select
+              value={filterColor}
+              onChange={e => setFilterColor(e.target.value)}
+              className="w-full px-3 py-2 text-sm rounded-xl border border-teal/20 focus:outline-none focus:border-teal bg-fondo text-texto"
+            >
+              <option value="">Todos los colores</option>
+              {allColors.map(c => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
+          </div>
+          {/* Característica / tag */}
+          <div>
+            <label className="text-xs text-texto-light mb-1 block">Característica</label>
+            <select
+              value={filterCaracteristica}
+              onChange={e => setFilterCaracteristica(e.target.value)}
+              className="w-full px-3 py-2 text-sm rounded-xl border border-teal/20 focus:outline-none focus:border-teal bg-fondo text-texto"
+            >
+              <option value="">Todas</option>
+              {allTags.map(t => (
+                <option key={t} value={t}>{t}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+      </div>
+
       {/* Lista de productos */}
       <div className="space-y-3">
-        {items.map(p => (
+        {filtered.map(p => (
           <div key={p.id} className="bg-white rounded-2xl border border-teal/10 overflow-hidden">
             {/* Encabezado del producto */}
             <button
               onClick={() => setExpandedId(expandedId === p.id ? null : p.id)}
               className="w-full flex items-center gap-4 p-4 hover:bg-fondo transition-colors text-left"
             >
-              <div className="w-10 h-10 bg-fondo rounded-xl flex items-center justify-center text-xl flex-shrink-0">
-                {p.categoria === 'nuit' ? '🖤' : p.categoria === 'bazar' ? '☕' : '🍳'}
+              <div className="w-10 h-10 bg-teal/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                <span className="text-teal font-bold text-sm">{p.nombre.slice(0, 2).toUpperCase()}</span>
               </div>
               <div className="flex-1 min-w-0">
                 <p className="font-semibold text-texto text-sm leading-tight">{p.nombre}</p>
@@ -298,7 +398,9 @@ export default function ProductosPage() {
                             // eslint-disable-next-line @next/next/no-img-element
                             <img src={v.preview || v.imagen} alt={v.color} className="w-full h-full object-contain" />
                           ) : (
-                            <span className="text-xl text-texto-light">📷</span>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-5 h-5 text-texto-light">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3 19.5h18M3.75 4.5h16.5M5.25 4.5v15M18.75 4.5v15" />
+                            </svg>
                           )}
                           {v.uploading && (
                             <div className="absolute inset-0 bg-white/85 flex items-center justify-center">
@@ -337,7 +439,7 @@ export default function ProductosPage() {
                           </div>
                           <div className="col-span-2">
                             <label className="cursor-pointer text-xs text-teal hover:text-teal-dark font-medium transition-colors">
-                              {v.imagen ? '📷 Cambiar foto' : '📷 Subir foto'}
+                              {v.imagen ? 'Cambiar foto' : 'Subir foto'}
                               <input type="file" accept="image/*" className="hidden" disabled={v.uploading}
                                 onChange={e => {
                                   const file = e.target.files?.[0]
@@ -398,7 +500,7 @@ export default function ProductosPage() {
             disabled={submitting}
             className="bg-teal hover:bg-teal-dark text-white font-semibold px-6 py-2.5 rounded-xl text-sm transition-colors disabled:opacity-50 w-full sm:w-auto"
           >
-            {submitting ? '⏳ Enviando...' : '🚀 Enviar para revisión'}
+            {submitting ? 'Enviando...' : 'Enviar para revisión'}
           </button>
         </div>
       )}
@@ -408,7 +510,7 @@ export default function ProductosPage() {
         <div className={`rounded-2xl p-5 ${result.ok ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
           {result.ok ? (
             <>
-              <p className="font-semibold text-green-700 text-sm">✅ ¡Cambios enviados!</p>
+              <p className="font-semibold text-green-700 text-sm">Cambios enviados correctamente</p>
               <p className="text-green-600 text-xs mt-1">Tomas los va a revisar y publicar pronto.</p>
               {result.prUrl && (
                 <a href={result.prUrl} target="_blank" rel="noopener noreferrer"
@@ -418,7 +520,7 @@ export default function ProductosPage() {
               )}
             </>
           ) : (
-            <p className="text-red-600 text-sm">❌ {result.error}</p>
+            <p className="text-red-600 text-sm">{result.error}</p>
           )}
         </div>
       )}
