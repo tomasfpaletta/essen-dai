@@ -36,6 +36,12 @@ export default function ProductosPage() {
   const [description, setDescription] = useState('')
   const [result, setResult] = useState<{ ok: boolean; prUrl?: string; error?: string } | null>(null)
 
+  // Filtros
+  const [filterCategoria, setFilterCategoria] = useState<string>('todos')
+  const [filterColor, setFilterColor] = useState<string>('')
+  const [filterCaracteristica, setFilterCaracteristica] = useState<string>('')
+  const [filterTexto, setFilterTexto] = useState<string>('')
+
   // Cargar borrador
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY)
@@ -140,37 +146,161 @@ export default function ProductosPage() {
     }
   }
 
+  // Colores únicos en todo el catálogo
+  const allColors = Array.from(new Set(items.flatMap(p => p.variantes.map(v => v.color)))).sort()
+
+  // Características únicas (tags)
+  const allTags = Array.from(new Set(items.flatMap(p => p.tags))).sort()
+
+  // Items filtrados
+  const filtered = items.filter(p => {
+    if (filterCategoria !== 'todos' && p.categoria !== filterCategoria) return false
+    if (filterColor && !p.variantes.some(v => v.color.toLowerCase().includes(filterColor.toLowerCase()))) return false
+    if (filterCaracteristica && !p.tags.some(t => t.toLowerCase().includes(filterCaracteristica.toLowerCase()))) return false
+    if (filterTexto && !p.nombre.toLowerCase().includes(filterTexto.toLowerCase()) && !p.descripcion.toLowerCase().includes(filterTexto.toLowerCase())) return false
+    return true
+  })
+
+  const activeFilters = [
+    filterCategoria !== 'todos' && filterCategoria,
+    filterColor,
+    filterCaracteristica,
+    filterTexto,
+  ].filter(Boolean).length
+
   return (
     <div className="space-y-5">
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-texto">Productos</h1>
-          <p className="text-texto-muted text-sm mt-1">{items.length} productos en el catálogo</p>
+          <p className="text-texto-muted text-sm mt-1">
+            {filtered.length === items.length
+              ? `${items.length} productos en el catálogo`
+              : `${filtered.length} de ${items.length} productos`}
+          </p>
         </div>
         {hasChanges && (
           <span className="text-xs bg-amber-100 text-amber-700 px-3 py-1.5 rounded-full font-medium flex-shrink-0">
-            ● Sin enviar
+            Sin enviar
           </span>
         )}
       </div>
 
+      {/* Filtros */}
+      <div className="bg-white rounded-2xl border border-teal/10 p-4 space-y-3">
+        <div className="flex items-center justify-between">
+          <p className="text-xs font-semibold text-texto-muted uppercase tracking-wide">Filtrar productos</p>
+          {activeFilters > 0 && (
+            <button
+              onClick={() => { setFilterCategoria('todos'); setFilterColor(''); setFilterCaracteristica(''); setFilterTexto('') }}
+              className="text-xs text-teal hover:text-teal-dark transition-colors"
+            >
+              Limpiar filtros ({activeFilters})
+            </button>
+          )}
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          {/* Búsqueda por texto */}
+          <div>
+            <label className="text-xs text-texto-light mb-1 block">Buscar</label>
+            <input
+              value={filterTexto}
+              onChange={e => setFilterTexto(e.target.value)}
+              placeholder="Nombre o descripción..."
+              className="w-full px-3 py-2 text-sm rounded-xl border border-teal/20 focus:outline-none focus:border-teal bg-fondo text-texto"
+            />
+          </div>
+          {/* Categoría */}
+          <div>
+            <label className="text-xs text-texto-light mb-1 block">Categoría</label>
+            <select
+              value={filterCategoria}
+              onChange={e => setFilterCategoria(e.target.value)}
+              className="w-full px-3 py-2 text-sm rounded-xl border border-teal/20 focus:outline-none focus:border-teal bg-fondo text-texto"
+            >
+              {categorias.map(c => (
+                <option key={c.value} value={c.value}>{c.label}</option>
+              ))}
+            </select>
+          </div>
+          {/* Color */}
+          <div>
+            <label className="text-xs text-texto-light mb-1 block">Color disponible</label>
+            <select
+              value={filterColor}
+              onChange={e => setFilterColor(e.target.value)}
+              className="w-full px-3 py-2 text-sm rounded-xl border border-teal/20 focus:outline-none focus:border-teal bg-fondo text-texto"
+            >
+              <option value="">Todos los colores</option>
+              {allColors.map(c => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
+          </div>
+          {/* Característica / tag */}
+          <div>
+            <label className="text-xs text-texto-light mb-1 block">Característica</label>
+            <select
+              value={filterCaracteristica}
+              onChange={e => setFilterCaracteristica(e.target.value)}
+              className="w-full px-3 py-2 text-sm rounded-xl border border-teal/20 focus:outline-none focus:border-teal bg-fondo text-texto"
+            >
+              <option value="">Todas</option>
+              {allTags.map(t => (
+                <option key={t} value={t}>{t}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+      </div>
+
       {/* Lista de productos */}
       <div className="space-y-3">
-        {items.map(p => (
+        {filtered.map(p => (
           <div key={p.id} className="bg-white rounded-2xl border border-teal/10 overflow-hidden">
             {/* Encabezado del producto */}
             <button
               onClick={() => setExpandedId(expandedId === p.id ? null : p.id)}
-              className="w-full flex items-center gap-4 p-4 hover:bg-fondo transition-colors text-left"
+              className={`w-full flex items-center gap-4 p-4 transition-colors text-left ${expandedId === p.id ? 'bg-teal/5' : 'hover:bg-fondo'}`}
             >
-              <div className="w-10 h-10 bg-fondo rounded-xl flex items-center justify-center text-xl flex-shrink-0">
-                {p.categoria === 'nuit' ? '🖤' : p.categoria === 'bazar' ? '☕' : '🍳'}
+              {/* Thumbnail de la primera variante con imagen, o iniciales */}
+              <div className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0 border border-teal/15 bg-fondo">
+                {p.variantes.find(v => v.imagen) ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={p.variantes.find(v => v.imagen)!.imagen}
+                    alt={p.nombre}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-teal/10">
+                    <span className="text-teal font-bold text-sm">{p.nombre.slice(0, 2).toUpperCase()}</span>
+                  </div>
+                )}
               </div>
+
               <div className="flex-1 min-w-0">
-                <p className="font-semibold text-texto text-sm leading-tight">{p.nombre}</p>
-                <p className="text-texto-muted text-xs truncate mt-0.5">{p.descripcion}</p>
+                <div className="flex items-center gap-2 mb-0.5">
+                  <p className="font-semibold text-texto text-sm leading-tight">{p.nombre}</p>
+                  {expandedId === p.id && (
+                    <span className="text-xs bg-teal text-white px-2 py-0.5 rounded-full font-medium">
+                      Editando
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-xs text-texto-light capitalize">{p.categoria}</span>
+                  {/* Dots de colores disponibles */}
+                  <div className="flex gap-1">
+                    {p.variantes.slice(0, 4).map(v => (
+                      <span key={v.color} className="w-2.5 h-2.5 rounded-full border border-white shadow-sm" style={{ background: v.hex }} title={v.color} />
+                    ))}
+                    {p.variantes.length > 4 && <span className="text-xs text-texto-light">+{p.variantes.length - 4}</span>}
+                  </div>
+                </div>
               </div>
+
               <div className="flex items-center gap-2 flex-shrink-0">
                 {p.destacado && (
                   <span className="hidden sm:block text-xs bg-teal/10 text-teal px-2 py-0.5 rounded-full">
@@ -178,17 +308,27 @@ export default function ProductosPage() {
                   </span>
                 )}
                 {p.descuento && (
-                  <span className="hidden sm:block text-xs bg-lila/10 text-lila-dark px-2 py-0.5 rounded-full">
+                  <span className="hidden sm:block text-xs bg-lila/10 text-lila px-2 py-0.5 rounded-full">
                     -{p.descuento}%
                   </span>
                 )}
-                <span className="text-texto-light text-sm">{expandedId === p.id ? '▲' : '▼'}</span>
+                <svg viewBox="0 0 20 20" fill="currentColor" className={`w-4 h-4 text-texto-light transition-transform ${expandedId === p.id ? 'rotate-180' : ''}`}>
+                  <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd"/>
+                </svg>
               </div>
             </button>
 
             {/* Panel de edición */}
             {expandedId === p.id && (
-              <div className="border-t border-teal/10 p-5 bg-fondo/40 space-y-5">
+              <div className="border-t-2 border-teal/30 bg-fondo/40">
+                {/* Header del editor */}
+                <div className="px-5 py-3 bg-teal/5 border-b border-teal/10 flex items-center gap-2">
+                  <svg viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5 text-teal">
+                    <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zm-1.207 1.207L2 14.172V17h2.828l10.38-10.379-2.83-2.828z"/>
+                  </svg>
+                  <p className="text-xs font-semibold text-teal">Editando: <span className="text-texto">{p.nombre}</span></p>
+                </div>
+              <div className="p-5 space-y-5">
                 {/* Nombre, badge y categoría */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div>
@@ -298,7 +438,9 @@ export default function ProductosPage() {
                             // eslint-disable-next-line @next/next/no-img-element
                             <img src={v.preview || v.imagen} alt={v.color} className="w-full h-full object-contain" />
                           ) : (
-                            <span className="text-xl text-texto-light">📷</span>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-5 h-5 text-texto-light">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3 19.5h18M3.75 4.5h16.5M5.25 4.5v15M18.75 4.5v15" />
+                            </svg>
                           )}
                           {v.uploading && (
                             <div className="absolute inset-0 bg-white/85 flex items-center justify-center">
@@ -337,7 +479,7 @@ export default function ProductosPage() {
                           </div>
                           <div className="col-span-2">
                             <label className="cursor-pointer text-xs text-teal hover:text-teal-dark font-medium transition-colors">
-                              {v.imagen ? '📷 Cambiar foto' : '📷 Subir foto'}
+                              {v.imagen ? 'Cambiar foto' : 'Subir foto'}
                               <input type="file" accept="image/*" className="hidden" disabled={v.uploading}
                                 onChange={e => {
                                   const file = e.target.files?.[0]
@@ -372,6 +514,7 @@ export default function ProductosPage() {
                   </p>
                 </div>
               </div>
+              </div>
             )}
           </div>
         ))}
@@ -398,7 +541,7 @@ export default function ProductosPage() {
             disabled={submitting}
             className="bg-teal hover:bg-teal-dark text-white font-semibold px-6 py-2.5 rounded-xl text-sm transition-colors disabled:opacity-50 w-full sm:w-auto"
           >
-            {submitting ? '⏳ Enviando...' : '🚀 Enviar para revisión'}
+            {submitting ? 'Enviando...' : 'Enviar para revisión'}
           </button>
         </div>
       )}
@@ -408,7 +551,7 @@ export default function ProductosPage() {
         <div className={`rounded-2xl p-5 ${result.ok ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
           {result.ok ? (
             <>
-              <p className="font-semibold text-green-700 text-sm">✅ ¡Cambios enviados!</p>
+              <p className="font-semibold text-green-700 text-sm">Cambios enviados correctamente</p>
               <p className="text-green-600 text-xs mt-1">Tomas los va a revisar y publicar pronto.</p>
               {result.prUrl && (
                 <a href={result.prUrl} target="_blank" rel="noopener noreferrer"
@@ -418,7 +561,7 @@ export default function ProductosPage() {
               )}
             </>
           ) : (
-            <p className="text-red-600 text-sm">❌ {result.error}</p>
+            <p className="text-red-600 text-sm">{result.error}</p>
           )}
         </div>
       )}

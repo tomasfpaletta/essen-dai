@@ -21,6 +21,7 @@ const config: Config = {
       fontFamily: {
         sans:    ["Plus Jakarta Sans", "sans-serif"],
         heading: ["Fredoka One", "cursive"],
+        script:  ["Dancing Script", "cursive"], // Darloune substitute — reemplazar con el .woff2 cuando esté disponible
       },
       keyframes: {
         marquee: { "0%": { transform: "translateX(0%)" }, "100%": { transform: "translateX(-50%)" } },

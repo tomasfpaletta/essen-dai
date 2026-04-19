@@ -19,7 +19,7 @@ const ACCENTS = ["#58A39D", "#89BCAF", "#BB9EC5", "#58A39D"];
 function TestimonioCard({ r, idx }: { r: typeof REVIEWS[0]; idx: number }) {
   const accent = ACCENTS[idx % ACCENTS.length];
   return (
-    <div className="w-72 flex-shrink-0 bg-white rounded-2xl p-6 border border-teal/10 mx-3 shadow-sm"
+    <div className="w-72 flex-shrink-0 bg-white rounded-2xl p-6 border border-teal/10 mx-3 shadow-sm whitespace-normal"
       style={{ borderLeftColor: accent, borderLeftWidth: "3px" }}>
       <div className="flex gap-0.5 mb-3">
         {[...Array(r.stars)].map((_, i) => (
@@ -40,7 +40,7 @@ export default function Testimonios() {
   const row2 = REVIEWS.slice(6, 12);
 
   return (
-    <section id="testimonios" className="py-24 bg-white overflow-hidden">
+    <section id="testimonios" className="py-24 bg-gradient-to-b from-fondo to-white overflow-hidden section-angle-both">
       {/* Header */}
       <div className="px-6 sm:px-12 lg:px-20 mb-12">
         <p className="text-teal text-xs font-semibold uppercase tracking-[0.2em] mb-3">Opiniones</p>

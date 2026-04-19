@@ -16,10 +16,25 @@ type HeroData = {
 }
 
 // ── Collapsible Section ───────────────────────────────────────────────────────
+function ChevronDown() {
+  return (
+    <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 text-texto-light">
+      <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd"/>
+    </svg>
+  )
+}
+function ChevronUp() {
+  return (
+    <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 text-texto-light">
+      <path fillRule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clipRule="evenodd"/>
+    </svg>
+  )
+}
+
 function Seccion({
-  title, icon, children, defaultOpen = false,
+  title, children, defaultOpen = false,
 }: {
-  title: string; icon: string; children: React.ReactNode; defaultOpen?: boolean
+  title: string; children: React.ReactNode; defaultOpen?: boolean
 }) {
   const [open, setOpen] = useState(defaultOpen)
   return (
@@ -28,9 +43,8 @@ function Seccion({
         onClick={() => setOpen(!open)}
         className="w-full flex items-center gap-3 p-5 hover:bg-fondo transition-colors text-left"
       >
-        <span className="text-xl">{icon}</span>
         <span className="font-semibold text-texto text-sm flex-1">{title}</span>
-        <span className="text-texto-light text-sm">{open ? '▲' : '▼'}</span>
+        {open ? <ChevronUp /> : <ChevronDown />}
       </button>
       {open && (
         <div className="border-t border-teal/10 p-5 space-y-4 bg-fondo/30">
@@ -159,13 +173,13 @@ export default function ContenidoPage() {
         </div>
         {hasChanges && (
           <span className="text-xs bg-amber-100 text-amber-700 px-3 py-1.5 rounded-full font-medium flex-shrink-0">
-            ● Sin enviar
+            Sin enviar
           </span>
         )}
       </div>
 
       {/* ── Hero ── */}
-      <Seccion title="Hero — Portada principal" icon="🎯" defaultOpen>
+      <Seccion title="Hero — Portada principal" defaultOpen>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Field label="Texto del badge" value={hero.badge} onChange={v => setHeroField('badge', v)}
             placeholder="Distribuidora Oficial · CABA" />
@@ -189,7 +203,7 @@ export default function ContenidoPage() {
       </Seccion>
 
       {/* ── Stats ── */}
-      <Seccion title="Estadísticas — Debajo de los botones" icon="📊">
+      <Seccion title="Estadísticas — Debajo de los botones">
         <p className="text-xs text-texto-muted">Estos textos aparecen en la fila de estadísticas del hero.</p>
         <div className="space-y-2">
           {hero.stats.map((stat, i) => (
@@ -233,7 +247,7 @@ export default function ContenidoPage() {
             disabled={submitting}
             className="bg-teal hover:bg-teal-dark text-white font-semibold px-6 py-2.5 rounded-xl text-sm transition-colors disabled:opacity-50 w-full sm:w-auto"
           >
-            {submitting ? '⏳ Enviando...' : '🚀 Enviar para revisión'}
+            {submitting ? 'Enviando...' : 'Enviar para revisión'}
           </button>
         </div>
       )}
@@ -243,7 +257,7 @@ export default function ContenidoPage() {
         <div className={`rounded-2xl p-5 ${result.ok ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
           {result.ok ? (
             <>
-              <p className="font-semibold text-green-700 text-sm">✅ ¡Cambios enviados!</p>
+              <p className="font-semibold text-green-700 text-sm">Cambios enviados correctamente</p>
               <p className="text-green-600 text-xs mt-1">Tomas los va a revisar y publicar pronto.</p>
               {result.prUrl && (
                 <a href={result.prUrl} target="_blank" rel="noopener noreferrer"
@@ -253,7 +267,7 @@ export default function ContenidoPage() {
               )}
             </>
           ) : (
-            <p className="text-red-600 text-sm">❌ {result.error}</p>
+            <p className="text-red-600 text-sm">{result.error}</p>
           )}
         </div>
       )}

@@ -187,7 +187,7 @@ export default function ClientePage() {
         </div>
         {hasChanges && (
           <span className="text-xs bg-amber-100 text-amber-700 px-3 py-1.5 rounded-full font-medium flex-shrink-0">
-            ● Sin enviar
+            Sin enviar
           </span>
         )}
       </div>
@@ -270,7 +270,7 @@ export default function ClientePage() {
             disabled={submitting}
             className="bg-teal hover:bg-teal-dark text-white font-semibold px-6 py-2.5 rounded-xl text-sm transition-colors disabled:opacity-50 w-full sm:w-auto"
           >
-            {submitting ? '⏳ Enviando...' : '🚀 Enviar para revisión'}
+            {submitting ? 'Enviando...' : 'Enviar para revisión'}
           </button>
         </div>
       )}
@@ -280,7 +280,7 @@ export default function ClientePage() {
         <div className={`rounded-2xl p-5 ${result.ok ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
           {result.ok ? (
             <>
-              <p className="font-semibold text-green-700 text-sm">✅ ¡Cambios enviados!</p>
+              <p className="font-semibold text-green-700 text-sm">Cambios enviados correctamente</p>
               <p className="text-green-600 text-xs mt-1">Tomas los va a revisar y publicar pronto.</p>
               {result.prUrl && (
                 <a href={result.prUrl} target="_blank" rel="noopener noreferrer"
@@ -290,7 +290,7 @@ export default function ClientePage() {
               )}
             </>
           ) : (
-            <p className="text-red-600 text-sm">❌ {result.error}</p>
+            <p className="text-red-600 text-sm">{result.error}</p>
           )}
         </div>
       )}

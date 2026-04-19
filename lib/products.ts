@@ -37,17 +37,17 @@ export const productos: Producto[] = [
       {
         "color": "Rosa",
         "hex": "#FFB6C1",
-        "imagen": "/products/cacerola-18cm-rosa.webp"
+        "imagen": ""
       },
       {
         "color": "Terra",
         "hex": "#808080",
-        "imagen": "/products/Cacerola 18cm Terra.webp"
+        "imagen": ""
       },
       {
         "color": "Capri",
         "hex": "#1A9EC0",
-        "imagen": "/products/cacerola-18cm-capri.webp"
+        "imagen": ""
       }
     ],
     "destacado": true,
@@ -66,17 +66,17 @@ export const productos: Producto[] = [
       {
         "color": "Rosa",
         "hex": "#FFB6C1",
-        "imagen": "/products/cacerola-24cm-rosa.webp"
+        "imagen": ""
       },
       {
         "color": "Terra",
         "hex": "#808080",
-        "imagen": "/products/Cacerola 24cm Terra.webp"
+        "imagen": ""
       },
       {
         "color": "Capri",
         "hex": "#1A9EC0",
-        "imagen": "/products/cacerola-24cm-capri.webp"
+        "imagen": ""
       }
     ],
     "destacado": true,
@@ -126,17 +126,17 @@ export const productos: Producto[] = [
       {
         "color": "Rosa",
         "hex": "#FFB6C1",
-        "imagen": "/products/sarten-24cm-rosa.webp"
+        "imagen": ""
       },
       {
         "color": "Terra",
         "hex": "#808080",
-        "imagen": "/products/Sarten 24cm Terra.webp"
+        "imagen": ""
       },
       {
         "color": "Capri",
         "hex": "#1A9EC0",
-        "imagen": "/products/sarten-24cm-capri.webp"
+        "imagen": ""
       }
     ]
   },
@@ -153,12 +153,12 @@ export const productos: Producto[] = [
       {
         "color": "Terra",
         "hex": "#808080",
-        "imagen": "/products/Sarten 31cm Terra.webp"
+        "imagen": ""
       },
       {
         "color": "Capri",
         "hex": "#1A9EC0",
-        "imagen": "/products/Sarten 31cm Capri.webp"
+        "imagen": ""
       }
     ],
     "descuento": 15
@@ -176,17 +176,17 @@ export const productos: Producto[] = [
       {
         "color": "Rosa",
         "hex": "#FFB6C1",
-        "imagen": "/products/cuadrada-29cm-rosa.webp"
+        "imagen": ""
       },
       {
         "color": "Terra",
         "hex": "#808080",
-        "imagen": "/products/Cuadrada 29cm Terra.webp"
+        "imagen": ""
       },
       {
         "color": "Capri",
         "hex": "#1A9EC0",
-        "imagen": "/products/cuadrada-29cm-capri.webp"
+        "imagen": ""
       }
     ],
     "descuento": 20,
@@ -205,17 +205,17 @@ export const productos: Producto[] = [
       {
         "color": "Rosa",
         "hex": "#FFB6C1",
-        "imagen": "/products/wok-32cm-rosa.webp"
+        "imagen": ""
       },
       {
         "color": "Terra",
         "hex": "#808080",
-        "imagen": "/products/Wok 32cm Terra.webp"
+        "imagen": ""
       },
       {
         "color": "Capri",
         "hex": "#1A9EC0",
-        "imagen": "/products/wok-32cm-capri.webp"
+        "imagen": ""
       }
     ],
     "destacado": true
@@ -233,7 +233,7 @@ export const productos: Producto[] = [
       {
         "color": "Unico",
         "hex": "#C17A5A",
-        "imagen": "/products/cafetera.webp"
+        "imagen": ""
       }
     ],
     "descuento": 30,
@@ -253,7 +253,7 @@ export const productos: Producto[] = [
       {
         "color": "Unico",
         "hex": "#C17A5A",
-        "imagen": "/products/set-utensilios.webp"
+        "imagen": ""
       }
     ],
     "descuento": 30,
@@ -272,7 +272,7 @@ export const productos: Producto[] = [
       {
         "color": "Nuit",
         "hex": "#2D2D2D",
-        "imagen": "/products/cacerola-nuit-20cm.webp"
+        "imagen": ""
       }
     ],
     "destacado": true,
@@ -291,7 +291,7 @@ export const productos: Producto[] = [
       {
         "color": "Nuit",
         "hex": "#2D2D2D",
-        "imagen": "/products/sarten-nuit-28cm.webp"
+        "imagen": ""
       }
     ]
   }
