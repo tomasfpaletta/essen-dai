@@ -30,16 +30,16 @@ function hexToRgba(hex: string, alpha: number) {
   return `rgba(${r},${g},${b},${alpha})`;
 }
 
-// ── Card de producto — estilo Apple ───────────────────────────────────────────
+// ── Card de producto — fiel al estilo Apple ───────────────────────────────────
 function ProductoCard({ p }: { p: Producto }) {
   const [varIdx, setVarIdx] = useState(0);
   const [lightbox, setLightbox] = useState(false);
   const variante = p.variantes[varIdx];
   const tieneImagen = !!variante.imagen;
 
-  // Fondo degradé derivado del color de la variante
-  const bgFrom = hexToRgba(variante.hex, 0.18);
-  const bgTo   = hexToRgba(variante.hex, 0.38);
+  const bgFrom = hexToRgba(variante.hex, 0.15);
+  const bgMid  = hexToRgba(variante.hex, 0.28);
+  const bgTo   = hexToRgba(variante.hex, 0.45);
 
   return (
     <>
@@ -47,108 +47,101 @@ function ProductoCard({ p }: { p: Producto }) {
         <Lightbox src={variante.imagen} alt={`${p.nombre} — ${variante.color}`} onClose={() => setLightbox(false)} />
       )}
 
-      <div className="bg-white rounded-3xl overflow-hidden flex flex-col group hover:shadow-2xl hover:-translate-y-1 transition-all duration-400 border border-black/5">
+      <div className="rounded-3xl overflow-hidden flex flex-col group hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 border border-black/5 bg-white">
 
-        {/* ── Imagen sobre fondo degradé del color ── */}
+        {/* ── ZONA IMAGEN — gradiente llena todo el ancho sin padding ── */}
         <div
-          className={`relative aspect-square overflow-hidden ${tieneImagen ? "cursor-zoom-in" : ""}`}
-          style={{ background: `linear-gradient(145deg, ${bgFrom} 0%, ${bgTo} 100%)` }}
+          className={`relative overflow-hidden flex-shrink-0 ${tieneImagen ? "cursor-zoom-in" : ""}`}
+          style={{
+            background: `radial-gradient(ellipse at 60% 40%, ${bgTo} 0%, ${bgMid} 40%, ${bgFrom} 100%)`,
+            paddingBottom: "75%", // aspect 4:3 — imagen ocupa el 75% del ancho
+            position: "relative",
+          }}
           onClick={() => tieneImagen && setLightbox(true)}
         >
-          {/* Badge */}
-          {p.badge && (
-            <span className="absolute top-4 left-4 text-white text-xs font-bold px-3 py-1 rounded-full z-10"
-              style={{ background: hexToRgba(variante.hex, 0.8), backdropFilter: "blur(8px)" }}>
-              {p.badge}
-            </span>
-          )}
-          {!p.badge && p.descuento && (
-            <span className="absolute top-4 left-4 bg-lila text-white text-xs font-bold px-3 py-1 rounded-full z-10">
-              -{p.descuento}%
-            </span>
-          )}
-
-          {tieneImagen ? (
-            <Image
-              src={variante.imagen}
-              alt={`${p.nombre} — ${variante.color}`}
-              fill
-              className="object-contain p-8 transition-transform duration-500 group-hover:scale-105"
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            />
-          ) : (
-            // Placeholder elegante cuando no hay foto
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
-              <div className="w-20 h-20 rounded-2xl flex items-center justify-center"
-                style={{ background: hexToRgba(variante.hex, 0.2) }}>
-                <svg viewBox="0 0 48 48" fill="none" className="w-10 h-10" style={{ color: variante.hex }}>
-                  <rect x="6" y="10" width="36" height="28" rx="4" stroke="currentColor" strokeWidth="2"/>
-                  <circle cx="18" cy="22" r="4" stroke="currentColor" strokeWidth="2"/>
-                  <path d="M6 34l10-10 8 8 6-8 12 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          <div className="absolute inset-0">
+            {tieneImagen ? (
+              <Image
+                src={variante.imagen}
+                alt={`${p.nombre} — ${variante.color}`}
+                fill
+                className="object-contain p-6 transition-transform duration-500 group-hover:scale-[1.04]"
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+              />
+            ) : (
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+                <svg viewBox="0 0 64 64" fill="none" className="w-16 h-16 opacity-30" style={{ color: variante.hex }}>
+                  <rect x="8" y="14" width="48" height="36" rx="6" stroke="currentColor" strokeWidth="2.5"/>
+                  <circle cx="24" cy="28" r="5" stroke="currentColor" strokeWidth="2.5"/>
+                  <path d="M8 44l14-14 10 10 8-10 16 14" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
+                <span className="text-xs font-medium opacity-40" style={{ color: variante.hex }}>Foto próximamente</span>
               </div>
-              <span className="text-xs font-medium" style={{ color: hexToRgba(variante.hex, 0.6) }}>Foto próximamente</span>
+            )}
+          </div>
+
+          {/* Badge arriba a la derecha */}
+          {(p.badge || p.descuento) && (
+            <div className="absolute top-3 right-3 z-10">
+              {p.badge
+                ? <span className="text-white text-xs font-bold px-2.5 py-1 rounded-full" style={{ background: hexToRgba(variante.hex, 0.85), backdropFilter: "blur(6px)" }}>{p.badge}</span>
+                : <span className="bg-lila text-white text-xs font-bold px-2.5 py-1 rounded-full">-{p.descuento}%</span>
+              }
             </div>
           )}
         </div>
 
-        {/* ── Dots de color — estilo Apple ── */}
-        {p.variantes.length > 1 && (
-          <div className="flex items-center justify-center gap-2.5 pt-4 pb-1">
+        {/* ── ZONA BLANCA — dots + info + CTAs ── */}
+        <div className="flex flex-col flex-1 px-5 pt-4 pb-6 text-center">
+
+          {/* Dots de color — exactamente como Apple */}
+          <div className="flex items-center justify-center gap-2 mb-4 min-h-[20px]">
             {p.variantes.map((v, i) => (
               <button
                 key={v.color}
                 onClick={() => setVarIdx(i)}
                 title={v.color}
-                className="rounded-full transition-all duration-200 flex-shrink-0"
+                className="rounded-full flex-shrink-0 transition-all duration-200"
                 style={{
-                  width: i === varIdx ? 12 : 10,
-                  height: i === varIdx ? 12 : 10,
+                  width: 12, height: 12,
                   background: v.hex,
-                  boxShadow: i === varIdx ? `0 0 0 2px white, 0 0 0 3.5px ${v.hex}` : "none",
-                  opacity: i === varIdx ? 1 : 0.45,
+                  boxShadow: i === varIdx
+                    ? `0 0 0 1.5px white, 0 0 0 3px ${v.hex}`
+                    : "none",
+                  opacity: i === varIdx ? 1 : 0.35,
+                  transform: i === varIdx ? "scale(1.1)" : "scale(1)",
                 }}
               />
             ))}
           </div>
-        )}
-        {p.variantes.length === 1 && <div className="pt-4" />}
 
-        {/* ── Texto centrado — estilo Apple ── */}
-        <div className="px-6 pb-7 text-center flex flex-col flex-1">
-          {/* Categoría */}
-          <p className="text-xs font-semibold uppercase tracking-widest mb-1.5" style={{ color: variante.hex }}>
-            {p.categoria}
-          </p>
-
-          {/* Nombre */}
-          <h3 className="font-heading text-texto text-xl leading-tight mb-2">{p.nombre}</h3>
-
-          {/* Descripción */}
-          <p className="text-texto-muted text-sm leading-relaxed line-clamp-2 mb-4">{p.descripcion}</p>
-
-          {/* Tags */}
-          {p.tags.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 justify-center mb-4">
-              {p.tags.map(tag => (
-                <span key={tag} className="text-xs px-2.5 py-0.5 rounded-full border"
-                  style={{ color: variante.hex, borderColor: hexToRgba(variante.hex, 0.3), background: hexToRgba(variante.hex, 0.06) }}>
-                  {tag}
-                </span>
-              ))}
-            </div>
+          {/* Badge "Nuevo" opcional */}
+          {p.ofertaEspecial && (
+            <p className="text-xs font-semibold mb-1" style={{ color: variante.hex }}>Oferta especial</p>
           )}
 
-          {/* CTA */}
-          <div className="mt-auto flex items-center justify-center gap-4">
+          {/* Nombre del producto — bold y prominente */}
+          <h3 className="font-heading text-texto text-xl leading-snug mb-1">{p.nombre}</h3>
+
+          {/* Tagline corta — como Apple usa 1-2 líneas */}
+          <p className="text-texto-muted text-sm leading-snug line-clamp-2 mb-5">{p.descripcion}</p>
+
+          {/* CTAs — botón relleno + link texto (exactamente Apple) */}
+          <div className="mt-auto flex items-center justify-center gap-4 flex-wrap">
             <a
               href={waLink(p, variante)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-white font-bold text-sm px-6 py-2.5 rounded-full transition-all hover:scale-105"
-              style={{ background: variante.hex, boxShadow: `0 4px 14px ${hexToRgba(variante.hex, 0.35)}` }}
+              target="_blank" rel="noopener noreferrer"
+              className="font-semibold text-sm px-5 py-2 rounded-full transition-all hover:opacity-90 text-white"
+              style={{ background: variante.hex }}
             >
-              Consultar precio →
+              Consultar
+            </a>
+            <a
+              href="#productos"
+              className="text-sm font-medium transition-colors hover:opacity-70"
+              style={{ color: variante.hex }}
+            >
+              Ver detalles &rsaquo;
             </a>
           </div>
         </div>
