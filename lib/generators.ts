@@ -15,7 +15,46 @@ export type ClienteType = typeof Cliente;
 `
 }
 
-/** Genera el contenido de lib/products.ts */
+/** Genera el contenido de config/promociones.ts */
+export function generatePromocionesTs(data: {
+  banner: Record<string, unknown>
+  items: unknown[]
+}): string {
+  return `// ─────────────────────────────────────────────────────────────────────────────
+//  PROMOCIONES — Sección de ediciones limitadas / ofertas especiales
+//  Última actualización: panel de administración
+// ─────────────────────────────────────────────────────────────────────────────
+
+export type PromoItem = {
+  id: string
+  titulo: string
+  descripcion: string
+  badge: string
+  colorFondo: string
+  colorTexto: string
+  imagen: string
+  activo: boolean
+}
+
+export type PromocionesConfig = {
+  visible: boolean
+  badge: string
+  titulo: string
+  subtitulo: string
+  descripcion: string
+  gradienteDesde: string
+  gradienteHasta: string
+  gradienteDireccion: string
+  ctaTexto: string
+  ctaLink: string
+}
+
+export const promocionesBanner: PromocionesConfig = ${JSON.stringify(data.banner, null, 2)};
+
+export const promocionesItems: PromoItem[] = ${JSON.stringify(data.items, null, 2)};
+`
+}
+
 /** Genera el contenido de config/descuentos.ts */
 export function generateDescuentosTs(data: {
   descuentos: unknown[]

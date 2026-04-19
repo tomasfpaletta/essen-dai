@@ -1,13 +1,13 @@
 import { NextResponse } from 'next/server'
 import { getFile, getMainSha, createBranch, updateFile, createPR } from '@/lib/github'
-import { generateClienteTs, generateProductsTs, generateDescuentosTs } from '@/lib/generators'
+import { generateClienteTs, generateProductsTs, generateDescuentosTs, generatePromocionesTs } from '@/lib/generators'
 
 export const maxDuration = 30
 
 export async function POST(req: Request) {
-  const { cliente, productos, hex, categorias, descuentos, descripcion } = await req.json()
+  const { cliente, productos, hex, categorias, descuentos, promociones, descripcion } = await req.json()
 
-  if (!cliente && !productos && !descuentos) {
+  if (!cliente && !productos && !descuentos && !promociones) {
     return NextResponse.json({ error: 'No hay cambios para enviar' }, { status: 400 })
   }
 
@@ -34,6 +34,12 @@ export async function POST(req: Request) {
       const { sha } = await getFile('config/descuentos.ts')
       await updateFile('config/descuentos.ts', generateDescuentosTs(descuentos),
         'admin: actualizar descuentos bancarios', sha, branchName)
+    }
+
+    if (promociones) {
+      const { sha } = await getFile('config/promociones.ts')
+      await updateFile('config/promociones.ts', generatePromocionesTs(promociones),
+        'admin: actualizar promociones y ediciones limitadas', sha, branchName)
     }
 
     const fecha = new Date().toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' })
