@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import Image from "next/image";
 import { useState, useEffect } from "react";
 import { Cliente } from "@/config/cliente";
 
@@ -40,18 +41,15 @@ export default function Navbar() {
       }`}>
 
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 flex-shrink-0">
-          {/* Isologotipo simplificado Master Essen */}
-          <div className="w-8 h-8 rounded-full bg-teal flex items-center justify-center">
-            <svg viewBox="0 0 24 20" className="w-5 h-4" fill="white">
-              {/* Dos figuras humanas estilizadas */}
-              <circle cx="7" cy="3.5" r="2.5"/>
-              <circle cx="15" cy="3" r="2"/>
-              <path d="M2 18 C2 12 5 10 7 10 C9 10 12 12 12 18Z" />
-              <path d="M10 18 C10 13 13 11 15 11 C17 11 20 13 20 18Z" />
-            </svg>
-          </div>
-          <span className="font-heading text-teal-dark text-base hidden sm:block tracking-wide">Master Essen</span>
+        <Link href="/" className="flex items-center flex-shrink-0">
+          <Image
+            src="/images/logo/isoLogoFondoBlanco.jpeg"
+            alt="Master Essen"
+            width={120}
+            height={52}
+            className="h-9 w-auto object-contain rounded-md"
+            priority
+          />
         </Link>
 
         {/* Nav links */}

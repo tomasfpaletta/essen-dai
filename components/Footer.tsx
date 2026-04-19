@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Cliente } from "@/config/cliente";
 
 export default function Footer() {
@@ -8,11 +9,14 @@ export default function Footer() {
   return (
     <footer className="bg-texto border-t border-white/5 px-6 sm:px-12 lg:px-20 py-10">
       <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-full bg-teal flex items-center justify-center">
-            <span className="font-heading text-white text-xs">ED</span>
-          </div>
-          <span className="font-heading text-white/60 text-sm tracking-wide">Essen Dai</span>
+        <Link href="/" className="flex items-center">
+          <Image
+            src="/images/logo/isoLogoCeleste.jpeg"
+            alt="Master Essen"
+            width={120}
+            height={52}
+            className="h-8 w-auto object-contain rounded-md opacity-90 hover:opacity-100 transition-opacity"
+          />
         </Link>
         <p className="text-white/25 text-xs text-center">
           &copy; {year} {Cliente.nombre} · Distribuidora Essen Argentina

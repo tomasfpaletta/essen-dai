@@ -1,5 +1,6 @@
 'use client'
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import { useState } from 'react'
 import React from 'react'
@@ -44,16 +45,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         `}
       >
         {/* Header sidebar */}
-        <div className="p-5 border-b border-teal/10 flex items-center gap-3">
-          <div className="w-9 h-9 bg-teal rounded-xl flex items-center justify-center flex-shrink-0">
-            <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" className="w-5 h-5">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-            </svg>
-          </div>
-          <div>
-            <p className="font-bold text-texto text-sm leading-tight">Panel Admin</p>
-            <p className="text-texto-muted text-xs">Master Essen</p>
-          </div>
+        <div className="p-4 border-b border-teal/10">
+          <Image
+            src="/images/logo/isoLogoFondoBlanco.jpeg"
+            alt="Master Essen"
+            width={140}
+            height={60}
+            className="h-10 w-auto object-contain rounded-md"
+            priority
+          />
+          <p className="text-texto-muted text-xs mt-2 pl-0.5">Panel de administración</p>
         </div>
 
         {/* Navegación */}
