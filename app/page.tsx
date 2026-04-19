@@ -1,5 +1,6 @@
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
+import Descuentos from "@/components/Descuentos";
 import Productos from "@/components/Productos";
 import Editorial from "@/components/Editorial";
 import Testimonios from "@/components/Testimonios";
@@ -15,6 +16,7 @@ export default function Home() {
     <main className="bg-fondo">
       <Navbar />
       <Hero />
+      <Descuentos />
       <Productos />
       <Editorial />
       <Testimonios />

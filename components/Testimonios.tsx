@@ -19,7 +19,7 @@ const ACCENTS = ["#58A39D", "#89BCAF", "#BB9EC5", "#58A39D"];
 function TestimonioCard({ r, idx }: { r: typeof REVIEWS[0]; idx: number }) {
   const accent = ACCENTS[idx % ACCENTS.length];
   return (
-    <div className="w-72 flex-shrink-0 bg-white rounded-2xl p-6 border border-teal/10 mx-3 shadow-sm"
+    <div className="w-72 flex-shrink-0 bg-white rounded-2xl p-6 border border-teal/10 mx-3 shadow-sm whitespace-normal"
       style={{ borderLeftColor: accent, borderLeftWidth: "3px" }}>
       <div className="flex gap-0.5 mb-3">
         {[...Array(r.stars)].map((_, i) => (

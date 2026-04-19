@@ -60,7 +60,13 @@ export const Cliente = {
       "5 años vendiendo Essen",
       "Envío gratis a todo el país",
       "2 años de garantía oficial"
-    ]
+    ],
+    "imagen": ""
+  },
+  "imagenes": {
+    "og": "",
+    "navbarLogo": "",
+    "favicon": ""
   }
 } as const;
 

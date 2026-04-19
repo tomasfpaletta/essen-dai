@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { Cliente } from "@/config/cliente";
 
 /* Diagonal dashes like the brand manual cover */
@@ -48,6 +49,23 @@ export default function Hero() {
       {/* Soft blob behind headline */}
       <div className="absolute top-1/3 left-1/4 w-[500px] h-[500px] bg-teal/8 rounded-full blur-[100px] pointer-events-none" />
       <div className="absolute bottom-1/4 right-1/4 w-[300px] h-[300px] bg-lila/10 rounded-full blur-[80px] pointer-events-none" />
+
+      {/* Imagen del hero (si está configurada) */}
+      {Cliente.hero.imagen && (
+        <div className="absolute inset-y-0 right-0 w-full md:w-1/2 pointer-events-none">
+          <div className="relative h-full w-full opacity-20 md:opacity-100">
+            <Image
+              src={Cliente.hero.imagen}
+              alt={`${Cliente.marca} — imagen principal`}
+              fill
+              className="object-cover object-center"
+              priority
+            />
+            {/* Fade hacia la izquierda en desktop */}
+            <div className="absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-fondo to-transparent hidden md:block" />
+          </div>
+        </div>
+      )}
 
       {/* Rotating badge */}
       <div className="absolute bottom-20 right-10 lg:right-24 w-28 h-28 hidden md:flex items-center justify-center">
