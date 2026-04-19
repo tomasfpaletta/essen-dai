@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 
 export default function AdminLogin() {
@@ -7,6 +7,13 @@ export default function AdminLogin() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const router = useRouter()
+
+  // En desarrollo, redirigir directo al dashboard sin contraseña
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      router.replace('/admin/dashboard')
+    }
+  }, [router])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
