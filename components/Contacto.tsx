@@ -15,7 +15,7 @@ export default function Contacto() {
   const waHref = `${Cliente.whatsapp.link}?text=${encodeURIComponent(Cliente.whatsapp.mensajeDefecto)}`;
 
   return (
-    <section id="contacto" className="bg-gradient-to-b from-[#1A3330] to-[#0F2320] px-6 sm:px-12 lg:px-20 py-28">
+    <section id="contacto" className="bg-gradient-to-b from-[#1A3330] to-[#0F2320] px-6 sm:px-12 lg:px-20 py-28 section-angle-top">
       <div className="max-w-7xl mx-auto">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
 

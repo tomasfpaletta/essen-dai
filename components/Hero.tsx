@@ -1,142 +1,148 @@
 "use client";
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import { Cliente } from "@/config/cliente";
-
-/* Diagonal dashes like the brand manual cover */
-function Dashes() {
-  return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none select-none" aria-hidden>
-      {/* Teal dashes */}
-      {[
-        { top: "8%",  left: "72%",  w: 80,  h: 14, rot: -40, color: "#58A39D" },
-        { top: "14%", left: "84%",  w: 55,  h: 12, rot: -40, color: "#58A39D" },
-        { top: "22%", left: "91%",  w: 70,  h: 12, rot: -40, color: "#58A39D" },
-        { top: "35%", left: "78%",  w: 48,  h: 10, rot: -40, color: "#89BCAF" },
-        { top: "48%", left: "88%",  w: 62,  h: 12, rot: -40, color: "#58A39D" },
-        { top: "62%", left: "75%",  w: 45,  h: 10, rot: -40, color: "#89BCAF" },
-        { top: "72%", left: "86%",  w: 75,  h: 13, rot: -40, color: "#58A39D" },
-        { top: "82%", left: "79%",  w: 50,  h: 11, rot: -40, color: "#89BCAF" },
-        /* Left side */
-        { top: "15%", left: "1%",   w: 60,  h: 12, rot: -40, color: "#BB9EC5" },
-        { top: "28%", left: "4%",   w: 40,  h: 10, rot: -40, color: "#89BCAF" },
-        { top: "55%", left: "0%",   w: 70,  h: 12, rot: -40, color: "#BB9EC5" },
-        { top: "70%", left: "3%",   w: 45,  h: 10, rot: -40, color: "#58A39D" },
-        { top: "85%", left: "1%",   w: 55,  h: 11, rot: -40, color: "#89BCAF" },
-      ].map((d, i) => (
-        <span key={i} className="absolute rounded-full" style={{
-          top: d.top, left: d.left,
-          width: d.w, height: d.h,
-          background: d.color,
-          opacity: 0.13,
-          transform: `rotate(${d.rot}deg)`,
-        }} />
-      ))}
-    </div>
-  );
-}
+import { categorias } from "@/lib/products";
 
 export default function Hero() {
   const [visible, setVisible] = useState(false);
-  useEffect(() => { setTimeout(() => setVisible(true), 80); }, []);
+  useEffect(() => { setTimeout(() => setVisible(true), 100); }, []);
 
   const waHref = `${Cliente.whatsapp.link}?text=${encodeURIComponent(Cliente.whatsapp.mensajeDefecto)}`;
 
   return (
-    <section className="relative min-h-screen bg-fondo flex flex-col justify-center overflow-hidden px-6 sm:px-12 lg:px-20 pt-24 pb-16">
-      <Dashes />
+    <section className="relative min-h-screen flex flex-col justify-center overflow-hidden" style={{ background: "#080F0E" }}>
 
-      {/* Soft blob behind headline */}
-      <div className="absolute top-1/3 left-1/4 w-[500px] h-[500px] bg-teal/8 rounded-full blur-[100px] pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-[300px] h-[300px] bg-lila/10 rounded-full blur-[80px] pointer-events-none" />
-
-      {/* Imagen del hero (si está configurada) */}
-      {Cliente.hero.imagen && (
-        <div className="absolute inset-y-0 right-0 w-full md:w-1/2 pointer-events-none">
-          <div className="relative h-full w-full opacity-20 md:opacity-100">
-            <Image
-              src={Cliente.hero.imagen}
-              alt={`${Cliente.marca} — imagen principal`}
-              fill
-              className="object-cover object-center"
-              priority
-            />
-            {/* Fade hacia la izquierda en desktop */}
-            <div className="absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-fondo to-transparent hidden md:block" />
-          </div>
-        </div>
-      )}
-
-      {/* Rotating badge */}
-      <div className="absolute bottom-20 right-10 lg:right-24 w-28 h-28 hidden md:flex items-center justify-center">
-        <svg viewBox="0 0 100 100" className="absolute w-full h-full animate-spin" style={{ animationDuration: "20s" }}>
-          <defs>
-            <path id="circle-path" d="M 50,50 m -30,0 a 30,30 0 1,1 60,0 a 30,30 0 1,1 -60,0" />
-          </defs>
-          <text style={{ fontSize: "9px", letterSpacing: "2px", fill: "#58A39D", opacity: 0.5 }}>
-            <textPath href="#circle-path">ESSEN DAI · BUENOS AIRES · 2025 · </textPath>
-          </text>
-        </svg>
-        <div className="w-12 h-12 rounded-full bg-teal flex items-center justify-center shadow-lg shadow-teal/30">
-          <span className="font-heading text-white text-sm">ED</span>
-        </div>
+      {/* ── Gradient blobs ── */}
+      <div className="absolute inset-0 pointer-events-none" aria-hidden>
+        {/* Teal blob - top right */}
+        <div className="absolute rounded-full"
+          style={{ width: 700, height: 700, top: "-15%", right: "-10%",
+            background: "radial-gradient(circle, rgba(88,163,157,0.35) 0%, transparent 70%)",
+            filter: "blur(60px)" }} />
+        {/* Lila blob - bottom left */}
+        <div className="absolute rounded-full"
+          style={{ width: 500, height: 500, bottom: "0%", left: "-5%",
+            background: "radial-gradient(circle, rgba(187,158,197,0.28) 0%, transparent 70%)",
+            filter: "blur(70px)" }} />
+        {/* Teal mid blob */}
+        <div className="absolute rounded-full"
+          style={{ width: 400, height: 400, top: "40%", left: "30%",
+            background: "radial-gradient(circle, rgba(89,188,175,0.12) 0%, transparent 70%)",
+            filter: "blur(80px)" }} />
+        {/* Warm accent - top center */}
+        <div className="absolute rounded-full"
+          style={{ width: 300, height: 300, top: "10%", left: "40%",
+            background: "radial-gradient(circle, rgba(187,158,197,0.15) 0%, transparent 70%)",
+            filter: "blur(50px)" }} />
       </div>
 
-      {/* Main content */}
-      <div className={`max-w-4xl relative z-10 transition-all duration-700 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
+      {/* ── Noise grain overlay ── */}
+      <div className="absolute inset-0 opacity-[0.03] pointer-events-none"
+        style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
+          backgroundSize: "200px" }} />
+
+      {/* ── Category pills (tipo Dribbble) ── */}
+      <div
+        className={`absolute top-28 left-0 right-0 flex justify-center gap-2 px-6 flex-wrap transition-all duration-700 delay-200 ${visible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"}`}
+      >
+        {categorias.filter(c => c.value !== "todos").map((c, i) => (
+          <a
+            key={c.value}
+            href="#productos"
+            className="px-4 py-1.5 rounded-full text-xs font-semibold border transition-all"
+            style={{
+              background: i === 0 ? "rgba(88,163,157,0.2)" : "rgba(255,255,255,0.05)",
+              borderColor: i === 0 ? "rgba(88,163,157,0.5)" : "rgba(255,255,255,0.1)",
+              color: i === 0 ? "#58A39D" : "rgba(255,255,255,0.5)",
+            }}
+          >
+            {c.label}
+          </a>
+        ))}
+      </div>
+
+      {/* ── Main content — centrado ── */}
+      <div className={`relative z-10 text-center px-6 sm:px-12 max-w-5xl mx-auto transition-all duration-700 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}>
 
         {/* Badge */}
-        <div className="inline-flex items-center gap-2 bg-teal/10 border border-teal/20 rounded-full px-4 py-1.5 mb-8">
-          <span className="w-1.5 h-1.5 bg-teal rounded-full" />
-          <span className="text-teal-dark text-xs font-semibold tracking-widest uppercase">{Cliente.hero.badge}</span>
+        <div className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 mb-8 border"
+          style={{ background: "rgba(88,163,157,0.1)", borderColor: "rgba(88,163,157,0.25)" }}>
+          <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#58A39D" }} />
+          <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: "#58A39D" }}>
+            {Cliente.hero.badge}
+          </span>
         </div>
 
         {/* Headline */}
-        <h1 className="display-hero text-texto mb-3 leading-none">
+        <h1 className="display-hero leading-none mb-2" style={{ color: "#ffffff" }}>
           {Cliente.hero.titulo1}
         </h1>
-        <h1 className="display-hero text-teal mb-3 leading-none">
+        <h1 className="display-hero leading-none mb-4" style={{ color: "#58A39D" }}>
           {Cliente.hero.titulo2}
         </h1>
-        <h2 className="font-heading text-lila text-3xl sm:text-4xl mb-8 leading-tight">
+        <h2 className="font-heading text-2xl sm:text-3xl mb-8 leading-tight" style={{ color: "#BB9EC5" }}>
           {Cliente.hero.subtitulo}
         </h2>
 
-        <p className="text-texto-muted text-lg max-w-md mb-10 font-light leading-relaxed">
-          {Cliente.hero.descripcion.split('\n').map((line, i) => (
-            <span key={i}>{line}{i < Cliente.hero.descripcion.split('\n').length - 1 && <br />}</span>
+        <p className="text-base sm:text-lg max-w-lg mx-auto mb-10 font-light leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>
+          {Cliente.hero.descripcion.split('\n').map((line, i, arr) => (
+            <span key={i}>{line}{i < arr.length - 1 && <br />}</span>
           ))}
         </p>
 
-        {/* Buttons */}
-        <div className="flex flex-wrap gap-4">
+        {/* CTAs */}
+        <div className="flex flex-wrap gap-4 justify-center">
           <a href="#productos"
-            className="bg-teal text-white font-bold px-8 py-4 rounded-full hover:bg-teal-dark transition-all text-sm tracking-wide shadow-md shadow-teal/25">
+            className="font-bold px-8 py-4 rounded-full text-sm tracking-wide transition-all hover:scale-105"
+            style={{ background: "#58A39D", color: "#fff", boxShadow: "0 0 30px rgba(88,163,157,0.4)" }}>
             {Cliente.hero.cta1Texto}
           </a>
           <a href={waHref} target="_blank" rel="noopener noreferrer"
-            className="border-2 border-teal/40 text-teal font-semibold px-8 py-4 rounded-full hover:border-teal hover:bg-teal/5 transition-all text-sm">
+            className="font-semibold px-8 py-4 rounded-full text-sm transition-all hover:scale-105 border"
+            style={{ borderColor: "rgba(255,255,255,0.2)", color: "rgba(255,255,255,0.75)", background: "rgba(255,255,255,0.05)" }}>
             {Cliente.hero.cta2Texto}
           </a>
         </div>
 
         {/* Stats */}
-        <div className="flex items-center gap-4 mt-14 text-texto-light text-sm flex-wrap">
+        <div className="flex items-center justify-center gap-3 sm:gap-6 mt-16 flex-wrap">
           {Cliente.hero.stats.map((stat, i) => (
-            <span key={i} className="flex items-center gap-4">
-              {stat}
-              {i < Cliente.hero.stats.length - 1 && <span className="w-1 h-1 bg-lila rounded-full" />}
+            <span key={i} className="flex items-center gap-3 sm:gap-6">
+              <span className="text-sm font-medium" style={{ color: "rgba(255,255,255,0.35)" }}>{stat}</span>
+              {i < Cliente.hero.stats.length - 1 && (
+                <span className="w-1 h-1 rounded-full flex-shrink-0" style={{ background: "rgba(187,158,197,0.4)" }} />
+              )}
             </span>
           ))}
         </div>
       </div>
 
-      {/* Scroll hint */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 text-texto-light text-xs animate-bounce">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
+      {/* ── Rotating badge ── */}
+      <div className="absolute bottom-20 right-10 lg:right-24 w-28 h-28 hidden md:flex items-center justify-center">
+        <svg viewBox="0 0 100 100" className="absolute w-full h-full animate-spin" style={{ animationDuration: "20s" }}>
+          <defs>
+            <path id="circle-path" d="M 50,50 m -30,0 a 30,30 0 1,1 60,0 a 30,30 0 1,1 -60,0" />
+          </defs>
+          <text style={{ fontSize: "9px", letterSpacing: "2px", fill: "#58A39D", opacity: 0.6 }}>
+            <textPath href="#circle-path">MASTER ESSEN · BUENOS AIRES · 2025 · </textPath>
+          </text>
+        </svg>
+        <div className="w-12 h-12 rounded-full flex items-center justify-center"
+          style={{ background: "rgba(88,163,157,0.2)", border: "1px solid rgba(88,163,157,0.4)" }}>
+          <span className="font-heading text-sm" style={{ color: "#58A39D" }}>ME</span>
+        </div>
+      </div>
+
+      {/* ── Scroll hint ── */}
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 animate-bounce">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4" style={{ color: "rgba(255,255,255,0.2)" }}>
           <polyline points="6 9 12 15 18 9" />
         </svg>
       </div>
+
+      {/* ── Diagonal bottom cut ── */}
+      <div className="absolute bottom-0 left-0 right-0 h-20 pointer-events-none"
+        style={{ background: "linear-gradient(to bottom right, transparent 49.5%, #F4FAF8 50%)" }} />
     </section>
   );
 }

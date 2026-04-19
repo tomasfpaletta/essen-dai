@@ -40,7 +40,7 @@ export default function Testimonios() {
   const row2 = REVIEWS.slice(6, 12);
 
   return (
-    <section id="testimonios" className="py-24 bg-gradient-to-b from-fondo to-white overflow-hidden">
+    <section id="testimonios" className="py-24 bg-gradient-to-b from-fondo to-white overflow-hidden section-angle-both">
       {/* Header */}
       <div className="px-6 sm:px-12 lg:px-20 mb-12">
         <p className="text-teal text-xs font-semibold uppercase tracking-[0.2em] mb-3">Opiniones</p>

@@ -11,7 +11,7 @@ const MARQUEE_ITEMS = ["ESSEN", "CALIDAD", "GARANTÍA", "CABA", "ARGENTINA", "OR
 
 export default function Editorial() {
   return (
-    <section id="nosotros" className="bg-[#1A3330] overflow-hidden">
+    <section id="nosotros" className="bg-[#1A3330] overflow-hidden section-angle-both">
 
       {/* Stats row */}
       <div className="max-w-7xl mx-auto px-6 sm:px-12 lg:px-20 pt-24 pb-16">

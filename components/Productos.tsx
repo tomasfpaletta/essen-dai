@@ -174,7 +174,7 @@ export default function Productos() {
   const filtered = cat === "todos" ? productos : productos.filter(p => p.categoria === cat);
 
   return (
-    <section id="productos" className="py-24 bg-gradient-to-b from-white via-fondo/40 to-white px-6 sm:px-12 lg:px-20">
+    <section id="productos" className="py-24 bg-gradient-to-b from-fondo via-white to-fondo px-6 sm:px-12 lg:px-20 section-angle-bottom">
       <div className="max-w-7xl mx-auto">
 
         {/* Header */}

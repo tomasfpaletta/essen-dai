@@ -23,7 +23,7 @@ export default function SumateEquipo() {
   }
 
   return (
-    <section id="equipo" className="py-24 bg-teal overflow-hidden relative">
+    <section id="equipo" className="py-24 bg-teal overflow-hidden relative section-angle-both">
       {/* Diagonal dashes decoration */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden>
         {[
