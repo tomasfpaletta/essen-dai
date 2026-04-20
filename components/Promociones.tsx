@@ -4,229 +4,105 @@ import Image from "next/image";
 import { promocionesBanner, promocionesItems } from "@/config/promociones";
 import { Cliente } from "@/config/cliente";
 
-function hexToRgba(hex: string, alpha: number) {
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-  return `rgba(${r},${g},${b},${alpha})`;
-}
-
-function getTextContrast(hex: string): "light" | "dark" {
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-  return (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.55 ? "dark" : "light";
-}
-
 export default function Promociones() {
   const config = promocionesBanner ?? null;
   const items = (promocionesItems ?? []).filter((i) => i.activo);
-  const [active, setActive] = useState(0);
+  const [mounted, setMounted] = useState(false);
 
-  useEffect(() => {
-    if (items.length <= 1) return;
-    const id = setInterval(() => setActive((a) => (a + 1) % items.length), 5000);
-    return () => clearInterval(id);
-  }, [items.length]);
+  useEffect(() => { setMounted(true); }, []);
 
   if (!config || !config.visible || items.length === 0) return null;
 
-  const safeActive = active < items.length ? active : 0;
-  const activeItem = items[safeActive];
-  if (!activeItem) return null;
-
-  const contrast = getTextContrast(activeItem.colorFondo ?? '#1A3330');
-  const waMsg = encodeURIComponent(
-    `Hola Daisy! Vi la promo "${activeItem.titulo}" y me interesa saber más.`
-  );
+  const waMsg = (titulo: string) =>
+    encodeURIComponent(`Hola Daisy! Vi la promo "${titulo}" y me interesa saber más.`);
 
   return (
     <section
       id="promociones"
-      className="relative overflow-hidden py-20"
-      style={{
-        background: `linear-gradient(${config.gradienteDireccion}, ${config.gradienteDesde}, ${config.gradienteHasta})`,
-      }}
+      className="py-20"
+      style={{ background: `linear-gradient(${config.gradienteDireccion}, ${config.gradienteDesde}, ${config.gradienteHasta})` }}
     >
-      {/* Background orbs */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-[600px] h-[600px] rounded-full blur-3xl opacity-20"
-          style={{ background: config.gradienteHasta }} />
-        <div className="absolute -bottom-40 -left-40 w-[400px] h-[400px] rounded-full blur-3xl opacity-15"
-          style={{ background: config.gradienteDesde }} />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full blur-3xl opacity-5 bg-white" />
-      </div>
+      <div className="max-w-7xl mx-auto px-6 sm:px-12 lg:px-20">
 
-      <div className="relative z-10 max-w-7xl mx-auto px-6 sm:px-12 lg:px-20">
-
-        {/* ── Section label ── */}
-        <div className="flex items-center gap-3 mb-10">
-          <span className="inline-flex items-center gap-2 border rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-white"
-            style={{ borderColor: hexToRgba("#FFFFFF", 0.25), background: hexToRgba("#FFFFFF", 0.1) }}>
-            <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+        {/* Header */}
+        <div className="text-center mb-12">
+          <span className="inline-block text-xs font-bold uppercase tracking-widest text-teal mb-3">
             {config.badge}
           </span>
+          <h2 className="font-heading text-white text-4xl sm:text-5xl">
+            {config.titulo}
+          </h2>
+          {config.subtitulo && (
+            <p className="text-white/60 mt-3 text-base max-w-xl mx-auto">{config.subtitulo}</p>
+          )}
         </div>
 
-        <div className="grid lg:grid-cols-5 gap-6 items-stretch">
-
-          {/* ── Featured card (active item) ── */}
-          <div className="lg:col-span-3">
+        {/* Grid de cards */}
+        <div className={`grid gap-5 ${items.length === 1 ? "grid-cols-1 max-w-2xl mx-auto" : "grid-cols-1 md:grid-cols-2"}`}>
+          {items.map((item) => (
             <div
-              key={activeItem.id}
-              className="relative rounded-3xl overflow-hidden h-full min-h-[340px] transition-all duration-500"
+              key={item.id}
+              className="rounded-2xl overflow-hidden flex flex-row items-stretch"
               style={{
-                background: activeItem.colorFondo,
-                boxShadow: `0 32px 64px ${hexToRgba(activeItem.colorFondo, 0.5)}`,
+                background: "rgba(255,255,255,0.06)",
+                border: "1px solid rgba(255,255,255,0.10)",
               }}
             >
-              {/* Glow ring */}
-              <div className="absolute inset-0 rounded-3xl pointer-events-none"
-                style={{ boxShadow: `inset 0 1px 0 ${hexToRgba("#FFFFFF", 0.2)}` }} />
-
-              {/* Layout: texto + imagen lado a lado si hay imagen, solo texto si no */}
-              <div className={`flex h-full ${activeItem.imagen ? "flex-row items-stretch" : "flex-col justify-between p-8"}`}>
-
-                {/* ── Columna de texto ── */}
-                <div className={`flex flex-col justify-between ${activeItem.imagen ? "flex-1 p-8" : ""}`}>
-
-                  {/* Decorative circles (solo sin imagen) */}
-                  {!activeItem.imagen && (
-                    <>
-                      <div className="absolute -top-10 -right-10 w-48 h-48 rounded-full opacity-10 bg-white pointer-events-none" />
-                      <div className="absolute -bottom-6 -left-6 w-32 h-32 rounded-full opacity-10 bg-white pointer-events-none" />
-                    </>
-                  )}
-
-                  <div className="relative z-10">
-                    <span
-                      className="inline-block text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-4"
-                      style={{
-                        background: hexToRgba("#FFFFFF", 0.2),
-                        color: contrast === "light" ? "#FFFFFF" : "#1A1A1A",
-                      }}
-                    >
-                      {activeItem.badge}
-                    </span>
-                    <h3
-                      className="font-heading text-3xl sm:text-4xl leading-tight mb-3"
-                      style={{ color: contrast === "light" ? "#FFFFFF" : "#1A1A1A" }}
-                    >
-                      {activeItem.titulo}
-                    </h3>
-                    <p
-                      className="text-base leading-relaxed max-w-sm"
-                      style={{ color: contrast === "light" ? hexToRgba("#FFFFFF", 0.75) : hexToRgba("#000000", 0.6) }}
-                    >
-                      {activeItem.descripcion}
-                    </p>
-                  </div>
-
-                  <div className="relative z-10 flex flex-wrap gap-3 mt-8">
-                    <a
-                      href={`${Cliente.whatsapp.link}?text=${waMsg}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 bg-white font-bold px-5 py-2.5 rounded-xl text-sm hover:scale-105 transition-transform shadow-lg"
-                      style={{ color: activeItem.colorFondo }}
-                    >
-                      Consultar →
-                    </a>
-                    <a
-                      href={config.ctaLink}
-                      className="inline-flex items-center gap-2 font-semibold px-5 py-2.5 rounded-xl text-sm border transition-all hover:bg-white/10"
-                      style={{
-                        color: contrast === "light" ? "white" : "#1A1A1A",
-                        borderColor: hexToRgba(contrast === "light" ? "#FFFFFF" : "#000000", 0.3),
-                      }}
-                    >
-                      {config.ctaTexto}
-                    </a>
-                  </div>
-                </div>
-
-                {/* ── Columna de imagen (solo si hay imagen) ── */}
-                {activeItem.imagen && (
-                  <div className="relative w-52 sm:w-64 flex-shrink-0 m-4 ml-0 rounded-2xl overflow-hidden"
-                    style={{ background: hexToRgba("#000000", 0.15) }}>
-                    <Image
-                      src={activeItem.imagen}
-                      alt={activeItem.titulo}
-                      fill
-                      className="object-cover object-center"
-                    />
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* ── Right: banner copy + item list ── */}
-          <div className="lg:col-span-2 flex flex-col justify-between gap-6">
-
-            {/* Copy */}
-            <div>
-              <h2 className="font-heading text-white text-3xl sm:text-4xl leading-tight mb-2">
-                {config.titulo}
-              </h2>
-              <p className="font-bold text-xl mb-3" style={{ color: hexToRgba("#FFFFFF", 0.7) }}>
-                {config.subtitulo}
-              </p>
-              <p className="text-sm leading-relaxed" style={{ color: hexToRgba("#FFFFFF", 0.55) }}>
-                {config.descripcion}
-              </p>
-            </div>
-
-            {/* Item selector list */}
-            <div className="flex flex-col gap-2">
-              {items.map((item, idx) => {
-                const isActive = idx === active;
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => setActive(idx)}
-                    className="text-left rounded-2xl px-4 py-3 transition-all duration-300 flex items-center gap-3"
-                    style={{
-                      background: isActive ? hexToRgba("#FFFFFF", 0.15) : hexToRgba("#FFFFFF", 0.05),
-                      borderLeft: `3px solid ${isActive ? "#FFFFFF" : hexToRgba("#FFFFFF", 0.2)}`,
-                    }}
+              {/* Texto */}
+              <div className="flex flex-col justify-between p-6 flex-1 min-w-0">
+                <div>
+                  <span
+                    className="inline-block text-xs font-bold uppercase tracking-widest px-2.5 py-1 rounded-full mb-3"
+                    style={{ background: "rgba(255,255,255,0.12)", color: "#7ECFCA" }}
                   >
-                    {/* Color dot */}
-                    <div
-                      className="w-3 h-3 rounded-full flex-shrink-0 border-2 border-white/30"
-                      style={{ background: item.colorFondo }}
-                    />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-white truncate">{item.titulo}</p>
-                      <p className="text-xs truncate" style={{ color: hexToRgba("#FFFFFF", 0.5) }}>
-                        {item.badge}
-                      </p>
-                    </div>
-                    {isActive && (
-                      <div className="w-1.5 h-1.5 rounded-full bg-white flex-shrink-0 animate-pulse" />
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Progress dots */}
-            {items.length > 1 && (
-              <div className="flex gap-2">
-                {items.map((_, idx) => (
-                  <button key={idx} onClick={() => setActive(idx)}
-                    className="rounded-full transition-all duration-300"
-                    style={{
-                      width: idx === active ? 24 : 6,
-                      height: 6,
-                      background: idx === active ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.25)",
-                    }}
-                  />
-                ))}
+                    {item.badge}
+                  </span>
+                  <h3 className="font-heading text-white text-2xl sm:text-3xl leading-snug mb-2">
+                    {item.titulo}
+                  </h3>
+                  <p className="text-white/60 text-sm leading-relaxed">
+                    {item.descripcion}
+                  </p>
+                </div>
+                <div className="mt-5">
+                  <a
+                    href={`${Cliente.whatsapp.link}?text=${waMsg(item.titulo)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block bg-white text-sm font-bold px-5 py-2.5 rounded-xl hover:bg-white/90 transition-colors"
+                    style={{ color: config.gradienteDesde }}
+                  >
+                    {config.ctaTexto}
+                  </a>
+                </div>
               </div>
-            )}
-          </div>
+
+              {/* Imagen */}
+              {item.imagen ? (
+                <div className="relative w-40 sm:w-52 flex-shrink-0 m-3 ml-0 rounded-xl overflow-hidden">
+                  <Image
+                    src={item.imagen}
+                    alt={item.titulo}
+                    fill
+                    className="object-cover object-center"
+                  />
+                </div>
+              ) : (
+                <div
+                  className="w-40 sm:w-52 flex-shrink-0 m-3 ml-0 rounded-xl flex items-center justify-center"
+                  style={{ background: "rgba(255,255,255,0.04)" }}
+                >
+                  <svg viewBox="0 0 48 48" fill="none" className="w-10 h-10 opacity-20">
+                    <rect x="6" y="10" width="36" height="28" rx="4" stroke="white" strokeWidth="2"/>
+                    <circle cx="18" cy="20" r="4" stroke="white" strokeWidth="2"/>
+                    <path d="M6 34l10-10 8 8 6-7 12 9" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+              )}
+            </div>
+          ))}
         </div>
+
       </div>
     </section>
   );

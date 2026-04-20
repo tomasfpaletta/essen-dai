@@ -1,93 +1,89 @@
 "use client";
-import { useState } from "react";
+import Image from "next/image";
 import { Cliente } from "@/config/cliente";
 
 const BENEFICIOS = [
-  "Ingresos reales sin horarios fijos",
-  "Kit de inicio y capacitación gratuita",
+  "Sin inversión inicial obligatoria",
+  "Capacitaciones exclusivas y gratuitas",
+  "Premios y viajes por objetivos",
   "Respaldo de una marca con 30 años de historia",
-  "Comunidad de vendedoras en todo el país",
 ];
 
-export default function SumateEquipo() {
-  const [nombre, setNombre] = useState("");
-  const [motivo, setMotivo] = useState("");
+// Cambiá esta ruta cuando el cliente suba su foto
+const FOTO_EQUIPO = "/images/equipo/emprendedora.webp";
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!nombre.trim() || !motivo.trim()) return;
-    const texto = encodeURIComponent(
-      `Hola Daisy! Me gustaría sumarme a tu equipo de ventas Essen.\n\nNombre: ${nombre.trim()}\nPor qué quiero unirme: ${motivo.trim()}\n\nQuedo a disposición, muchas gracias!`
-    );
-    window.open(`${Cliente.whatsapp.link}?text=${texto}`, "_blank");
-  }
+export default function SumateEquipo() {
+  const waTexto = encodeURIComponent(
+    "Hola Daisy! Me gustaría sumarme a tu equipo de ventas Essen. ¿Me podés contar más?"
+  );
 
   return (
-    <section id="equipo" className="py-24 bg-teal overflow-hidden relative section-angle-both">
-      {/* Diagonal dashes decoration */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden>
-        {[
-          { top: "10%", left: "5%",  w: 60, h: 11, rot: -40 },
-          { top: "30%", left: "2%",  w: 40, h: 10, rot: -40 },
-          { top: "65%", left: "6%",  w: 55, h: 11, rot: -40 },
-          { top: "85%", left: "3%",  w: 45, h: 10, rot: -40 },
-          { top: "15%", left: "88%", w: 65, h: 12, rot: -40 },
-          { top: "40%", left: "92%", w: 50, h: 10, rot: -40 },
-          { top: "70%", left: "85%", w: 70, h: 12, rot: -40 },
-        ].map((d, i) => (
-          <span key={i} className="absolute rounded-full bg-white/10" style={{
-            top: d.top, left: d.left, width: d.w, height: d.h,
-            transform: `rotate(${d.rot}deg)`,
-          }} />
-        ))}
-      </div>
+    <section id="equipo" className="py-20 bg-white">
+      <div className="max-w-7xl mx-auto px-6 sm:px-12 lg:px-20">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
 
-      <div className="max-w-7xl mx-auto px-6 sm:px-12 lg:px-20 relative z-10">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
-
-          {/* Left */}
-          <div>
-            <span className="inline-block bg-white/15 text-white text-xs font-semibold uppercase tracking-widest px-4 py-1.5 rounded-full mb-6">
-              Oportunidad
-            </span>
-            <h2 className="font-heading text-4xl sm:text-5xl text-white leading-tight mb-8">
-              ¿Querés vender<br />Essen?
-            </h2>
-            <div className="space-y-4">
-              {BENEFICIOS.map(b => (
-                <div key={b} className="flex items-start gap-3">
-                  <span className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <span className="w-1.5 h-1.5 bg-white rounded-full" />
-                  </span>
-                  <span className="text-white/80 text-base leading-relaxed">{b}</span>
+          {/* ── Imagen ── */}
+          <div className="relative">
+            <div className="relative rounded-3xl overflow-hidden aspect-[4/5] w-full max-w-md mx-auto lg:mx-0 shadow-2xl shadow-teal/20">
+              {/* Imagen del cliente — placeholder hasta que la suban */}
+              <div className="absolute inset-0 bg-gradient-to-br from-teal/20 to-teal-dark/40 flex items-center justify-center">
+                <div className="text-center text-white/60 p-8">
+                  <svg viewBox="0 0 64 64" fill="none" className="w-16 h-16 mx-auto mb-3 opacity-40">
+                    <circle cx="32" cy="22" r="10" stroke="currentColor" strokeWidth="2"/>
+                    <path d="M10 54c0-12.15 9.85-22 22-22s22 9.85 22 22" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                  </svg>
+                  <p className="text-sm font-medium">Foto del equipo</p>
+                  <p className="text-xs mt-1 opacity-70">El cliente sube la imagen</p>
                 </div>
-              ))}
+              </div>
+              {/* La imagen real — descomentá cuando esté disponible */}
+              {/* <Image src={FOTO_EQUIPO} alt="Emprendedora Essen" fill className="object-cover object-top" /> */}
+            </div>
+
+            {/* Badge flotante */}
+            <div className="absolute -bottom-4 -right-4 lg:bottom-6 lg:-right-6 bg-teal text-white rounded-2xl px-5 py-3 shadow-xl shadow-teal/30">
+              <p className="text-2xl font-black leading-none">30+</p>
+              <p className="text-xs font-semibold opacity-80 mt-0.5">años de marca</p>
             </div>
           </div>
 
-          {/* Right — Form */}
-          <div className="bg-white rounded-3xl p-8 shadow-xl shadow-teal-dark/20">
-            <h3 className="font-heading text-xl text-texto mb-1">Sumate al equipo</h3>
-            <p className="text-texto-muted text-sm mb-6">Completá el formulario y te contactamos</p>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="text-texto-light text-xs uppercase tracking-widest block mb-2">Tu nombre</label>
-                <input type="text" value={nombre} onChange={e => setNombre(e.target.value)}
-                  placeholder="Nombre completo"
-                  className="w-full bg-fondo border border-teal/20 rounded-xl px-4 py-3 text-texto placeholder-texto-light text-sm focus:outline-none focus:border-teal/50 transition-colors" />
-              </div>
-              <div>
-                <label className="text-texto-light text-xs uppercase tracking-widest block mb-2">¿Por qué te interesa?</label>
-                <textarea value={motivo} onChange={e => setMotivo(e.target.value)}
-                  placeholder="Contame brevemente..."
-                  rows={4}
-                  className="w-full bg-fondo border border-teal/20 rounded-xl px-4 py-3 text-texto placeholder-texto-light text-sm resize-none focus:outline-none focus:border-teal/50 transition-colors" />
-              </div>
-              <button type="submit"
-                className="w-full bg-teal text-white font-bold py-4 rounded-xl hover:bg-teal-dark transition-all text-sm tracking-wide shadow-sm">
-                Enviar por WhatsApp →
-              </button>
-            </form>
+          {/* ── Texto ── */}
+          <div>
+            <span className="inline-block text-xs font-bold uppercase tracking-widest text-teal mb-4">
+              Oportunidad Essen
+            </span>
+            <h2 className="font-heading text-texto text-3xl sm:text-4xl lg:text-5xl leading-tight mb-5">
+              Transformá tu pasión<br />en un negocio próspero
+            </h2>
+            <p className="text-texto-muted text-base leading-relaxed mb-8">
+              Unite a nuestra comunidad de emprendedoras. Gestioná tus tiempos, obtené ganancias desde el primer día y convertite en una experta culinaria. No necesitás experiencia previa, nosotros te capacitamos.
+            </p>
+
+            {/* Lista de beneficios */}
+            <ul className="space-y-3 mb-10">
+              {BENEFICIOS.map(b => (
+                <li key={b} className="flex items-center gap-3">
+                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-teal/15 flex items-center justify-center">
+                    <svg viewBox="0 0 12 12" fill="none" className="w-3 h-3">
+                      <path d="M2 6l3 3 5-5" stroke="#58A39D" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </span>
+                  <span className="text-texto-muted text-sm">{b}</span>
+                </li>
+              ))}
+            </ul>
+
+            <a
+              href={`${Cliente.whatsapp.link}?text=${waTexto}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 bg-teal text-white font-bold px-7 py-4 rounded-xl hover:bg-teal-dark transition-colors shadow-lg shadow-teal/25 text-sm"
+            >
+              Quiero ser emprendedora
+              <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+                <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd"/>
+              </svg>
+            </a>
           </div>
         </div>
       </div>
