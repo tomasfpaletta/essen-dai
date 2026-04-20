@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { productos as initialProductos, HEX, categorias, type Producto, type Variante } from '@/lib/products'
+import { productos as initialProductos, HEX, categorias as initialCategorias, type Producto, type Variante } from '@/lib/products'
 
 // ── Tipos ────────────────────────────────────────────────────────────────────
 type VarianteEdit = Variante & { preview?: string; uploading?: boolean }
@@ -30,6 +30,9 @@ export default function ProductosPage() {
   const [items, setItems] = useState<ProductoEdit[]>(
     initialProductos.map(p => ({ ...p, variantes: p.variantes.map(v => ({ ...v })) }))
   )
+  const [cats, setCats] = useState(initialCategorias.map(c => ({ ...c })))
+  const [newCatLabel, setNewCatLabel] = useState('')
+  const [showCatPanel, setShowCatPanel] = useState(false)
   const [expandedId, setExpandedId]   = useState<string | null>(null)
   const [modifiedIds, setModifiedIds] = useState<string[]>([])
   const [hasChanges, setHasChanges]   = useState(false)
@@ -58,6 +61,28 @@ export default function ProductosPage() {
 
   function markModified(id: string) {
     setModifiedIds(prev => prev.includes(id) ? prev : [...prev, id])
+  }
+
+  function slugify(label: string) {
+    return label.toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '')
+  }
+
+  function addCategory() {
+    const label = newCatLabel.trim()
+    if (!label) return
+    const value = slugify(label)
+    if (cats.some(c => c.value === value)) return
+    setCats(prev => [...prev, { value: value as Producto['categoria'], label }])
+    setNewCatLabel('')
+    setHasChanges(true)
+  }
+
+  function removeCategory(value: string) {
+    if (value === 'todos') return
+    setCats(prev => prev.filter(c => c.value !== value))
+    setHasChanges(true)
   }
 
   function updateProduct(id: string, updates: Partial<ProductoEdit>) {
@@ -133,7 +158,7 @@ export default function ProductosPage() {
       id,
       nombre: 'Nuevo producto',
       descripcion: 'Descripción del producto.',
-      categoria: categorias.find(c => c.value !== 'todos')?.value as ProductoEdit['categoria'] ?? 'contemporanea',
+      categoria: cats.find(c => c.value !== 'todos')?.value as ProductoEdit['categoria'] ?? 'contemporanea',
       tags: [],
       variantes: [{ color: 'Negro', hex: '#1C1C1E', imagen: '' }],
       destacado: false,
@@ -164,7 +189,7 @@ export default function ProductosPage() {
         body: JSON.stringify({
           productos: cleanForStorage(items),
           hex: HEX,
-          categorias,
+          categorias: cats,
         }),
       })
       const data = await res.json()
@@ -289,7 +314,7 @@ export default function ProductosPage() {
               onChange={e => setFilterCategoria(e.target.value)}
               className="w-full px-3 py-2 text-sm rounded-xl border border-teal/20 focus:outline-none focus:border-teal bg-fondo text-texto"
             >
-              {categorias.map(c => (
+              {cats.map(c => (
                 <option key={c.value} value={c.value}>{c.label}</option>
               ))}
             </select>
@@ -321,6 +346,73 @@ export default function ProductosPage() {
             </select>
           </div>
         </div>
+      </div>
+
+      {/* Categorías */}
+      <div className="bg-white rounded-2xl border border-teal/10 overflow-hidden">
+        <button
+          onClick={() => setShowCatPanel(!showCatPanel)}
+          className="w-full flex items-center justify-between px-5 py-4 hover:bg-fondo transition-colors text-left"
+        >
+          <div className="flex items-center gap-3">
+            <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 text-teal">
+              <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM14 11a1 1 0 011 1v1h1a1 1 0 110 2h-1v1a1 1 0 11-2 0v-1h-1a1 1 0 110-2h1v-1a1 1 0 011-1z"/>
+            </svg>
+            <span className="font-semibold text-texto text-sm">Categorías del catálogo</span>
+            <span className="text-xs bg-teal/10 text-teal px-2 py-0.5 rounded-full">{cats.filter(c => c.value !== 'todos').length}</span>
+          </div>
+          <svg viewBox="0 0 20 20" fill="currentColor" className={`w-4 h-4 text-texto-light transition-transform ${showCatPanel ? 'rotate-180' : ''}`}>
+            <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd"/>
+          </svg>
+        </button>
+
+        {showCatPanel && (
+          <div className="border-t border-teal/10 p-5 space-y-4">
+            <p className="text-xs text-texto-muted">Las categorías se aplican al catálogo público. Al publicar, los cambios se sincronizan con la web.</p>
+
+            {/* Lista de categorías existentes */}
+            <div className="flex flex-wrap gap-2">
+              {cats.filter(c => c.value !== 'todos').map(c => (
+                <div
+                  key={c.value}
+                  className="flex items-center gap-1.5 bg-fondo border border-teal/15 rounded-xl px-3 py-1.5"
+                >
+                  <span className="text-sm text-texto font-medium">{c.label}</span>
+                  <span className="text-[10px] text-texto-light font-mono">/{c.value}</span>
+                  <button
+                    onClick={() => removeCategory(c.value)}
+                    className="ml-1 text-red-400 hover:text-red-600 transition-colors text-xs leading-none"
+                    title="Eliminar categoría"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            {/* Agregar nueva categoría */}
+            <div className="flex gap-2">
+              <input
+                value={newCatLabel}
+                onChange={e => setNewCatLabel(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && addCategory()}
+                placeholder="Ej: Ollas de hierro"
+                className="flex-1 px-3 py-2 text-sm rounded-xl border border-teal/20 focus:outline-none focus:border-teal bg-fondo text-texto"
+              />
+              <button
+                onClick={addCategory}
+                disabled={!newCatLabel.trim()}
+                className="flex items-center gap-1.5 bg-teal/10 text-teal font-semibold px-4 py-2 rounded-xl text-sm hover:bg-teal/20 transition-colors disabled:opacity-40"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Agregar
+              </button>
+            </div>
+            <p className="text-[11px] text-texto-light">
+              El slug se genera automáticamente. Acordate de presionar <strong>Publicar</strong> para que aparezca en la web.
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Lista de productos */}
@@ -433,7 +525,7 @@ export default function ProductosPage() {
                           onChange={e => updateProduct(p.id, { categoria: e.target.value as Producto['categoria'] })}
                           className="w-full px-3 py-2 text-sm rounded-xl border border-teal/20 focus:outline-none focus:border-teal bg-white text-texto"
                         >
-                          {categorias.filter(c => c.value !== 'todos').map(c => (
+                          {cats.filter(c => c.value !== 'todos').map(c => (
                             <option key={c.value} value={c.value}>{c.label}</option>
                           ))}
                         </select>

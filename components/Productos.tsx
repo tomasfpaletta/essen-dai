@@ -45,9 +45,11 @@ function hexToRgba(hex: string, alpha: number) {
 
 // ── Card de producto ──────────────────────────────────────────────────────────
 function ProductoCard({ p }: { p: Producto }) {
+  // Solo mostrar variantes que tienen foto cargada
+  const variantesConFoto = p.variantes.filter(v => !!v.imagen);
   const [varIdx, setVarIdx] = useState(0);
   const [lightbox, setLightbox] = useState(false);
-  const variante = p.variantes[varIdx];
+  const variante = variantesConFoto[varIdx] ?? p.variantes[0];
   const tieneImagen = !!variante.imagen;
 
   const bgFrom = hexToRgba(variante.hex, 0.10);
@@ -127,9 +129,9 @@ function ProductoCard({ p }: { p: Producto }) {
         {/* ── TEXTO — compacto ── */}
         <div className="px-4 pt-3 pb-4 flex flex-col gap-2">
 
-          {/* Dots de color */}
+          {/* Dots de color — solo variantes con foto */}
           <div className="flex items-center gap-1.5">
-            {p.variantes.map((v, i) => (
+            {variantesConFoto.map((v, i) => (
               <button
                 key={v.color}
                 onClick={() => setVarIdx(i)}
