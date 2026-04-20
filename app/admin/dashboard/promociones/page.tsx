@@ -179,40 +179,91 @@ function PromoImageUploader({
   )
 }
 
-// ── Uploader imagen bancaria ──────────────────────────────────────────────────
+// ── Convierte primera página de un PDF a Blob JPEG (client-side) ─────────────
+async function pdfFirstPageToBlob(file: File): Promise<Blob> {
+  const pdfjsLib = await import('pdfjs-dist')
+  // Worker desde CDN con versión exacta — evita configuración de webpack
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`
+
+  const arrayBuffer = await file.arrayBuffer()
+  const pdf  = await pdfjsLib.getDocument({ data: arrayBuffer }).promise
+  const page = await pdf.getPage(1)
+
+  const viewport = page.getViewport({ scale: 2.5 }) // alta resolución
+  const canvas   = document.createElement('canvas')
+  canvas.width   = viewport.width
+  canvas.height  = viewport.height
+
+  await page.render({
+    canvasContext: canvas.getContext('2d') as CanvasRenderingContext2D,
+    canvas,
+    viewport,
+  }).promise
+
+  return new Promise<Blob>((resolve, reject) =>
+    canvas.toBlob(
+      b => (b ? resolve(b) : reject(new Error('No se pudo convertir el PDF'))),
+      'image/jpeg', 0.92
+    )
+  )
+}
+
+// ── Uploader imagen bancaria — acepta imagen O PDF ────────────────────────────
 function BancosImageUploader() {
   const inputRef = useRef<HTMLInputElement>(null)
-  const [uploading, setUploading] = useState(false)
+  const [phase, setPhase]     = useState<'idle' | 'converting' | 'uploading' | 'done'>('idle')
   const [uploadOk, setUploadOk] = useState(false)
-  const [error, setError] = useState('')
+  const [error, setError]     = useState('')
   const [preview, setPreview] = useState('/images/bancos/promos.webp')
+
+  const busy = phase === 'converting' || phase === 'uploading'
 
   async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
-    setUploading(true)
     setError('')
     setUploadOk(false)
-    try {
-      // Preview local inmediato
-      setPreview(URL.createObjectURL(file))
 
+    try {
+      let uploadFile: File = file
+
+      if (file.type === 'application/pdf') {
+        // ── PDF: renderizar página 1 en el browser ──
+        setPhase('converting')
+        const blob = await pdfFirstPageToBlob(file)
+        uploadFile  = new File([blob], 'promos.jpg', { type: 'image/jpeg' })
+        setPreview(URL.createObjectURL(blob))
+      } else {
+        // ── Imagen: preview inmediato ──
+        setPreview(URL.createObjectURL(file))
+      }
+
+      // ── Subir al servidor ──
+      setPhase('uploading')
       const form = new FormData()
-      form.append('file', file)
-      form.append('filename', 'promos')   // siempre se llama "promos"
-      form.append('folder', 'bancos')     // carpeta /public/images/bancos/
-      const res = await fetch('/api/admin/upload', { method: 'POST', body: form })
+      form.append('file', uploadFile)
+      form.append('filename', 'promos')
+      form.append('folder', 'bancos')
+      const res  = await fetch('/api/admin/upload', { method: 'POST', body: form })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Error al subir')
+
       setUploadOk(true)
+      setPhase('done')
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Error al subir imagen')
-      setPreview('/images/bancos/promos.webp') // revert preview
+      setError(err instanceof Error ? err.message : 'Error al procesar el archivo')
+      setPreview('/images/bancos/promos.webp')
+      setPhase('idle')
     } finally {
-      setUploading(false)
       if (inputRef.current) inputRef.current.value = ''
     }
   }
+
+  const btnLabel =
+    phase === 'converting' ? 'Convirtiendo PDF…' :
+    phase === 'uploading'  ? 'Subiendo…' :
+    'Subir imagen o PDF'
 
   return (
     <div className="bg-white rounded-2xl border border-gray-100 p-6">
@@ -220,7 +271,7 @@ function BancosImageUploader() {
         <div>
           <h2 className="font-bold text-texto">Imagen de beneficios bancarios</h2>
           <p className="text-texto-muted text-xs mt-1">
-            Se actualiza 1–2 veces por mes. Subí la nueva foto de promociones bancarias aquí.
+            Se actualiza 1–2 veces por mes. Podés subir una foto <strong>o directamente el PDF</strong> del banco.
           </p>
         </div>
         <span className="text-xs bg-teal/10 text-teal px-2.5 py-1 rounded-full font-medium flex-shrink-0">
@@ -229,22 +280,35 @@ function BancosImageUploader() {
       </div>
 
       <div className="flex flex-col sm:flex-row gap-5 items-start">
-        {/* Preview actual */}
+        {/* Preview */}
         <div
-          className="relative rounded-xl overflow-hidden border border-gray-100 cursor-pointer hover:border-teal/40 transition-colors flex-shrink-0"
+          className="relative rounded-xl overflow-hidden border border-gray-100 cursor-pointer hover:border-teal/40 transition-colors flex-shrink-0 group"
           style={{ width: 160, height: 220 }}
-          onClick={() => inputRef.current?.click()}
+          onClick={() => !busy && inputRef.current?.click()}
         >
           <img
-            src={`${preview}?t=${Date.now()}`}
+            src={preview.startsWith('blob:') ? preview : `${preview}?t=${Date.now()}`}
             alt="Imagen bancaria actual"
             style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top', display: 'block' }}
             onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
           />
-          <div className="absolute inset-0 bg-black/0 hover:bg-black/10 transition-colors flex items-end justify-center pb-3 pointer-events-none">
-            <span className="opacity-0 group-hover:opacity-100 bg-black/50 text-white text-xs px-2 py-1 rounded-lg">
-              Cambiar
-            </span>
+          {/* Spinner durante conversión/upload */}
+          {busy && (
+            <div className="absolute inset-0 bg-white/75 flex flex-col items-center justify-center gap-2 backdrop-blur-sm">
+              <svg className="animate-spin w-6 h-6 text-teal" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48 2.83 2.83"/>
+              </svg>
+              <p className="text-xs text-teal font-medium text-center px-2">
+                {phase === 'converting' ? 'Convirtiendo PDF…' : 'Subiendo…'}
+              </p>
+            </div>
+          )}
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/15 transition-colors flex items-end justify-center pb-3">
+            {!busy && (
+              <span className="opacity-0 group-hover:opacity-100 transition-opacity bg-black/60 text-white text-xs px-3 py-1 rounded-full">
+                Cambiar
+              </span>
+            )}
           </div>
         </div>
 
@@ -253,22 +317,21 @@ function BancosImageUploader() {
           <button
             type="button"
             onClick={() => inputRef.current?.click()}
-            disabled={uploading}
+            disabled={busy}
             className="inline-flex items-center gap-2 bg-teal/10 text-teal font-semibold px-5 py-3 rounded-xl text-sm hover:bg-teal/20 transition-colors disabled:opacity-50 w-full sm:w-auto"
           >
-            {uploading ? (
-              <>
-                <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48 2.83 2.83"/></svg>
-                Subiendo imagen…
-              </>
+            {busy ? (
+              <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48 2.83 2.83"/>
+              </svg>
             ) : (
-              <>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
-                </svg>
-                Subir nueva imagen bancaria
-              </>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
             )}
+            {btnLabel}
           </button>
 
           {uploadOk && (
@@ -281,15 +344,28 @@ function BancosImageUploader() {
           )}
           {error && <p className="text-xs text-red-500">{error}</p>}
 
-          <div className="text-xs text-texto-muted space-y-1 mt-1">
-            <p>• Formatos: JPG, PNG o WebP</p>
-            <p>• Tamaño recomendado: orientación vertical (tipo flyer)</p>
-            <p>• Máximo recomendado: 2 MB</p>
+          <div className="bg-teal/5 border border-teal/15 rounded-xl p-3 space-y-1">
+            <p className="text-xs font-semibold text-teal mb-1">Formatos aceptados</p>
+            <p className="text-xs text-texto-muted flex items-center gap-1.5">
+              <span className="inline-block w-5 h-5 bg-red-100 text-red-600 rounded text-[10px] font-bold flex items-center justify-center">PDF</span>
+              PDF — se convierte a imagen automáticamente
+            </p>
+            <p className="text-xs text-texto-muted flex items-center gap-1.5">
+              <span className="inline-block w-5 h-5 bg-blue-100 text-blue-600 rounded text-[10px] font-bold flex items-center justify-center">IMG</span>
+              JPG, PNG o WebP — se sube directamente
+            </p>
           </div>
         </div>
       </div>
 
-      <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
+      {/* Input acepta imágenes Y PDFs */}
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*,application/pdf"
+        className="hidden"
+        onChange={handleFile}
+      />
     </div>
   )
 }
