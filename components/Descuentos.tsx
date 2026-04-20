@@ -1,83 +1,60 @@
 "use client";
+import { useRef, useState } from "react";
 import { descuentos, descuentosConfig, type Descuento } from "@/config/descuentos";
 
-function hexToRgba(hex: string, alpha: number) {
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-  return `rgba(${r},${g},${b},${alpha})`;
+// Extrae el número de porcentaje del string, si existe
+function extractPct(s: string) {
+  const m = s.match(/(\d+)\s*%/);
+  return m ? m[1] : null;
 }
 
-/** Luminancia relativa → si el color es muy claro, usar texto oscuro */
-function isDark(hex: string) {
-  const r = parseInt(hex.slice(1, 3), 16) / 255;
-  const g = parseInt(hex.slice(3, 5), 16) / 255;
-  const b = parseInt(hex.slice(5, 7), 16) / 255;
-  return 0.299 * r + 0.587 * g + 0.114 * b < 0.65;
-}
-
-function BancoCard({ d }: { d: Descuento }) {
-  const dark = isDark(d.color);
-  const textColor = dark ? "rgba(255,255,255,0.95)" : "rgba(0,0,0,0.85)";
-  const mutedColor = dark ? "rgba(255,255,255,0.6)" : "rgba(0,0,0,0.45)";
-  const borderColor = dark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.08)";
+function BancoCard({ d, active }: { d: Descuento; active: boolean }) {
+  const pct = extractPct(d.descuento);
+  const esCuotas = !pct;
 
   return (
     <div
-      className="relative rounded-2xl overflow-hidden flex flex-col gap-3 p-4 group transition-all duration-200 hover:-translate-y-1"
-      style={{
-        background: `linear-gradient(140deg, ${d.color} 0%, ${d.color}CC 100%)`,
-        boxShadow: `0 4px 20px ${hexToRgba(d.color, 0.3)}`,
-      }}
+      className={`flex-shrink-0 w-72 sm:w-80 bg-white rounded-2xl overflow-hidden border transition-all duration-200 select-none ${
+        active ? "border-gray-200 shadow-lg" : "border-gray-100 shadow-sm opacity-80"
+      }`}
     >
-      {/* Shine on hover */}
-      <div
-        className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
-        style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 55%)" }}
-      />
-      {/* Orb decorativo */}
-      <div className="absolute -top-6 -right-6 w-28 h-28 rounded-full pointer-events-none" style={{ background: "rgba(255,255,255,0.08)" }} />
-
-      {/* Nombre del banco — pill estilizado */}
-      <div className="relative z-10">
-        <span
-          className="inline-block text-xs font-bold uppercase tracking-widest px-2.5 py-1 rounded-lg"
-          style={{
-            background: dark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.08)",
-            color: textColor,
-            letterSpacing: "0.08em",
-          }}
+      {/* Cuerpo */}
+      <div className="p-5 flex items-start gap-4">
+        {/* Círculo de descuento */}
+        <div
+          className="flex-shrink-0 w-20 h-20 rounded-full flex flex-col items-center justify-center text-white shadow-md"
+          style={{ background: `radial-gradient(circle at 35% 35%, ${d.color}EE, ${d.color})` }}
         >
-          {d.banco}
-        </span>
-      </div>
-
-      {/* Beneficio — protagonista */}
-      <div className="relative z-10 flex-1">
-        <p
-          className="font-heading font-bold leading-none"
-          style={{ fontSize: "clamp(1.4rem, 3vw, 1.8rem)", color: textColor }}
-        >
-          {d.descuento}
-        </p>
-        <p className="text-xs mt-1.5 font-medium" style={{ color: mutedColor }}>
-          {d.condicion}
-        </p>
-      </div>
-
-      {/* Footer */}
-      <div
-        className="relative z-10 flex items-center justify-between pt-3"
-        style={{ borderTop: `1px solid ${borderColor}` }}
-      >
-        <div className="flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: dark ? "rgba(255,255,255,0.6)" : "rgba(0,0,0,0.3)" }} />
-          <span className="text-[10px] font-medium" style={{ color: mutedColor }}>
-            Vigente · {descuentosConfig.vigencia}
-          </span>
+          {pct ? (
+            <>
+              <span className="text-2xl font-black leading-none">{pct}%</span>
+              <span className="text-[9px] font-bold uppercase tracking-wider opacity-80 mt-0.5">de ahorro</span>
+            </>
+          ) : (
+            <>
+              <span className="text-[11px] font-black leading-tight text-center px-1">{d.descuento}</span>
+            </>
+          )}
         </div>
-        <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: mutedColor }}>Essen</span>
+
+        {/* Info banco */}
+        <div className="flex-1 min-w-0 pt-1">
+          <p className="font-bold text-gray-800 text-base leading-tight">{d.banco}</p>
+          {d.detalle && (
+            <p className="text-gray-500 text-xs mt-1.5 leading-snug">{d.detalle}</p>
+          )}
+        </div>
       </div>
+
+      {/* Banner condición */}
+      {d.condicion && (
+        <div
+          className="px-5 py-2.5 text-white text-xs font-semibold leading-snug"
+          style={{ background: d.color }}
+        >
+          {d.condicion}
+        </div>
+      )}
     </div>
   );
 }
@@ -86,37 +63,118 @@ export default function Descuentos() {
   const activos = descuentos.filter(d => d.activo);
   if (!descuentosConfig.visible || activos.length === 0) return null;
 
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [current, setCurrent] = useState(0);
+
+  function scrollTo(idx: number) {
+    const el = scrollRef.current;
+    if (!el) return;
+    const card = el.children[idx] as HTMLElement;
+    if (!card) return;
+    el.scrollTo({ left: card.offsetLeft - 16, behavior: "smooth" });
+    setCurrent(idx);
+  }
+
+  function prev() { scrollTo(Math.max(0, current - 1)); }
+  function next() { scrollTo(Math.min(activos.length - 1, current + 1)); }
+
+  // Todos los bancos para el strip de cuotas
+  const todosBancos = descuentosConfig.cuotasBancos;
+
   return (
-    <section className="px-6 sm:px-12 lg:px-20 py-14 bg-fondo">
-      <div className="max-w-7xl mx-auto">
+    <section className="py-14 bg-white">
+      <div className="max-w-7xl mx-auto px-6 sm:px-12 lg:px-20">
 
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
-          <div>
-            <div className="inline-flex items-center gap-2 bg-teal/10 border border-teal/20 rounded-full px-3 py-1 mb-3">
-              <svg viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5 text-teal">
-                <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z"/>
-                <path fillRule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clipRule="evenodd"/>
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="font-heading text-texto text-2xl sm:text-3xl font-bold">
+            {descuentosConfig.subtitulo}
+          </h3>
+          {/* Flechas */}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <button
+              onClick={prev}
+              disabled={current === 0}
+              className="w-9 h-9 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50 hover:border-gray-300 transition-colors disabled:opacity-30"
+            >
+              <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+                <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd"/>
               </svg>
-              <span className="text-teal-dark text-xs font-semibold uppercase tracking-widest">Beneficios bancarios</span>
-            </div>
-            <h3 className="font-heading text-texto text-2xl sm:text-3xl">{descuentosConfig.subtitulo}</h3>
-          </div>
-          <div className="flex items-center gap-2 text-texto-light text-sm bg-teal/5 border border-teal/15 rounded-full px-4 py-1.5 self-start sm:self-auto flex-shrink-0">
-            <span className="w-2 h-2 rounded-full bg-teal animate-pulse" />
-            {descuentosConfig.vigencia}
+            </button>
+            <button
+              onClick={next}
+              disabled={current === activos.length - 1}
+              className="w-9 h-9 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50 hover:border-gray-300 transition-colors disabled:opacity-30"
+            >
+              <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+                <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd"/>
+              </svg>
+            </button>
           </div>
         </div>
 
-        {/* Cards — auto-fit: 4 desktop, 2-3 tablet, 1 mobile */}
+        {/* Carrusel */}
         <div
-          className="grid gap-4"
-          style={{ gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))" }}
+          ref={scrollRef}
+          className="flex gap-4 overflow-x-auto pb-2 scroll-smooth"
+          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+          onScroll={e => {
+            const el = e.currentTarget;
+            const cards = Array.from(el.children) as HTMLElement[];
+            let closest = 0;
+            let minDist = Infinity;
+            cards.forEach((c, i) => {
+              const dist = Math.abs(c.offsetLeft - el.scrollLeft - 16);
+              if (dist < minDist) { minDist = dist; closest = i; }
+            });
+            setCurrent(closest);
+          }}
         >
-          {activos.map(d => <BancoCard key={d.banco} d={d} />)}
+          {activos.map((d, i) => (
+            <BancoCard key={d.banco} d={d} active={i === current} />
+          ))}
         </div>
 
-        <p className="text-xs text-texto-light mt-5 opacity-50">
+        {/* Puntos de paginación */}
+        <div className="flex items-center gap-1.5 mt-4">
+          {activos.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => scrollTo(i)}
+              className={`rounded-full transition-all duration-200 ${
+                i === current
+                  ? "w-5 h-2 bg-teal"
+                  : "w-2 h-2 bg-gray-200 hover:bg-gray-300"
+              }`}
+            />
+          ))}
+        </div>
+
+        {/* Strip de cuotas */}
+        <div className="mt-8 bg-gray-50 border border-gray-100 rounded-2xl px-6 py-4 flex flex-wrap items-center gap-x-6 gap-y-3">
+          <p className="text-texto font-bold text-base flex-shrink-0">
+            {descuentosConfig.cuotasTexto}
+          </p>
+          <div className="flex flex-wrap gap-x-4 gap-y-2">
+            {todosBancos.map(banco => {
+              const d = descuentos.find(x => x.banco === banco);
+              return (
+                <span
+                  key={banco}
+                  className="text-xs font-semibold px-2.5 py-1 rounded-lg"
+                  style={{
+                    background: d ? `${d.color}18` : "#f3f4f6",
+                    color: d ? d.color : "#6b7280",
+                  }}
+                >
+                  {banco}
+                </span>
+              );
+            })}
+          </div>
+        </div>
+
+        <p className="text-xs text-gray-400 mt-4">
           * Descuentos válidos al {descuentosConfig.vigencia}. Consultá condiciones con tu banco.
         </p>
       </div>

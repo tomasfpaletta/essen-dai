@@ -57,6 +57,7 @@ export default function DescuentosPage() {
       banco: 'Nuevo banco',
       logo: '',
       descuento: '10% OFF',
+      detalle: '',
       condicion: 'Todos los días',
       color: '#58A39D',
       activo: true,
@@ -210,21 +211,30 @@ export default function DescuentosPage() {
                 />
               </div>
               <div>
-                <label className="text-xs font-medium text-texto-muted mb-1.5 block">Beneficio</label>
+                <label className="text-xs font-medium text-texto-muted mb-1.5 block">Beneficio principal</label>
                 <input
                   value={d.descuento}
                   onChange={e => updateItem(idx, { descuento: e.target.value })}
                   className="w-full px-3 py-2 text-sm rounded-xl border border-teal/20 focus:outline-none focus:border-teal bg-white text-texto"
-                  placeholder="15% OFF · 3 cuotas sin interés"
+                  placeholder="20% OFF"
                 />
               </div>
               <div>
-                <label className="text-xs font-medium text-texto-muted mb-1.5 block">Condición</label>
+                <label className="text-xs font-medium text-texto-muted mb-1.5 block">Detalle</label>
+                <input
+                  value={(d as Descuento & { detalle?: string }).detalle ?? ''}
+                  onChange={e => updateItem(idx, { detalle: e.target.value } as Partial<Descuento>)}
+                  className="w-full px-3 py-2 text-sm rounded-xl border border-teal/20 focus:outline-none focus:border-teal bg-white text-texto"
+                  placeholder="Con tarjetas de Crédito y Débito"
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <label className="text-xs font-medium text-texto-muted mb-1.5 block">Condición (banner inferior de la card)</label>
                 <input
                   value={d.condicion}
                   onChange={e => updateItem(idx, { condicion: e.target.value })}
                   className="w-full px-3 py-2 text-sm rounded-xl border border-teal/20 focus:outline-none focus:border-teal bg-white text-texto"
-                  placeholder="Martes y miércoles"
+                  placeholder="Martes y miércoles · Tope $5.000 de reintegro"
                 />
               </div>
               <div>
