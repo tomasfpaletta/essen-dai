@@ -98,3 +98,19 @@ export async function createPR(title: string, body: string, head: string, base =
   }
   return res.json() as Promise<{ html_url: string; number: number }>
 }
+
+/**
+ * Crea o actualiza un archivo directamente en main.
+ * No requiere rama ni PR — los cambios se publican al instante (Vercel deploya en ~30s).
+ */
+export async function publishFile(path: string, content: string, message: string) {
+  let sha: string | undefined
+  try {
+    const existing = await getFile(path)
+    sha = existing.sha
+  } catch {
+    // El archivo no existe aún → lo creamos
+  }
+  const base64 = Buffer.from(content, 'utf-8').toString('base64')
+  return uploadFile(path, base64, message, sha, 'main')
+}

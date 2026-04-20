@@ -67,7 +67,8 @@ export const Cliente = {
     "og": "",
     "navbarLogo": "",
     "favicon": ""
-  }
+  },
+  "fuente": "moderna"
 } as const;
 
 export type ClienteType = typeof Cliente;

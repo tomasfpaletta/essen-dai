@@ -10,6 +10,19 @@ const jakartaSans = Plus_Jakarta_Sans({
   variable: "--font-jakarta",
 });
 
+// Mapa de opciones de fuente → CSS font families
+const FONT_MAP: Record<string, { heading: string; body: string }> = {
+  moderna:    { heading: "'Fredoka One'",         body: "'Plus Jakarta Sans'" },
+  elegante:   { heading: "'Playfair Display'",    body: "'Lato'" },
+  clasica:    { heading: "'Cormorant Garamond'",  body: "'Lato'" },
+  bold:       { heading: "'Bebas Neue'",          body: "'Inter'" },
+  amigable:   { heading: "'Nunito'",              body: "'Nunito'" },
+  manuscrita: { heading: "'Dancing Script'",      body: "'Plus Jakarta Sans'" },
+}
+
+const fuenteKey = (Cliente as Record<string, unknown>).fuente as string || 'moderna'
+const fontVars = FONT_MAP[fuenteKey] ?? FONT_MAP.moderna
+
 const BASE_URL = Cliente.seo.baseUrl;
 
 export const metadata: Metadata = {
@@ -40,7 +53,14 @@ const jsonLd = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es-AR" className={jakartaSans.variable}>
+    <html
+      lang="es-AR"
+      className={jakartaSans.variable}
+      style={{
+        '--font-heading': fontVars.heading,
+        '--font-body':    fontVars.body,
+      } as React.CSSProperties}
+    >
       <head>
         <meta name="theme-color" content="#58A39D" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />

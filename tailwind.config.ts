@@ -19,9 +19,9 @@ const config: Config = {
         fondo: { DEFAULT: "#F4FAF8", card: "#FFFFFF", alt: "#EBF5F3" },
       },
       fontFamily: {
-        sans:    ["Plus Jakarta Sans", "sans-serif"],
-        heading: ["Fredoka One", "cursive"],
-        script:  ["Dancing Script", "cursive"], // Darloune substitute — reemplazar con el .woff2 cuando esté disponible
+        sans:    ["var(--font-body)", "Plus Jakarta Sans", "sans-serif"],
+        heading: ["var(--font-heading)", "Fredoka One", "cursive"],
+        script:  ["Dancing Script", "cursive"],
       },
       keyframes: {
         marquee: { "0%": { transform: "translateX(0%)" }, "100%": { transform: "translateX(-50%)" } },
