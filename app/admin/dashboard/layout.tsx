@@ -59,8 +59,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </p>
           </div>
 
-          {/* Nav */}
-          <nav className="flex-1 p-3 space-y-0.5">
+          {/* Nav — scrolleable si hay muchos ítems */}
+          <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
             {NAV.map(item => {
               const isActive = pathname === item.href
               return (

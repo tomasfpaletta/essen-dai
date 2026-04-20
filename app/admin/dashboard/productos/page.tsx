@@ -30,17 +30,18 @@ export default function ProductosPage() {
   const [items, setItems] = useState<ProductoEdit[]>(
     initialProductos.map(p => ({ ...p, variantes: p.variantes.map(v => ({ ...v })) }))
   )
-  const [expandedId, setExpandedId] = useState<string | null>(null)
-  const [hasChanges, setHasChanges] = useState(false)
-  const [submitting, setSubmitting] = useState(false)
-  const [status, setStatus] = useState<'idle' | 'ok' | 'error'>('idle')
-  const [errorMsg, setErrorMsg] = useState('')
+  const [expandedId, setExpandedId]   = useState<string | null>(null)
+  const [modifiedIds, setModifiedIds] = useState<string[]>([])
+  const [hasChanges, setHasChanges]   = useState(false)
+  const [submitting, setSubmitting]   = useState(false)
+  const [status, setStatus]           = useState<'idle' | 'ok' | 'error'>('idle')
+  const [errorMsg, setErrorMsg]       = useState('')
 
   // Filtros
-  const [filterCategoria, setFilterCategoria] = useState<string>('todos')
-  const [filterColor, setFilterColor] = useState<string>('')
+  const [filterCategoria, setFilterCategoria]         = useState<string>('todos')
+  const [filterColor, setFilterColor]                 = useState<string>('')
   const [filterCaracteristica, setFilterCaracteristica] = useState<string>('')
-  const [filterTexto, setFilterTexto] = useState<string>('')
+  const [filterTexto, setFilterTexto]                 = useState<string>('')
 
   // Cargar borrador
   useEffect(() => {
@@ -55,9 +56,15 @@ export default function ProductosPage() {
     if (hasChanges) localStorage.setItem(STORAGE_KEY, JSON.stringify(cleanForStorage(items)))
   }, [items, hasChanges])
 
+  function markModified(id: string) {
+    setModifiedIds(prev => prev.includes(id) ? prev : [...prev, id])
+  }
+
   function updateProduct(id: string, updates: Partial<ProductoEdit>) {
     setItems(prev => prev.map(p => p.id === id ? { ...p, ...updates } : p))
     setHasChanges(true)
+    markModified(id)
+    setStatus('idle')
   }
 
   function updateVariante(productId: string, idx: number, updates: Partial<VarianteEdit>) {
@@ -68,6 +75,7 @@ export default function ProductosPage() {
       return { ...p, variantes }
     }))
     setHasChanges(true)
+    markModified(productId)
   }
 
   function removeVariante(productId: string, idx: number) {
@@ -77,6 +85,7 @@ export default function ProductosPage() {
       return { ...p, variantes }
     }))
     setHasChanges(true)
+    markModified(productId)
   }
 
   function addVariante(productId: string) {
@@ -86,6 +95,7 @@ export default function ProductosPage() {
       return { ...p, variantes: [...p.variantes, newVariante] }
     }))
     setHasChanges(true)
+    markModified(productId)
   }
 
   async function handleImageUpload(file: File, productId: string, varIdx: number) {
@@ -94,7 +104,6 @@ export default function ProductosPage() {
     const variante = product.variantes[varIdx]
     const filename = `${productId}-${variante.color.toLowerCase().replace(/\s+/g, '-')}`
 
-    // Preview local inmediato
     const preview = URL.createObjectURL(file)
     updateVariante(productId, varIdx, { uploading: true, preview })
 
@@ -131,14 +140,16 @@ export default function ProductosPage() {
     }
     setItems(prev => [newProducto, ...prev])
     setExpandedId(id)
+    markModified(id)
     setHasChanges(true)
-    // Scroll al inicio
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   function removeProduct(id: string) {
     if (!confirm('¿Eliminar este producto?')) return
     setItems(prev => prev.filter(p => p.id !== id))
+    setModifiedIds(prev => prev.filter(mid => mid !== id))
+    if (expandedId === id) setExpandedId(null)
     setHasChanges(true)
   }
 
@@ -158,6 +169,7 @@ export default function ProductosPage() {
       const data = await res.json()
       if (res.ok) {
         setStatus('ok')
+        setModifiedIds([])
         localStorage.removeItem(STORAGE_KEY)
         setHasChanges(false)
       } else {
@@ -174,11 +186,8 @@ export default function ProductosPage() {
 
   // Colores únicos en todo el catálogo
   const allColors = Array.from(new Set(items.flatMap(p => p.variantes.map(v => v.color)))).sort()
+  const allTags   = Array.from(new Set(items.flatMap(p => p.tags))).sort()
 
-  // Características únicas (tags)
-  const allTags = Array.from(new Set(items.flatMap(p => p.tags))).sort()
-
-  // Items filtrados
   const filtered = items.filter(p => {
     if (filterCategoria !== 'todos' && p.categoria !== filterCategoria) return false
     if (filterColor && !p.variantes.some(v => v.color.toLowerCase().includes(filterColor.toLowerCase()))) return false
@@ -194,8 +203,12 @@ export default function ProductosPage() {
     filterTexto,
   ].filter(Boolean).length
 
+  const activeProduct = expandedId ? items.find(p => p.id === expandedId) : null
+
   return (
-    <div className="space-y-5">
+    // pb-20 deja espacio para la barra fija inferior cuando hay un producto abierto
+    <div className={`space-y-5 ${activeProduct ? 'pb-20' : ''}`}>
+
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
@@ -259,7 +272,6 @@ export default function ProductosPage() {
           )}
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          {/* Búsqueda por texto */}
           <div>
             <label className="text-xs text-texto-light mb-1 block">Buscar</label>
             <input
@@ -269,7 +281,6 @@ export default function ProductosPage() {
               className="w-full px-3 py-2 text-sm rounded-xl border border-teal/20 focus:outline-none focus:border-teal bg-fondo text-texto"
             />
           </div>
-          {/* Categoría */}
           <div>
             <label className="text-xs text-texto-light mb-1 block">Categoría</label>
             <select
@@ -282,7 +293,6 @@ export default function ProductosPage() {
               ))}
             </select>
           </div>
-          {/* Color */}
           <div>
             <label className="text-xs text-texto-light mb-1 block">Color disponible</label>
             <select
@@ -296,7 +306,6 @@ export default function ProductosPage() {
               ))}
             </select>
           </div>
-          {/* Característica / tag */}
           <div>
             <label className="text-xs text-texto-light mb-1 block">Característica</label>
             <select
@@ -315,280 +324,340 @@ export default function ProductosPage() {
 
       {/* Lista de productos */}
       <div className="space-y-3">
-        {filtered.map(p => (
-          <div key={p.id} className="bg-white rounded-2xl border border-teal/10 overflow-hidden">
-            {/* Encabezado del producto */}
-            <button
-              onClick={() => setExpandedId(expandedId === p.id ? null : p.id)}
-              className={`w-full flex items-center gap-4 p-4 transition-colors text-left ${expandedId === p.id ? 'bg-teal/5' : 'hover:bg-fondo'}`}
-            >
-              {/* Thumbnail de la primera variante con imagen, o iniciales */}
-              <div className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0 border border-teal/15 bg-fondo">
-                {p.variantes.find(v => v.imagen) ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={p.variantes.find(v => v.imagen)!.imagen}
-                    alt={p.nombre}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-teal/10">
-                    <span className="text-teal font-bold text-sm">{p.nombre.slice(0, 2).toUpperCase()}</span>
-                  </div>
-                )}
-              </div>
+        {filtered.map(p => {
+          const isExpanded = expandedId === p.id
+          const isModified = modifiedIds.includes(p.id) && !isExpanded
 
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-0.5">
-                  <p className="font-semibold text-texto text-sm leading-tight">{p.nombre}</p>
-                  {expandedId === p.id && (
-                    <span className="text-xs bg-teal text-white px-2 py-0.5 rounded-full font-medium">
-                      Editando
-                    </span>
+          return (
+            <div
+              key={p.id}
+              className={`bg-white rounded-2xl overflow-hidden transition-all ${
+                isExpanded
+                  ? 'border-2 border-teal/40 shadow-md'
+                  : isModified
+                    ? 'border border-amber-300/60'
+                    : 'border border-teal/10'
+              }`}
+            >
+              {/* Encabezado del producto */}
+              <button
+                onClick={() => setExpandedId(isExpanded ? null : p.id)}
+                className={`w-full flex items-center gap-4 p-4 transition-colors text-left ${isExpanded ? 'bg-teal/5' : isModified ? 'bg-amber-50/50 hover:bg-amber-50' : 'hover:bg-fondo'}`}
+              >
+                {/* Thumbnail */}
+                <div className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0 border border-teal/15 bg-fondo">
+                  {p.variantes.find(v => v.imagen) ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={p.variantes.find(v => v.imagen)!.imagen}
+                      alt={p.nombre}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-teal/10">
+                      <span className="text-teal font-bold text-sm">{p.nombre.slice(0, 2).toUpperCase()}</span>
+                    </div>
                   )}
                 </div>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-xs text-texto-light capitalize">{p.categoria}</span>
-                  {/* Dots de colores disponibles */}
-                  <div className="flex gap-1">
-                    {p.variantes.slice(0, 4).map(v => (
-                      <span key={v.color} className="w-2.5 h-2.5 rounded-full border border-white shadow-sm" style={{ background: v.hex }} title={v.color} />
-                    ))}
-                    {p.variantes.length > 4 && <span className="text-xs text-texto-light">+{p.variantes.length - 4}</span>}
-                  </div>
-                </div>
-              </div>
 
-              <div className="flex items-center gap-2 flex-shrink-0">
-                {p.destacado && (
-                  <span className="hidden sm:block text-xs bg-teal/10 text-teal px-2 py-0.5 rounded-full">
-                    Destacado
-                  </span>
-                )}
-                {p.descuento && (
-                  <span className="hidden sm:block text-xs bg-lila/10 text-lila px-2 py-0.5 rounded-full">
-                    -{p.descuento}%
-                  </span>
-                )}
-                <svg viewBox="0 0 20 20" fill="currentColor" className={`w-4 h-4 text-texto-light transition-transform ${expandedId === p.id ? 'rotate-180' : ''}`}>
-                  <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd"/>
-                </svg>
-              </div>
-            </button>
-
-            {/* Panel de edición */}
-            {expandedId === p.id && (
-              <div className="border-t-2 border-teal/30 bg-fondo/40">
-                {/* Header del editor */}
-                <div className="px-5 py-3 bg-teal/5 border-b border-teal/10 flex items-center gap-2">
-                  <svg viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5 text-teal">
-                    <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zm-1.207 1.207L2 14.172V17h2.828l10.38-10.379-2.83-2.828z"/>
-                  </svg>
-                  <p className="text-xs font-semibold text-teal">Editando: <span className="text-texto">{p.nombre}</span></p>
-                </div>
-              <div className="p-5 space-y-5">
-                {/* Nombre, badge y categoría */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div>
-                    <label className="text-xs font-medium text-texto-muted mb-1.5 block">Nombre</label>
-                    <input
-                      value={p.nombre}
-                      onChange={e => updateProduct(p.id, { nombre: e.target.value })}
-                      className="w-full px-3 py-2 text-sm rounded-xl border border-teal/20 focus:outline-none focus:border-teal bg-white text-texto"
-                    />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                    <p className="font-semibold text-texto text-sm leading-tight">{p.nombre}</p>
+                    {isExpanded && (
+                      <span className="text-xs bg-teal text-white px-2 py-0.5 rounded-full font-medium">
+                        Editando
+                      </span>
+                    )}
+                    {isModified && (
+                      <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium flex items-center gap-1">
+                        <svg viewBox="0 0 20 20" fill="currentColor" className="w-2.5 h-2.5">
+                          <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zm-1.207 1.207L2 14.172V17h2.828l10.38-10.379-2.83-2.828z"/>
+                        </svg>
+                        Modificado
+                      </span>
+                    )}
                   </div>
-                  <div>
-                    <label className="text-xs font-medium text-texto-muted mb-1.5 block">Categoría</label>
-                    <select
-                      value={p.categoria}
-                      onChange={e => updateProduct(p.id, { categoria: e.target.value as Producto['categoria'] })}
-                      className="w-full px-3 py-2 text-sm rounded-xl border border-teal/20 focus:outline-none focus:border-teal bg-white text-texto"
-                    >
-                      {categorias.filter(c => c.value !== 'todos').map(c => (
-                        <option key={c.value} value={c.value}>{c.label}</option>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-xs text-texto-light capitalize">{p.categoria}</span>
+                    <div className="flex gap-1">
+                      {p.variantes.slice(0, 4).map(v => (
+                        <span key={v.color} className="w-2.5 h-2.5 rounded-full border border-white shadow-sm" style={{ background: v.hex }} title={v.color} />
                       ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="text-xs font-medium text-texto-muted mb-1.5 block">
-                      Badge <span className="font-normal">(ej: "Más vendida")</span>
-                    </label>
-                    <input
-                      value={p.badge || ''}
-                      onChange={e => updateProduct(p.id, { badge: e.target.value || undefined })}
-                      className="w-full px-3 py-2 text-sm rounded-xl border border-teal/20 focus:outline-none focus:border-teal bg-white text-texto"
-                      placeholder="Opcional"
-                    />
+                      {p.variantes.length > 4 && <span className="text-xs text-texto-light">+{p.variantes.length - 4}</span>}
+                    </div>
                   </div>
                 </div>
 
-                {/* Descripción */}
-                <div>
-                  <label className="text-xs font-medium text-texto-muted mb-1.5 block">Descripción</label>
-                  <textarea
-                    value={p.descripcion}
-                    onChange={e => updateProduct(p.id, { descripcion: e.target.value })}
-                    rows={2}
-                    className="w-full px-3 py-2 text-sm rounded-xl border border-teal/20 focus:outline-none focus:border-teal bg-white text-texto resize-none"
-                  />
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  {p.destacado && (
+                    <span className="hidden sm:block text-xs bg-teal/10 text-teal px-2 py-0.5 rounded-full">
+                      Destacado
+                    </span>
+                  )}
+                  {p.descuento && (
+                    <span className="hidden sm:block text-xs bg-lila/10 text-lila px-2 py-0.5 rounded-full">
+                      -{p.descuento}%
+                    </span>
+                  )}
+                  <svg viewBox="0 0 20 20" fill="currentColor" className={`w-4 h-4 text-texto-light transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
+                    <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd"/>
+                  </svg>
                 </div>
+              </button>
 
-                {/* Tags */}
-                <div>
-                  <label className="text-xs font-medium text-texto-muted mb-1.5 block">
-                    Tags <span className="font-normal">(separados por coma)</span>
-                  </label>
-                  <input
-                    value={p.tags.join(', ')}
-                    onChange={e => updateProduct(p.id, {
-                      tags: e.target.value.split(',').map(t => t.trim()).filter(Boolean)
-                    })}
-                    className="w-full px-3 py-2 text-sm rounded-xl border border-teal/20 focus:outline-none focus:border-teal bg-white text-texto"
-                    placeholder="2,1 lts, Todos los fuegos"
-                  />
-                  <div className="flex flex-wrap gap-1.5 mt-2">
-                    {p.tags.map(t => <Tag key={t} text={t} />)}
+              {/* Panel de edición */}
+              {isExpanded && (
+                <div className="border-t-2 border-teal/30 bg-fondo/40">
+                  <div className="px-5 py-3 bg-teal/5 border-b border-teal/10 flex items-center gap-2">
+                    <svg viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5 text-teal">
+                      <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zm-1.207 1.207L2 14.172V17h2.828l10.38-10.379-2.83-2.828z"/>
+                    </svg>
+                    <p className="text-xs font-semibold text-teal">Editando: <span className="text-texto">{p.nombre}</span></p>
                   </div>
-                </div>
-
-                {/* Checkboxes + descuento */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  {[
-                    { key: 'destacado',    label: 'Destacado'      },
-                    { key: 'stockBajo',    label: 'Stock bajo'     },
-                    { key: 'ofertaEspecial', label: 'Oferta especial' },
-                  ].map(({ key, label }) => (
-                    <label key={key} className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={!!(p as Record<string, unknown>)[key]}
-                        onChange={e => updateProduct(p.id, { [key]: e.target.checked || undefined })}
-                        className="rounded border-teal/30 text-teal focus:ring-teal/20"
-                      />
-                      <span className="text-xs text-texto-muted">{label}</span>
-                    </label>
-                  ))}
-                  <div>
-                    <label className="text-xs text-texto-muted block mb-1">Descuento %</label>
-                    <input
-                      type="number" min="0" max="100"
-                      value={p.descuento || ''}
-                      onChange={e => updateProduct(p.id, {
-                        descuento: e.target.value ? Number(e.target.value) : undefined
-                      })}
-                      className="w-full px-2 py-1.5 text-sm rounded-xl border border-teal/20 focus:outline-none focus:border-teal bg-white text-texto"
-                      placeholder="0"
-                    />
-                  </div>
-                </div>
-
-                {/* Variantes / colores */}
-                <div>
-                  <label className="text-xs font-medium text-texto-muted mb-3 block">
-                    Colores y fotos disponibles
-                  </label>
-                  <div className="space-y-3">
-                    {p.variantes.map((v, idx) => (
-                      <div key={idx} className="flex gap-3 items-start bg-white rounded-xl p-3 border border-teal/10">
-                        {/* Preview imagen */}
-                        <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-fondo border border-teal/15 flex items-center justify-center flex-shrink-0">
-                          {v.preview || v.imagen ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img src={v.preview || v.imagen} alt={v.color} className="w-full h-full object-contain" />
-                          ) : (
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-5 h-5 text-texto-light">
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3 19.5h18M3.75 4.5h16.5M5.25 4.5v15M18.75 4.5v15" />
-                            </svg>
-                          )}
-                          {v.uploading && (
-                            <div className="absolute inset-0 bg-white/85 flex items-center justify-center">
-                              <p className="text-xs text-teal font-medium">...</p>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Datos del color */}
-                        <div className="flex-1 grid grid-cols-2 gap-2">
-                          <div>
-                            <label className="text-xs text-texto-light mb-1 block">Nombre del color</label>
-                            <input
-                              value={v.color}
-                              onChange={e => updateVariante(p.id, idx, { color: e.target.value })}
-                              className="w-full px-2 py-1.5 text-xs rounded-lg border border-teal/20 focus:outline-none focus:border-teal bg-fondo text-texto"
-                              placeholder="Rosa"
-                            />
-                          </div>
-                          <div>
-                            <label className="text-xs text-texto-light mb-1 block">Color (hex)</label>
-                            <div className="flex gap-1.5">
-                              <input
-                                type="color"
-                                value={v.hex}
-                                onChange={e => updateVariante(p.id, idx, { hex: e.target.value })}
-                                className="w-8 h-8 rounded-lg border border-teal/20 cursor-pointer p-0.5 bg-white"
-                              />
-                              <input
-                                value={v.hex}
-                                onChange={e => updateVariante(p.id, idx, { hex: e.target.value })}
-                                className="flex-1 px-2 py-1.5 text-xs rounded-lg border border-teal/20 focus:outline-none focus:border-teal bg-fondo text-texto font-mono"
-                                placeholder="#FFB6C1"
-                              />
-                            </div>
-                          </div>
-                          <div className="col-span-2">
-                            <label className="cursor-pointer text-xs text-teal hover:text-teal-dark font-medium transition-colors">
-                              {v.imagen ? 'Cambiar foto' : 'Subir foto'}
-                              <input type="file" accept="image/*" className="hidden" disabled={v.uploading}
-                                onChange={e => {
-                                  const file = e.target.files?.[0]
-                                  if (file) handleImageUpload(file, p.id, idx)
-                                  e.target.value = ''
-                                }} />
-                            </label>
-                            {v.imagen && <span className="text-xs text-texto-light ml-2">{v.imagen.split('/').pop()}</span>}
-                          </div>
-                        </div>
-
-                        {/* Eliminar variante */}
-                        <button
-                          onClick={() => removeVariante(p.id, idx)}
-                          className="text-red-400 hover:text-red-600 hover:bg-red-50 p-1.5 rounded-lg transition-colors flex-shrink-0 text-xs"
-                          title="Eliminar color"
-                        >
-                          ✕
-                        </button>
+                  <div className="p-5 space-y-5">
+                    {/* Nombre, badge y categoría */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div>
+                        <label className="text-xs font-medium text-texto-muted mb-1.5 block">Nombre</label>
+                        <input
+                          value={p.nombre}
+                          onChange={e => updateProduct(p.id, { nombre: e.target.value })}
+                          className="w-full px-3 py-2 text-sm rounded-xl border border-teal/20 focus:outline-none focus:border-teal bg-white text-texto"
+                        />
                       </div>
-                    ))}
+                      <div>
+                        <label className="text-xs font-medium text-texto-muted mb-1.5 block">Categoría</label>
+                        <select
+                          value={p.categoria}
+                          onChange={e => updateProduct(p.id, { categoria: e.target.value as Producto['categoria'] })}
+                          className="w-full px-3 py-2 text-sm rounded-xl border border-teal/20 focus:outline-none focus:border-teal bg-white text-texto"
+                        >
+                          {categorias.filter(c => c.value !== 'todos').map(c => (
+                            <option key={c.value} value={c.value}>{c.label}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="text-xs font-medium text-texto-muted mb-1.5 block">
+                          Badge <span className="font-normal">(ej: "Más vendida")</span>
+                        </label>
+                        <input
+                          value={p.badge || ''}
+                          onChange={e => updateProduct(p.id, { badge: e.target.value || undefined })}
+                          className="w-full px-3 py-2 text-sm rounded-xl border border-teal/20 focus:outline-none focus:border-teal bg-white text-texto"
+                          placeholder="Opcional"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Descripción */}
+                    <div>
+                      <label className="text-xs font-medium text-texto-muted mb-1.5 block">Descripción</label>
+                      <textarea
+                        value={p.descripcion}
+                        onChange={e => updateProduct(p.id, { descripcion: e.target.value })}
+                        rows={2}
+                        className="w-full px-3 py-2 text-sm rounded-xl border border-teal/20 focus:outline-none focus:border-teal bg-white text-texto resize-none"
+                      />
+                    </div>
+
+                    {/* Tags */}
+                    <div>
+                      <label className="text-xs font-medium text-texto-muted mb-1.5 block">
+                        Tags <span className="font-normal">(separados por coma)</span>
+                      </label>
+                      <input
+                        value={p.tags.join(', ')}
+                        onChange={e => updateProduct(p.id, {
+                          tags: e.target.value.split(',').map(t => t.trim()).filter(Boolean)
+                        })}
+                        className="w-full px-3 py-2 text-sm rounded-xl border border-teal/20 focus:outline-none focus:border-teal bg-white text-texto"
+                        placeholder="2,1 lts, Todos los fuegos"
+                      />
+                      <div className="flex flex-wrap gap-1.5 mt-2">
+                        {p.tags.map(t => <Tag key={t} text={t} />)}
+                      </div>
+                    </div>
+
+                    {/* Checkboxes + descuento */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                      {[
+                        { key: 'destacado',     label: 'Destacado'       },
+                        { key: 'stockBajo',     label: 'Stock bajo'      },
+                        { key: 'ofertaEspecial', label: 'Oferta especial' },
+                      ].map(({ key, label }) => (
+                        <label key={key} className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={!!(p as Record<string, unknown>)[key]}
+                            onChange={e => updateProduct(p.id, { [key]: e.target.checked || undefined })}
+                            className="rounded border-teal/30 text-teal focus:ring-teal/20"
+                          />
+                          <span className="text-xs text-texto-muted">{label}</span>
+                        </label>
+                      ))}
+                      <div>
+                        <label className="text-xs text-texto-muted block mb-1">Descuento %</label>
+                        <input
+                          type="number" min="0" max="100"
+                          value={p.descuento || ''}
+                          onChange={e => updateProduct(p.id, {
+                            descuento: e.target.value ? Number(e.target.value) : undefined
+                          })}
+                          className="w-full px-2 py-1.5 text-sm rounded-xl border border-teal/20 focus:outline-none focus:border-teal bg-white text-texto"
+                          placeholder="0"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Variantes */}
+                    <div>
+                      <label className="text-xs font-medium text-texto-muted mb-3 block">
+                        Colores y fotos disponibles
+                      </label>
+                      <div className="space-y-3">
+                        {p.variantes.map((v, idx) => (
+                          <div key={idx} className="flex gap-3 items-start bg-white rounded-xl p-3 border border-teal/10">
+                            <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-fondo border border-teal/15 flex items-center justify-center flex-shrink-0">
+                              {v.preview || v.imagen ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img src={v.preview || v.imagen} alt={v.color} className="w-full h-full object-contain" />
+                              ) : (
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-5 h-5 text-texto-light">
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3 19.5h18M3.75 4.5h16.5M5.25 4.5v15M18.75 4.5v15" />
+                                </svg>
+                              )}
+                              {v.uploading && (
+                                <div className="absolute inset-0 bg-white/85 flex items-center justify-center">
+                                  <p className="text-xs text-teal font-medium">...</p>
+                                </div>
+                              )}
+                            </div>
+
+                            <div className="flex-1 grid grid-cols-2 gap-2">
+                              <div>
+                                <label className="text-xs text-texto-light mb-1 block">Nombre del color</label>
+                                <input
+                                  value={v.color}
+                                  onChange={e => updateVariante(p.id, idx, { color: e.target.value })}
+                                  className="w-full px-2 py-1.5 text-xs rounded-lg border border-teal/20 focus:outline-none focus:border-teal bg-fondo text-texto"
+                                  placeholder="Rosa"
+                                />
+                              </div>
+                              <div>
+                                <label className="text-xs text-texto-light mb-1 block">Color (hex)</label>
+                                <div className="flex gap-1.5">
+                                  <input
+                                    type="color"
+                                    value={v.hex}
+                                    onChange={e => updateVariante(p.id, idx, { hex: e.target.value })}
+                                    className="w-8 h-8 rounded-lg border border-teal/20 cursor-pointer p-0.5 bg-white"
+                                  />
+                                  <input
+                                    value={v.hex}
+                                    onChange={e => updateVariante(p.id, idx, { hex: e.target.value })}
+                                    className="flex-1 px-2 py-1.5 text-xs rounded-lg border border-teal/20 focus:outline-none focus:border-teal bg-fondo text-texto font-mono"
+                                    placeholder="#FFB6C1"
+                                  />
+                                </div>
+                              </div>
+                              <div className="col-span-2">
+                                <label className="cursor-pointer text-xs text-teal hover:text-teal-dark font-medium transition-colors">
+                                  {v.imagen ? 'Cambiar foto' : 'Subir foto'}
+                                  <input type="file" accept="image/*" className="hidden" disabled={v.uploading}
+                                    onChange={e => {
+                                      const file = e.target.files?.[0]
+                                      if (file) handleImageUpload(file, p.id, idx)
+                                      e.target.value = ''
+                                    }} />
+                                </label>
+                                {v.imagen && <span className="text-xs text-texto-light ml-2">{v.imagen.split('/').pop()}</span>}
+                              </div>
+                            </div>
+
+                            <button
+                              onClick={() => removeVariante(p.id, idx)}
+                              className="text-red-400 hover:text-red-600 hover:bg-red-50 p-1.5 rounded-lg transition-colors flex-shrink-0 text-xs"
+                              title="Eliminar color"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+
+                      <button
+                        onClick={() => addVariante(p.id)}
+                        className="mt-3 text-xs text-teal hover:text-teal-dark font-medium transition-colors"
+                      >
+                        + Agregar color
+                      </button>
+                      <p className="text-xs text-texto-light mt-2">
+                        Las fotos se convierten a .webp automáticamente al subirse.
+                      </p>
+                    </div>
                   </div>
-
-                  <button
-                    onClick={() => addVariante(p.id)}
-                    className="mt-3 text-xs text-teal hover:text-teal-dark font-medium transition-colors"
-                  >
-                    + Agregar color
-                  </button>
-                  <p className="text-xs text-texto-light mt-2">
-                    Las fotos se convierten a .webp automáticamente al subirse.
-                  </p>
                 </div>
-              </div>
-
-              {/* Eliminar producto */}
-              <div className="border-t border-red-100 p-3 flex justify-end">
-                <button
-                  onClick={() => removeProduct(p.id)}
-                  className="text-xs text-red-400 hover:text-red-600 hover:bg-red-50 px-3 py-1.5 rounded-lg transition-colors"
-                >
-                  Eliminar producto
-                </button>
-              </div>
-              </div>
-            )}
-          </div>
-        ))}
+              )}
+            </div>
+          )
+        })}
       </div>
 
-      {/* Eliminar producto — botón flotante en cada card, ya manejado en removeProduct */}
+      {/* ── Barra fija inferior — aparece cuando hay un producto abierto ── */}
+      {activeProduct && (
+        <div
+          className="fixed bottom-0 left-0 right-0 lg:left-60 z-40 flex items-center justify-between gap-3 px-5 py-3 border-t border-teal/15 shadow-[0_-4px_24px_rgba(0,0,0,0.08)]"
+          style={{ background: 'rgba(255,255,255,0.97)', backdropFilter: 'blur(12px)' }}
+        >
+          {/* Producto activo */}
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-7 h-7 rounded-lg overflow-hidden flex-shrink-0 border border-teal/20 bg-fondo">
+              {activeProduct.variantes.find(v => v.imagen) ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={activeProduct.variantes.find(v => v.imagen)!.imagen}
+                  alt={activeProduct.nombre}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-teal/10">
+                  <span className="text-teal font-bold text-[9px]">{activeProduct.nombre.slice(0, 2).toUpperCase()}</span>
+                </div>
+              )}
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs text-texto-muted leading-none mb-0.5">Editando</p>
+              <p className="text-sm font-semibold text-texto leading-none truncate">{activeProduct.nombre}</p>
+            </div>
+          </div>
+
+          {/* Acciones */}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <button
+              onClick={() => removeProduct(activeProduct.id)}
+              className="flex items-center gap-1.5 text-red-500 hover:text-red-600 hover:bg-red-50 text-xs font-semibold px-3 py-2 rounded-xl transition-colors border border-red-200/60"
+            >
+              <svg viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5">
+                <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd"/>
+              </svg>
+              <span className="hidden sm:inline">Eliminar producto</span>
+              <span className="sm:hidden">Eliminar</span>
+            </button>
+            <button
+              onClick={handlePublish}
+              disabled={submitting || !hasChanges}
+              className="flex items-center gap-1.5 bg-teal text-white font-semibold px-4 py-2 rounded-xl text-xs hover:bg-teal-dark transition-colors disabled:opacity-40"
+            >
+              {submitting
+                ? <svg className="animate-spin w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48 2.83 2.83"/></svg>
+                : <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5"><path d="M5 12l5 5L20 7"/></svg>
+              }
+              {submitting ? 'Publicando…' : 'Publicar cambios'}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
