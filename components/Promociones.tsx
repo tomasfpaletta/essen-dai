@@ -81,7 +81,7 @@ export default function Promociones() {
           <div className="flex flex-col lg:flex-row gap-6 items-start">
 
             {/* ── Imagen bancaria ── */}
-            <div className="w-full lg:w-64 xl:w-72 flex-shrink-0">
+            <div className="w-full lg:w-80 xl:w-96 flex-shrink-0">
               <p className="text-xs font-semibold uppercase tracking-widest text-white/40 mb-3">
                 Beneficios bancarios
               </p>
@@ -140,34 +140,35 @@ export default function Promociones() {
                   >
                     <div className="flex flex-row items-stretch">
 
-                      {/* Imagen del producto — grande y prominente */}
+                      {/* Imagen del producto — ocupa ~40% del card */}
                       {item.imagen ? (
                         <div
                           className="relative flex-shrink-0"
-                          style={{ width: 180, minHeight: 160 }}
+                          style={{ width: 240, minHeight: 210 }}
                         >
                           <Image
                             src={item.imagen}
                             alt={item.titulo}
                             fill
                             className="object-cover object-center"
-                            sizes="180px"
+                            sizes="240px"
                           />
                         </div>
                       ) : (
                         <div
-                          className="flex-shrink-0 flex items-center justify-center"
+                          className="flex-shrink-0 flex flex-col items-center justify-center gap-2"
                           style={{
-                            width: 120,
-                            minHeight: 160,
+                            width: 160,
+                            minHeight: 210,
                             background: "rgba(255,255,255,0.04)",
                           }}
                         >
-                          <svg viewBox="0 0 48 48" fill="none" className="w-10 h-10 opacity-15">
+                          <svg viewBox="0 0 48 48" fill="none" className="w-10 h-10 opacity-20">
                             <rect x="6" y="10" width="36" height="28" rx="4" stroke="white" strokeWidth="2"/>
                             <circle cx="18" cy="20" r="4" stroke="white" strokeWidth="2"/>
                             <path d="M6 34l10-10 8 8 6-7 12 9" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                           </svg>
+                          <span className="text-white/30 text-xs">Sin imagen</span>
                         </div>
                       )}
 

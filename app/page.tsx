@@ -15,8 +15,8 @@ export default function Home() {
     <main className="bg-fondo">
       <Navbar />
       <Hero />
-      <Productos />
       <Promociones />
+      <Productos />
       <Editorial />
       <SumateEquipo />
       <FAQ />

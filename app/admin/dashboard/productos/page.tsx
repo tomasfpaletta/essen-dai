@@ -33,8 +33,8 @@ export default function ProductosPage() {
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [hasChanges, setHasChanges] = useState(false)
   const [submitting, setSubmitting] = useState(false)
-  const [description, setDescription] = useState('')
-  const [result, setResult] = useState<{ ok: boolean; prUrl?: string; error?: string } | null>(null)
+  const [status, setStatus] = useState<'idle' | 'ok' | 'error'>('idle')
+  const [errorMsg, setErrorMsg] = useState('')
 
   // Filtros
   const [filterCategoria, setFilterCategoria] = useState<string>('todos')
@@ -117,9 +117,34 @@ export default function ProductosPage() {
     }
   }
 
-  async function handleSubmit() {
+  function addProduct() {
+    const id = `producto-${Date.now()}`
+    const newProducto: ProductoEdit = {
+      id,
+      nombre: 'Nuevo producto',
+      descripcion: 'Descripción del producto.',
+      categoria: categorias.find(c => c.value !== 'todos')?.value as ProductoEdit['categoria'] ?? 'contemporanea',
+      tags: [],
+      variantes: [{ color: 'Negro', hex: '#1C1C1E', imagen: '' }],
+      destacado: false,
+      ofertaEspecial: false,
+    }
+    setItems(prev => [newProducto, ...prev])
+    setExpandedId(id)
+    setHasChanges(true)
+    // Scroll al inicio
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  function removeProduct(id: string) {
+    if (!confirm('¿Eliminar este producto?')) return
+    setItems(prev => prev.filter(p => p.id !== id))
+    setHasChanges(true)
+  }
+
+  async function handlePublish() {
     setSubmitting(true)
-    setResult(null)
+    setStatus('idle')
     try {
       const res = await fetch('/api/admin/submit-pr', {
         method: 'POST',
@@ -128,19 +153,20 @@ export default function ProductosPage() {
           productos: cleanForStorage(items),
           hex: HEX,
           categorias,
-          descripcion: description,
         }),
       })
       const data = await res.json()
       if (res.ok) {
-        setResult({ ok: true })
+        setStatus('ok')
         localStorage.removeItem(STORAGE_KEY)
         setHasChanges(false)
       } else {
-        setResult({ ok: false, error: data.error })
+        setStatus('error')
+        setErrorMsg(data.error || 'Error desconocido')
       }
     } catch {
-      setResult({ ok: false, error: 'Error de conexión. Intentá de nuevo.' })
+      setStatus('error')
+      setErrorMsg('Error de conexión. Intentá de nuevo.')
     } finally {
       setSubmitting(false)
     }
@@ -180,12 +206,44 @@ export default function ProductosPage() {
               : `${filtered.length} de ${items.length} productos`}
           </p>
         </div>
-        {hasChanges && (
-          <span className="text-xs bg-amber-100 text-amber-700 px-3 py-1.5 rounded-full font-medium flex-shrink-0">
-            Sin enviar
-          </span>
-        )}
+        <div className="flex items-center gap-2 flex-shrink-0">
+          {hasChanges && (
+            <span className="text-xs bg-amber-100 text-amber-700 px-3 py-1.5 rounded-full font-medium">
+              Sin publicar
+            </span>
+          )}
+          <button
+            onClick={addProduct}
+            className="flex items-center gap-1.5 bg-white border border-teal/30 text-teal font-semibold px-4 py-2.5 rounded-xl text-sm hover:bg-teal/5 transition-colors"
+          >
+            <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+              <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd"/>
+            </svg>
+            Nuevo producto
+          </button>
+          <button
+            onClick={handlePublish}
+            disabled={submitting || !hasChanges}
+            className="flex items-center gap-2 bg-teal text-white font-semibold px-4 py-2.5 rounded-xl text-sm hover:bg-teal-dark transition-colors disabled:opacity-40"
+          >
+            {submitting
+              ? <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48 2.83 2.83"/></svg>
+              : <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4"><path d="M5 12l5 5L20 7"/></svg>
+            }
+            {submitting ? 'Publicando…' : 'Publicar'}
+          </button>
+        </div>
       </div>
+
+      {status === 'ok' && (
+        <div className="bg-green-50 border border-green-200 text-green-800 rounded-xl px-4 py-3 text-sm flex items-center gap-2">
+          <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 flex-shrink-0"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/></svg>
+          ¡Publicado! La web se actualiza en aproximadamente 30 segundos.
+        </div>
+      )}
+      {status === 'error' && (
+        <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm">{errorMsg}</div>
+      )}
 
       {/* Filtros */}
       <div className="bg-white rounded-2xl border border-teal/10 p-4 space-y-3">
@@ -514,51 +572,23 @@ export default function ProductosPage() {
                   </p>
                 </div>
               </div>
+
+              {/* Eliminar producto */}
+              <div className="border-t border-red-100 p-3 flex justify-end">
+                <button
+                  onClick={() => removeProduct(p.id)}
+                  className="text-xs text-red-400 hover:text-red-600 hover:bg-red-50 px-3 py-1.5 rounded-lg transition-colors"
+                >
+                  Eliminar producto
+                </button>
+              </div>
               </div>
             )}
           </div>
         ))}
       </div>
 
-      {/* Enviar */}
-      {hasChanges && (
-        <div className="bg-white rounded-2xl border border-teal/20 p-5 space-y-4">
-          <h3 className="font-semibold text-texto text-sm">Enviar cambios para revisión</h3>
-          <div>
-            <label className="text-xs font-medium text-texto mb-1.5 block">
-              Descripción de los cambios (opcional)
-            </label>
-            <textarea
-              value={description}
-              onChange={e => setDescription(e.target.value)}
-              placeholder="Ej: Actualicé la descripción del wok y subí fotos nuevas de la cacerola 24cm."
-              className="w-full px-3 py-2 text-sm rounded-xl border border-teal/20 focus:outline-none focus:border-teal bg-fondo text-texto resize-none"
-              rows={3}
-            />
-          </div>
-          <button
-            onClick={handleSubmit}
-            disabled={submitting}
-            className="bg-teal hover:bg-teal-dark text-white font-semibold px-6 py-2.5 rounded-xl text-sm transition-colors disabled:opacity-50 w-full sm:w-auto"
-          >
-            {submitting ? 'Enviando...' : 'Enviar para revisión'}
-          </button>
-        </div>
-      )}
-
-      {/* Resultado */}
-      {result && (
-        <div className={`rounded-2xl p-5 ${result.ok ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
-          {result.ok ? (
-            <>
-              <p className="font-semibold text-green-700 text-sm">¡Publicado correctamente!</p>
-              <p className="text-green-600 text-xs mt-1">Vercel desplegará los cambios en aproximadamente 30 segundos.</p>
-            </>
-          ) : (
-            <p className="text-red-600 text-sm">{result.error}</p>
-          )}
-        </div>
-      )}
+      {/* Eliminar producto — botón flotante en cada card, ya manejado en removeProduct */}
     </div>
   )
 }

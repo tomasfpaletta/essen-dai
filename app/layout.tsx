@@ -65,6 +65,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="theme-color" content="#58A39D" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        {/* Fuente seleccionada desde el panel admin */}
+        <link
+          rel="stylesheet"
+          href={`https://fonts.googleapis.com/css2?family=Fredoka+One&family=Playfair+Display:wght@400;700&family=Cormorant+Garamond:wght@400;700&family=Bebas+Neue&family=Nunito:wght@400;600;700;800&family=Dancing+Script:wght@400;700&family=Lato:wght@400;700&family=Inter:wght@400;600;700&display=swap`}
+        />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       </head>
       <body className="min-h-screen flex flex-col antialiased font-sans bg-fondo text-texto">
