@@ -15,30 +15,40 @@ export default function Hero() {
       <div className="absolute inset-0 pointer-events-none" aria-hidden>
         {/* Teal blob - top right */}
         <div className="absolute rounded-full"
-          style={{ width: 700, height: 700, top: "-15%", right: "-10%",
+          style={{
+            width: 700, height: 700, top: "-15%", right: "-10%",
             background: "radial-gradient(circle, rgba(88,163,157,0.35) 0%, transparent 70%)",
-            filter: "blur(60px)" }} />
+            filter: "blur(60px)"
+          }} />
         {/* Lila blob - bottom left */}
         <div className="absolute rounded-full"
-          style={{ width: 500, height: 500, bottom: "0%", left: "-5%",
+          style={{
+            width: 500, height: 500, bottom: "0%", left: "-5%",
             background: "radial-gradient(circle, rgba(187,158,197,0.28) 0%, transparent 70%)",
-            filter: "blur(70px)" }} />
+            filter: "blur(70px)"
+          }} />
         {/* Teal mid blob */}
         <div className="absolute rounded-full"
-          style={{ width: 400, height: 400, top: "40%", left: "30%",
+          style={{
+            width: 400, height: 400, top: "40%", left: "30%",
             background: "radial-gradient(circle, rgba(89,188,175,0.12) 0%, transparent 70%)",
-            filter: "blur(80px)" }} />
+            filter: "blur(80px)"
+          }} />
         {/* Warm accent - top center */}
         <div className="absolute rounded-full"
-          style={{ width: 300, height: 300, top: "10%", left: "40%",
+          style={{
+            width: 300, height: 300, top: "10%", left: "40%",
             background: "radial-gradient(circle, rgba(187,158,197,0.15) 0%, transparent 70%)",
-            filter: "blur(50px)" }} />
+            filter: "blur(50px)"
+          }} />
       </div>
 
       {/* ── Noise grain overlay ── */}
       <div className="absolute inset-0 opacity-[0.03] pointer-events-none"
-        style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
-          backgroundSize: "200px" }} />
+        style={{
+          backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
+          backgroundSize: "200px"
+        }} />
 
       {/* ── Main content — centrado ── */}
       <div className={`relative z-10 text-center px-6 sm:px-12 max-w-5xl mx-auto transition-all duration-700 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}>
