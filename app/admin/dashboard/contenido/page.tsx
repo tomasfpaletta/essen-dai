@@ -68,7 +68,20 @@ export default function ContenidoPage() {
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY)
     if (saved) {
-      try { const d = JSON.parse(saved); setHero(d.hero); setFuente(d.fuente ?? currentFuente); setHasChanges(true) } catch {}
+      try {
+        const d = JSON.parse(saved)
+        if (d.hero && typeof d.hero === 'object') {
+          setHero(prev => ({
+            ...prev,
+            ...d.hero,
+            stats: Array.isArray(d.hero.stats) ? d.hero.stats : prev.stats,
+          }))
+        }
+        if (d.fuente) setFuente(d.fuente)
+        setHasChanges(true)
+      } catch {
+        localStorage.removeItem(STORAGE_KEY)
+      }
     }
   }, [currentFuente])
 
