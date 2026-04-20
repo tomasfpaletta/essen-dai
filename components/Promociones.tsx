@@ -31,8 +31,11 @@ export default function Promociones() {
 
   if (!config || !config.visible || items.length === 0) return null;
 
-  const activeItem = items[active];
-  const contrast = getTextContrast(activeItem.colorFondo);
+  const safeActive = active < items.length ? active : 0;
+  const activeItem = items[safeActive];
+  if (!activeItem) return null;
+
+  const contrast = getTextContrast(activeItem.colorFondo ?? '#1A3330');
   const waMsg = encodeURIComponent(
     `Hola Daisy! Vi la promo "${activeItem.titulo}" y me interesa saber más.`
   );
