@@ -49,7 +49,7 @@ export const Cliente = {
   },
   "hero": {
     "badge": "Distribuidora Oficial · CABA",
-    "titulo1": "COCINÁS",
+    "titulo1": "NAHUEL",
     "titulo2": "MEJOR.",
     "subtitulo": "Vivís mejor.",
     "descripcion": "Productos Essen originales con entrega a todo Argentina.\nAtención de Daisy, directa y sin intermediarios.",
@@ -68,7 +68,7 @@ export const Cliente = {
     "navbarLogo": "",
     "favicon": ""
   },
-  "fuente": "clasica",
+  "fuente": "elegante",
   "stats": [
     "150+ clientes",
     "5 años vendiendo Essen",
