@@ -15,8 +15,8 @@ function Lightbox({ src, alt, onClose }: { src: string; alt: string; onClose: ()
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4" onClick={onClose}>
       <button className="absolute top-4 right-4 text-white/70 hover:text-white text-3xl leading-none" onClick={onClose}>✕</button>
-      <div className="relative w-full max-w-lg aspect-square rounded-2xl overflow-hidden bg-white" onClick={e => e.stopPropagation()}>
-        <Image src={src} alt={alt} fill className="object-contain p-6" />
+      <div className="relative w-full max-w-lg max-h-[80vh] aspect-auto rounded-2xl overflow-hidden bg-white flex items-center justify-center" onClick={e => e.stopPropagation()} style={{ height: 'min(80vh, 512px)' }}>
+        <Image src={src} alt={alt} fill className="object-contain" />
       </div>
     </div>
   );
@@ -65,7 +65,7 @@ function ProductoCard({ p }: { p: Producto }) {
                 src={variante.imagen}
                 alt={`${p.nombre} — ${variante.color}`}
                 fill
-                className="object-contain p-6 transition-transform duration-500 group-hover:scale-[1.04]"
+                className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
               />
             ) : (
