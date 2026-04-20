@@ -13,7 +13,7 @@ const LINKS = [
 
 function IgIcon() {
   return (
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
       strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
       <circle cx="12" cy="12" r="4"/>
@@ -80,9 +80,18 @@ export default function Navbar() {
 
         {/* Instagram */}
         <a href={Cliente.instagram.url} target="_blank" rel="noopener noreferrer"
-          className="transition-colors flex-shrink-0"
-          style={{ color: scrolled ? "rgba(26,51,48,0.4)" : "rgba(255,255,255,0.4)" }}
-          title={`@${Cliente.instagram.usuario}`}>
+          className="flex-shrink-0 p-1.5 rounded-lg transition-all"
+          style={{ color: scrolled ? "rgba(26,51,48,0.65)" : "rgba(255,255,255,0.7)" }}
+          title={`@${Cliente.instagram.usuario}`}
+          onMouseEnter={e => {
+            (e.currentTarget as HTMLAnchorElement).style.color = "#58A39D";
+            (e.currentTarget as HTMLAnchorElement).style.background = scrolled ? "rgba(88,163,157,0.1)" : "rgba(255,255,255,0.1)";
+          }}
+          onMouseLeave={e => {
+            (e.currentTarget as HTMLAnchorElement).style.color = scrolled ? "rgba(26,51,48,0.65)" : "rgba(255,255,255,0.7)";
+            (e.currentTarget as HTMLAnchorElement).style.background = "";
+          }}
+        >
           <IgIcon />
         </a>
 
