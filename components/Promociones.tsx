@@ -47,7 +47,7 @@ export default function Promociones() {
     <>
       {zoom && (
         <Lightbox
-          src="/images/bancos/promos.jpg"
+          src="/images/bancos/promos.webp"
           alt="Promociones bancarias"
           onClose={() => setZoom(false)}
         />
@@ -96,7 +96,7 @@ export default function Promociones() {
                 onClick={() => setZoom(true)}
               >
                 <img
-                  src="/images/bancos/promos.jpg"
+                  src="/images/bancos/promos.webp"
                   alt="Promociones bancarias"
                   style={{
                     width: "100%",
