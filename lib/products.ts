@@ -37,7 +37,7 @@ export const productos: Producto[] = [
       {
         "color": "Rosa",
         "hex": "#FFB6C1",
-        "imagen": ""
+        "imagen": "/images/products/cacerola-18cm-rosa.webp"
       },
       {
         "color": "Terra",
