@@ -19,8 +19,8 @@ function getTextContrast(hex: string): "light" | "dark" {
 }
 
 export default function Promociones() {
-  const config = promocionesBanner;
-  const items = promocionesItems.filter((i) => i.activo);
+  const config = promocionesBanner ?? null;
+  const items = (promocionesItems ?? []).filter((i) => i.activo);
   const [active, setActive] = useState(0);
 
   useEffect(() => {
@@ -29,7 +29,7 @@ export default function Promociones() {
     return () => clearInterval(id);
   }, [items.length]);
 
-  if (!config.visible || items.length === 0) return null;
+  if (!config || !config.visible || items.length === 0) return null;
 
   const activeItem = items[active];
   const contrast = getTextContrast(activeItem.colorFondo);
