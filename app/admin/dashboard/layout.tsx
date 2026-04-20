@@ -9,7 +9,6 @@ const NAV = [
   { href: '/admin/dashboard',             label: 'Inicio',        icon: 'M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h4a1 1 0 001-1v-3h2v3a1 1 0 001 1h4a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z' },
   { href: '/admin/dashboard/contenido',   label: 'Contenido web', icon: 'M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zm-1.207 1.207L2 14.172V17h2.828l10.38-10.379-2.83-2.828z' },
   { href: '/admin/dashboard/productos',   label: 'Productos',     icon: 'M4 3a2 2 0 100 4h12a2 2 0 100-4H4z M3 8h14v7a2 2 0 01-2 2H5a2 2 0 01-2-2V8z' },
-  { href: '/admin/dashboard/descuentos',  label: 'Descuentos',    icon: 'M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9z' },
   { href: '/admin/dashboard/promociones', label: 'Promociones',   icon: 'M9 11H3v5a2 2 0 002 2h4v-7zm2 7h4a2 2 0 002-2v-5h-6v7z' },
   { href: '/admin/dashboard/cliente',     label: 'Configuración', icon: 'M10 13a3 3 0 100-6 3 3 0 000 6z' },
 ]
@@ -39,7 +38,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <div className="min-h-screen flex" style={{ background: '#EEF2F0' }}>
         {/* ── Sidebar ── */}
         <aside
-          className={`fixed inset-y-0 left-0 z-50 w-60 flex flex-col transition-transform duration-300 lg:translate-x-0 lg:static lg:flex ${open ? 'translate-x-0' : '-translate-x-full'}`}
+          className={`fixed inset-y-0 left-0 z-50 w-60 flex flex-col transition-transform duration-300 lg:translate-x-0 lg:sticky lg:top-0 lg:h-screen ${open ? 'translate-x-0' : '-translate-x-full'}`}
           style={{ background: '#1B3530' }}
         >
           {/* Logo */}

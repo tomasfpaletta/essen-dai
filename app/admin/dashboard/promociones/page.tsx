@@ -601,7 +601,10 @@ export default function PromocionesPage() {
                   onClick={e => { e.stopPropagation(); patchItem(item.id, 'activo', !item.activo) }}
                   className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors flex-shrink-0 ${item.activo ? 'bg-teal' : 'bg-gray-200'}`}
                 >
-                  <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform ${item.activo ? 'translate-x-4.5' : 'translate-x-0.5'}`} />
+                  <span
+                    className="inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform"
+                    style={{ transform: `translateX(${item.activo ? '18px' : '2px'})` }}
+                  />
                 </button>
 
                 {/* Move up/down */}

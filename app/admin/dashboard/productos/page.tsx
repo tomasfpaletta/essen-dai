@@ -91,7 +91,8 @@ export default function ProductosPage() {
   function addVariante(productId: string) {
     setItems(prev => prev.map(p => {
       if (p.id !== productId) return p
-      const newVariante: VarianteEdit = { color: 'Nuevo', hex: '#CCCCCC', imagen: '' }
+      const [defaultColor, defaultHex] = Object.entries(HEX)[0]
+      const newVariante: VarianteEdit = { color: defaultColor, hex: defaultHex, imagen: '' }
       return { ...p, variantes: [...p.variantes, newVariante] }
     }))
     setHasChanges(true)
@@ -534,32 +535,33 @@ export default function ProductosPage() {
                               )}
                             </div>
 
-                            <div className="flex-1 grid grid-cols-2 gap-2">
+                            <div className="flex-1 grid grid-cols-1 gap-2">
                               <div>
-                                <label className="text-xs text-texto-light mb-1 block">Nombre del color</label>
-                                <input
-                                  value={v.color}
-                                  onChange={e => updateVariante(p.id, idx, { color: e.target.value })}
-                                  className="w-full px-2 py-1.5 text-xs rounded-lg border border-teal/20 focus:outline-none focus:border-teal bg-fondo text-texto"
-                                  placeholder="Rosa"
-                                />
-                              </div>
-                              <div>
-                                <label className="text-xs text-texto-light mb-1 block">Color (hex)</label>
-                                <div className="flex gap-1.5">
-                                  <input
-                                    type="color"
-                                    value={v.hex}
-                                    onChange={e => updateVariante(p.id, idx, { hex: e.target.value })}
-                                    className="w-8 h-8 rounded-lg border border-teal/20 cursor-pointer p-0.5 bg-white"
-                                  />
-                                  <input
-                                    value={v.hex}
-                                    onChange={e => updateVariante(p.id, idx, { hex: e.target.value })}
-                                    className="flex-1 px-2 py-1.5 text-xs rounded-lg border border-teal/20 focus:outline-none focus:border-teal bg-fondo text-texto font-mono"
-                                    placeholder="#FFB6C1"
-                                  />
+                                <label className="text-xs text-texto-light mb-2 block">Color</label>
+                                <div className="flex flex-wrap gap-2">
+                                  {Object.entries(HEX).map(([name, hex]) => (
+                                    <button
+                                      key={name}
+                                      type="button"
+                                      title={name}
+                                      onClick={() => updateVariante(p.id, idx, { color: name, hex })}
+                                      className="flex flex-col items-center gap-1 px-1.5 py-1.5 rounded-xl border-2 transition-all"
+                                      style={{
+                                        borderColor: v.color === name ? hex : 'transparent',
+                                        background: v.color === name ? `${hex}18` : 'transparent',
+                                      }}
+                                    >
+                                      <span
+                                        className="w-6 h-6 rounded-full block border border-black/10 shadow-sm"
+                                        style={{ background: hex }}
+                                      />
+                                      <span className="text-[10px] text-texto-light leading-none whitespace-nowrap">{name}</span>
+                                    </button>
+                                  ))}
                                 </div>
+                                <p className="text-[10px] text-texto-light mt-1.5 font-mono">
+                                  {v.color} · {v.hex}
+                                </p>
                               </div>
                               <div className="col-span-2">
                                 <label className="cursor-pointer text-xs text-teal hover:text-teal-dark font-medium transition-colors">

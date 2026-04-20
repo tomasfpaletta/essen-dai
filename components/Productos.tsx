@@ -182,7 +182,8 @@ function ProductoCard({ p }: { p: Producto }) {
 // ── Sección principal ─────────────────────────────────────────────────────────
 export default function Productos() {
   const [cat, setCat] = useState<Categoria>("todos");
-  const filtered = cat === "todos" ? productos : productos.filter(p => p.categoria === cat);
+  const filtered = (cat === "todos" ? productos : productos.filter(p => p.categoria === cat))
+    .filter(p => p.variantes.some(v => !!v.imagen));
 
   return (
     <section id="productos" className="py-24 bg-fondo px-6 sm:px-12 lg:px-20">
