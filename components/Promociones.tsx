@@ -74,79 +74,89 @@ export default function Promociones() {
           <div className="lg:col-span-3">
             <div
               key={activeItem.id}
-              className="relative rounded-3xl overflow-hidden h-full min-h-[340px] flex flex-col justify-between p-8 transition-all duration-500"
+              className="relative rounded-3xl overflow-hidden h-full min-h-[340px] transition-all duration-500"
               style={{
                 background: activeItem.colorFondo,
                 boxShadow: `0 32px 64px ${hexToRgba(activeItem.colorFondo, 0.5)}`,
               }}
             >
               {/* Glow ring */}
-              <div className="absolute inset-0 rounded-3xl"
+              <div className="absolute inset-0 rounded-3xl pointer-events-none"
                 style={{ boxShadow: `inset 0 1px 0 ${hexToRgba("#FFFFFF", 0.2)}` }} />
 
-              {/* Image — fondo decorativo si hay imagen */}
-              {activeItem.imagen && (
-                <div className="absolute inset-0 pointer-events-none">
-                  <Image
-                    src={activeItem.imagen}
-                    alt={activeItem.titulo}
-                    fill
-                    className="object-cover object-center opacity-20"
-                  />
-                  <div className="absolute inset-0"
-                    style={{ background: `linear-gradient(135deg, ${activeItem.colorFondo}FF 40%, ${activeItem.colorFondo}80 100%)` }} />
+              {/* Layout: texto + imagen lado a lado si hay imagen, solo texto si no */}
+              <div className={`flex h-full ${activeItem.imagen ? "flex-row items-stretch" : "flex-col justify-between p-8"}`}>
+
+                {/* ── Columna de texto ── */}
+                <div className={`flex flex-col justify-between ${activeItem.imagen ? "flex-1 p-8" : ""}`}>
+
+                  {/* Decorative circles (solo sin imagen) */}
+                  {!activeItem.imagen && (
+                    <>
+                      <div className="absolute -top-10 -right-10 w-48 h-48 rounded-full opacity-10 bg-white pointer-events-none" />
+                      <div className="absolute -bottom-6 -left-6 w-32 h-32 rounded-full opacity-10 bg-white pointer-events-none" />
+                    </>
+                  )}
+
+                  <div className="relative z-10">
+                    <span
+                      className="inline-block text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-4"
+                      style={{
+                        background: hexToRgba("#FFFFFF", 0.2),
+                        color: contrast === "light" ? "#FFFFFF" : "#1A1A1A",
+                      }}
+                    >
+                      {activeItem.badge}
+                    </span>
+                    <h3
+                      className="font-heading text-3xl sm:text-4xl leading-tight mb-3"
+                      style={{ color: contrast === "light" ? "#FFFFFF" : "#1A1A1A" }}
+                    >
+                      {activeItem.titulo}
+                    </h3>
+                    <p
+                      className="text-base leading-relaxed max-w-sm"
+                      style={{ color: contrast === "light" ? hexToRgba("#FFFFFF", 0.75) : hexToRgba("#000000", 0.6) }}
+                    >
+                      {activeItem.descripcion}
+                    </p>
+                  </div>
+
+                  <div className="relative z-10 flex flex-wrap gap-3 mt-8">
+                    <a
+                      href={`${Cliente.whatsapp.link}?text=${waMsg}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 bg-white font-bold px-5 py-2.5 rounded-xl text-sm hover:scale-105 transition-transform shadow-lg"
+                      style={{ color: activeItem.colorFondo }}
+                    >
+                      Consultar →
+                    </a>
+                    <a
+                      href={config.ctaLink}
+                      className="inline-flex items-center gap-2 font-semibold px-5 py-2.5 rounded-xl text-sm border transition-all hover:bg-white/10"
+                      style={{
+                        color: contrast === "light" ? "white" : "#1A1A1A",
+                        borderColor: hexToRgba(contrast === "light" ? "#FFFFFF" : "#000000", 0.3),
+                      }}
+                    >
+                      {config.ctaTexto}
+                    </a>
+                  </div>
                 </div>
-              )}
 
-              {/* Decorative circles */}
-              <div className="absolute -top-10 -right-10 w-48 h-48 rounded-full opacity-10 bg-white pointer-events-none" />
-              <div className="absolute -bottom-6 -left-6 w-32 h-32 rounded-full opacity-10 bg-white pointer-events-none" />
-
-              {/* Content */}
-              <div className="relative z-10">
-                <span
-                  className="inline-block text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-4"
-                  style={{
-                    background: hexToRgba("#FFFFFF", 0.2),
-                    color: contrast === "light" ? "#FFFFFF" : "#1A1A1A",
-                  }}
-                >
-                  {activeItem.badge}
-                </span>
-                <h3
-                  className="font-heading text-3xl sm:text-4xl leading-tight mb-3"
-                  style={{ color: contrast === "light" ? "#FFFFFF" : "#1A1A1A" }}
-                >
-                  {activeItem.titulo}
-                </h3>
-                <p
-                  className="text-base leading-relaxed max-w-sm"
-                  style={{ color: contrast === "light" ? hexToRgba("#FFFFFF", 0.75) : hexToRgba("#000000", 0.6) }}
-                >
-                  {activeItem.descripcion}
-                </p>
-              </div>
-
-              <div className="relative z-10 flex flex-wrap gap-3 mt-8">
-                <a
-                  href={`${Cliente.whatsapp.link}?text=${waMsg}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 bg-white font-bold px-5 py-2.5 rounded-xl text-sm hover:scale-105 transition-transform shadow-lg"
-                  style={{ color: activeItem.colorFondo }}
-                >
-                  Consultar →
-                </a>
-                <a
-                  href={config.ctaLink}
-                  className="inline-flex items-center gap-2 font-semibold px-5 py-2.5 rounded-xl text-sm border transition-all hover:bg-white/10"
-                  style={{
-                    color: contrast === "light" ? "white" : "#1A1A1A",
-                    borderColor: hexToRgba(contrast === "light" ? "#FFFFFF" : "#000000", 0.3),
-                  }}
-                >
-                  {config.ctaTexto}
-                </a>
+                {/* ── Columna de imagen (solo si hay imagen) ── */}
+                {activeItem.imagen && (
+                  <div className="relative w-52 sm:w-64 flex-shrink-0 m-4 ml-0 rounded-2xl overflow-hidden"
+                    style={{ background: hexToRgba("#000000", 0.15) }}>
+                    <Image
+                      src={activeItem.imagen}
+                      alt={activeItem.titulo}
+                      fill
+                      className="object-cover object-center"
+                    />
+                  </div>
+                )}
               </div>
             </div>
           </div>
