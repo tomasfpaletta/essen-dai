@@ -71,10 +71,10 @@ export const descuentos: Descuento[] = [
   {
     banco: "Mercado Pago",
     logo: "/images/bancos/mercado-pago.webp",
-    descuento: "",
-    condicion: "",
+    descuento: "18 cuotas sin interés",
+    condicion: "Visa y Mastercard · Todos los días",
     color: "#009EE3",
-    activo: false,
+    activo: true,
   },
   {
     banco: "Naranja X",

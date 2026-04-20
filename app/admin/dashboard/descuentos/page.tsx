@@ -15,9 +15,9 @@ export default function DescuentosPage() {
   const [items, setItems] = useState<Descuento[]>(initialDescuentos.map(d => ({ ...d })))
   const [config, setConfig] = useState<Config>({ ...initialConfig })
   const [hasChanges, setHasChanges] = useState(false)
-  const [submitting, setSubmitting] = useState(false)
-  const [description, setDescription] = useState('')
-  const [result, setResult] = useState<{ ok: boolean; prUrl?: string; error?: string } | null>(null)
+  const [publishing, setPublishing] = useState(false)
+  const [status, setStatus] = useState<'idle' | 'ok' | 'error'>('idle')
+  const [errorMsg, setErrorMsg] = useState('')
 
   // Cargar borrador
   useEffect(() => {
@@ -64,30 +64,31 @@ export default function DescuentosPage() {
     setHasChanges(true)
   }
 
-  async function handleSubmit() {
-    setSubmitting(true)
-    setResult(null)
+  async function handlePublish() {
+    setPublishing(true)
+    setStatus('idle')
     try {
       const res = await fetch('/api/admin/submit-pr', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           descuentos: { descuentos: items, config },
-          descripcion: description,
         }),
       })
       const data = await res.json()
       if (res.ok) {
-        setResult({ ok: true })
+        setStatus('ok')
         localStorage.removeItem(STORAGE_KEY)
         setHasChanges(false)
       } else {
-        setResult({ ok: false, error: data.error })
+        setStatus('error')
+        setErrorMsg(data.error || 'Error desconocido')
       }
     } catch {
-      setResult({ ok: false, error: 'Error de conexión. Intentá de nuevo.' })
+      setStatus('error')
+      setErrorMsg('Error de conexión. Intentá de nuevo.')
     } finally {
-      setSubmitting(false)
+      setPublishing(false)
     }
   }
 
@@ -101,12 +102,36 @@ export default function DescuentosPage() {
             Gestioná las promociones y beneficios por banco que se muestran en la web
           </p>
         </div>
-        {hasChanges && (
-          <span className="text-xs bg-amber-100 text-amber-700 px-3 py-1.5 rounded-full font-medium flex-shrink-0">
-            Sin enviar
-          </span>
-        )}
+        <div className="flex items-center gap-3 flex-shrink-0">
+          {hasChanges && (
+            <span className="text-xs bg-amber-100 text-amber-700 px-3 py-1.5 rounded-full font-medium">
+              Sin publicar
+            </span>
+          )}
+          <button
+            onClick={handlePublish}
+            disabled={publishing || !hasChanges}
+            className="flex items-center gap-2 bg-teal text-white font-semibold px-5 py-2.5 rounded-xl text-sm hover:bg-teal-dark transition-colors disabled:opacity-40"
+          >
+            {publishing ? (
+              <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48 2.83 2.83"/></svg>
+            ) : (
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4"><path d="M5 12l5 5L20 7"/></svg>
+            )}
+            {publishing ? 'Publicando…' : 'Publicar cambios'}
+          </button>
+        </div>
       </div>
+
+      {status === 'ok' && (
+        <div className="bg-green-50 border border-green-200 text-green-800 rounded-xl px-4 py-3 text-sm flex items-center gap-2">
+          <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 flex-shrink-0"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/></svg>
+          ¡Publicado! Vercel desplegará los cambios en aproximadamente 30 segundos.
+        </div>
+      )}
+      {status === 'error' && (
+        <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm">{errorMsg}</div>
+      )}
 
       {/* Configuración general */}
       <div className="bg-white rounded-2xl border border-teal/10 p-5 space-y-4">
@@ -239,45 +264,6 @@ export default function DescuentosPage() {
       >
         + Agregar banco
       </button>
-
-      {/* Enviar */}
-      {hasChanges && (
-        <div className="bg-white rounded-2xl border border-teal/20 p-5 space-y-4">
-          <h3 className="font-semibold text-texto text-sm">Enviar cambios para revisión</h3>
-          <div>
-            <label className="text-xs font-medium text-texto-muted mb-1.5 block">
-              Descripción de los cambios (opcional)
-            </label>
-            <textarea
-              value={description}
-              onChange={e => setDescription(e.target.value)}
-              placeholder="Ej: Actualicé los descuentos de Galicia, ahora aplica jueves y viernes."
-              className="w-full px-3 py-2 text-sm rounded-xl border border-teal/20 focus:outline-none focus:border-teal bg-fondo text-texto resize-none"
-              rows={3}
-            />
-          </div>
-          <button
-            onClick={handleSubmit}
-            disabled={submitting}
-            className="bg-teal hover:bg-teal-dark text-white font-semibold px-6 py-2.5 rounded-xl text-sm transition-colors disabled:opacity-50 w-full sm:w-auto"
-          >
-            {submitting ? 'Enviando...' : 'Enviar para revisión'}
-          </button>
-        </div>
-      )}
-
-      {result && (
-        <div className={`rounded-2xl p-5 ${result.ok ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
-          {result.ok ? (
-            <>
-              <p className="font-semibold text-green-700 text-sm">¡Publicado correctamente!</p>
-              <p className="text-green-600 text-xs mt-1">Vercel desplegará los cambios en aproximadamente 30 segundos.</p>
-            </>
-          ) : (
-            <p className="text-red-600 text-sm">{result.error}</p>
-          )}
-        </div>
-      )}
     </div>
   )
 }
