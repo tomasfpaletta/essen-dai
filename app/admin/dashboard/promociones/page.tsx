@@ -179,6 +179,121 @@ function PromoImageUploader({
   )
 }
 
+// ── Uploader imagen bancaria ──────────────────────────────────────────────────
+function BancosImageUploader() {
+  const inputRef = useRef<HTMLInputElement>(null)
+  const [uploading, setUploading] = useState(false)
+  const [uploadOk, setUploadOk] = useState(false)
+  const [error, setError] = useState('')
+  const [preview, setPreview] = useState('/images/bancos/promos.webp')
+
+  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploading(true)
+    setError('')
+    setUploadOk(false)
+    try {
+      // Preview local inmediato
+      setPreview(URL.createObjectURL(file))
+
+      const form = new FormData()
+      form.append('file', file)
+      form.append('filename', 'promos')   // siempre se llama "promos"
+      form.append('folder', 'bancos')     // carpeta /public/images/bancos/
+      const res = await fetch('/api/admin/upload', { method: 'POST', body: form })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Error al subir')
+      setUploadOk(true)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Error al subir imagen')
+      setPreview('/images/bancos/promos.webp') // revert preview
+    } finally {
+      setUploading(false)
+      if (inputRef.current) inputRef.current.value = ''
+    }
+  }
+
+  return (
+    <div className="bg-white rounded-2xl border border-gray-100 p-6">
+      <div className="flex items-start justify-between mb-4">
+        <div>
+          <h2 className="font-bold text-texto">Imagen de beneficios bancarios</h2>
+          <p className="text-texto-muted text-xs mt-1">
+            Se actualiza 1–2 veces por mes. Subí la nueva foto de promociones bancarias aquí.
+          </p>
+        </div>
+        <span className="text-xs bg-teal/10 text-teal px-2.5 py-1 rounded-full font-medium flex-shrink-0">
+          Se publica al instante
+        </span>
+      </div>
+
+      <div className="flex flex-col sm:flex-row gap-5 items-start">
+        {/* Preview actual */}
+        <div
+          className="relative rounded-xl overflow-hidden border border-gray-100 cursor-pointer hover:border-teal/40 transition-colors flex-shrink-0"
+          style={{ width: 160, height: 220 }}
+          onClick={() => inputRef.current?.click()}
+        >
+          <img
+            src={`${preview}?t=${Date.now()}`}
+            alt="Imagen bancaria actual"
+            style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top', display: 'block' }}
+            onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
+          />
+          <div className="absolute inset-0 bg-black/0 hover:bg-black/10 transition-colors flex items-end justify-center pb-3 pointer-events-none">
+            <span className="opacity-0 group-hover:opacity-100 bg-black/50 text-white text-xs px-2 py-1 rounded-lg">
+              Cambiar
+            </span>
+          </div>
+        </div>
+
+        {/* Controles */}
+        <div className="flex flex-col gap-3 pt-1 flex-1">
+          <button
+            type="button"
+            onClick={() => inputRef.current?.click()}
+            disabled={uploading}
+            className="inline-flex items-center gap-2 bg-teal/10 text-teal font-semibold px-5 py-3 rounded-xl text-sm hover:bg-teal/20 transition-colors disabled:opacity-50 w-full sm:w-auto"
+          >
+            {uploading ? (
+              <>
+                <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48 2.83 2.83"/></svg>
+                Subiendo imagen…
+              </>
+            ) : (
+              <>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+                Subir nueva imagen bancaria
+              </>
+            )}
+          </button>
+
+          {uploadOk && (
+            <div className="flex items-center gap-2 text-green-700 bg-green-50 border border-green-200 rounded-xl px-4 py-2.5 text-sm">
+              <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 flex-shrink-0">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
+              </svg>
+              ¡Imagen actualizada! Ya se ve en la web.
+            </div>
+          )}
+          {error && <p className="text-xs text-red-500">{error}</p>}
+
+          <div className="text-xs text-texto-muted space-y-1 mt-1">
+            <p>• Formatos: JPG, PNG o WebP</p>
+            <p>• Tamaño recomendado: orientación vertical (tipo flyer)</p>
+            <p>• Máximo recomendado: 2 MB</p>
+          </div>
+        </div>
+      </div>
+
+      <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
+    </div>
+  )
+}
+
 // ── Main page ─────────────────────────────────────────────────────────────────
 export default function PromocionesPage() {
   const [banner, setBanner] = useState<PromocionesConfig>({ ...promocionesBanner })
@@ -289,6 +404,9 @@ export default function PromocionesPage() {
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm">{error}</div>
       )}
+
+      {/* ── Sección: Imagen beneficios bancarios ── */}
+      <BancosImageUploader />
 
       {/* ── Sección: Configuración del banner ── */}
       <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-6">
