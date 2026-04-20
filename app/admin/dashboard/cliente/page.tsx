@@ -1,5 +1,6 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import Image from 'next/image'
 import { Cliente } from '@/config/cliente'
 
 // ── Tipos ────────────────────────────────────────────────────────────────────
@@ -14,7 +15,7 @@ type FormState = {
   coordenadas: { lat: number; lng: number }
   whatsapp: { numero: string; display: string; mensajeDefecto: string }
   instagram: { usuario: string; url: string }
-  seo: { baseUrl: string; titulo: string; descripcion: string }
+  seo: { baseUrl: string; titulo: string; descripcion: string; ogImage: string }
   popupDelay: number
   colores: { primary: string; secondary: string; accent: string; dark: string }
 }
@@ -90,21 +91,33 @@ export default function ClientePage() {
       baseUrl:     Cliente.seo.baseUrl,
       titulo:      Cliente.seo.titulo,
       descripcion: Cliente.seo.descripcion,
+      ogImage:     Cliente.seo.ogImage,
     },
     popupDelay: Cliente.popupDelay,
     colores:    { ...Cliente.colores },
   })
 
-  const [hasChanges, setHasChanges]   = useState(false)
-  const [submitting, setSubmitting]   = useState(false)
-  const [description, setDescription] = useState('')
-  const [result, setResult]           = useState<{ ok: boolean; prUrl?: string; error?: string } | null>(null)
+  const [hasChanges, setHasChanges] = useState(false)
+  const [publishing, setPublishing] = useState(false)
+  const [status, setStatus]         = useState<'idle' | 'ok' | 'error'>('idle')
+  const [statusMsg, setStatusMsg]   = useState('')
+
+  // OG Image
+  const ogInputRef               = useRef<HTMLInputElement>(null)
+  const [ogUploading, setOgUploading] = useState(false)
+  const [ogError, setOgError]         = useState('')
 
   // Cargar borrador de localStorage
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY)
     if (saved) {
-      try { setForm(JSON.parse(saved)); setHasChanges(true) } catch {}
+      try {
+        const d = JSON.parse(saved)
+        setForm(prev => ({ ...prev, ...d }))
+        setHasChanges(true)
+      } catch {
+        localStorage.removeItem(STORAGE_KEY)
+      }
     }
   }, [])
 
@@ -123,13 +136,36 @@ export default function ClientePage() {
       return next as FormState
     })
     setHasChanges(true)
+    setStatus('idle')
   }
 
-  async function handleSubmit() {
-    setSubmitting(true)
-    setResult(null)
+  async function handleOgUpload(file: File) {
+    setOgUploading(true)
+    setOgError('')
+    try {
+      const fd = new FormData()
+      fd.append('file', file)
+      fd.append('filename', 'og')
+      fd.append('folder', 'og')
+      const res  = await fetch('/api/admin/upload', { method: 'POST', body: fd })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Error al subir imagen')
+      set('seo.ogImage', data.path)
+    } catch (e: unknown) {
+      setOgError(e instanceof Error ? e.message : 'Error al subir imagen')
+    } finally {
+      setOgUploading(false)
+    }
+  }
+
+  async function handlePublish() {
+    setPublishing(true)
+    setStatus('idle')
     try {
       const clienteData = {
+        // Preserve all existing fields not in the form
+        ...JSON.parse(JSON.stringify(Cliente)),
+        // Override with form values
         nombre:           form.nombre,
         marca:            form.marca,
         slogan:           form.slogan,
@@ -147,11 +183,11 @@ export default function ClientePage() {
           url: `https://www.instagram.com/${form.instagram.usuario}`,
         },
         seo: {
+          ...Cliente.seo,
           baseUrl:     form.seo.baseUrl,
           titulo:      form.seo.titulo,
           descripcion: form.seo.descripcion,
-          keywords:    [...Cliente.seo.keywords],
-          ogImage:     Cliente.seo.ogImage,
+          ogImage:     form.seo.ogImage,
         },
         popupDelay: form.popupDelay,
         colores:    form.colores,
@@ -160,20 +196,23 @@ export default function ClientePage() {
       const res = await fetch('/api/admin/submit-pr', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cliente: clienteData, descripcion: description }),
+        body: JSON.stringify({ cliente: clienteData }),
       })
       const data = await res.json()
       if (res.ok) {
-        setResult({ ok: true, prUrl: data.prUrl })
+        setStatus('ok')
+        setStatusMsg('¡Configuración publicada! Los cambios se verán en la web en ~1 minuto.')
         localStorage.removeItem(STORAGE_KEY)
         setHasChanges(false)
       } else {
-        setResult({ ok: false, error: data.error })
+        setStatus('error')
+        setStatusMsg(data.error || 'Error al publicar')
       }
     } catch {
-      setResult({ ok: false, error: 'Error de conexión. Intentá de nuevo.' })
+      setStatus('error')
+      setStatusMsg('Error de conexión. Intentá de nuevo.')
     } finally {
-      setSubmitting(false)
+      setPublishing(false)
     }
   }
 
@@ -183,14 +222,31 @@ export default function ClientePage() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-texto">Configuración del sitio</h1>
-          <p className="text-texto-muted text-sm mt-1">Datos de contacto y textos principales.</p>
+          <p className="text-texto-muted text-sm mt-1">Datos de contacto, textos e imagen de redes.</p>
         </div>
-        {hasChanges && (
-          <span className="text-xs bg-amber-100 text-amber-700 px-3 py-1.5 rounded-full font-medium flex-shrink-0">
-            Sin enviar
-          </span>
-        )}
+        <button
+          onClick={handlePublish}
+          disabled={publishing || !hasChanges}
+          className="flex-shrink-0 flex items-center gap-2 bg-teal hover:bg-teal-dark text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition-colors disabled:opacity-40"
+        >
+          {publishing
+            ? <><svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83"/></svg> Publicando…</>
+            : <><svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4"><path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clipRule="evenodd"/></svg> Publicar cambios</>
+          }
+        </button>
       </div>
+
+      {/* Feedback */}
+      {status === 'ok' && (
+        <div className="bg-green-50 border border-green-200 text-green-700 rounded-xl px-4 py-3 text-sm">
+          ✓ {statusMsg}
+        </div>
+      )}
+      {status === 'error' && (
+        <div className="bg-red-50 border border-red-200 text-red-600 rounded-xl px-4 py-3 text-sm">
+          {statusMsg}
+        </div>
+      )}
 
       {/* Identidad */}
       <Section title="Identidad">
@@ -254,46 +310,71 @@ export default function ClientePage() {
         </p>
       </Section>
 
-      {/* Enviar */}
-      {hasChanges && (
-        <div className="bg-white rounded-2xl border border-teal/20 p-5 space-y-4">
-          <h3 className="font-semibold text-texto text-sm">Enviar cambios para revisión</h3>
-          <Field
-            label="Descripción de los cambios (opcional)"
-            value={description}
-            onChange={setDescription}
-            textarea
-            placeholder="Ej: Cambié el número de WhatsApp y actualicé el slogan."
-          />
-          <button
-            onClick={handleSubmit}
-            disabled={submitting}
-            className="bg-teal hover:bg-teal-dark text-white font-semibold px-6 py-2.5 rounded-xl text-sm transition-colors disabled:opacity-50 w-full sm:w-auto"
-          >
-            {submitting ? 'Enviando...' : 'Enviar para revisión'}
-          </button>
-        </div>
-      )}
+      {/* OG Image */}
+      <Section title="Imagen para redes sociales (OG Image)">
+        <p className="text-xs text-texto-muted -mt-1">
+          Esta imagen aparece cuando alguien comparte tu web en WhatsApp, Facebook o Instagram. Ideal: 1200×630 px.
+        </p>
 
-      {/* Resultado */}
-      {result && (
-        <div className={`rounded-2xl p-5 ${result.ok ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
-          {result.ok ? (
-            <>
-              <p className="font-semibold text-green-700 text-sm">Cambios enviados correctamente</p>
-              <p className="text-green-600 text-xs mt-1">Tomas los va a revisar y publicar pronto.</p>
-              {result.prUrl && (
-                <a href={result.prUrl} target="_blank" rel="noopener noreferrer"
-                  className="text-teal text-xs underline mt-2 inline-block">
-                  Ver solicitud en GitHub →
-                </a>
-              )}
-            </>
-          ) : (
-            <p className="text-red-600 text-sm">{result.error}</p>
-          )}
+        {/* Preview */}
+        <div className="flex items-start gap-4">
+          <div className="relative w-48 h-24 rounded-xl overflow-hidden bg-gray-50 border border-teal/15 flex-shrink-0">
+            {form.seo.ogImage ? (
+              <Image
+                src={form.seo.ogImage}
+                alt="OG Image preview"
+                fill
+                className="object-cover"
+                unoptimized
+              />
+            ) : (
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-1">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-8 h-8 text-gray-300">
+                  <rect x="3" y="3" width="18" height="18" rx="3"/>
+                  <circle cx="8.5" cy="8.5" r="1.5"/>
+                  <path d="M21 15l-5-5L5 21"/>
+                </svg>
+                <span className="text-[10px] text-gray-400">Sin imagen</span>
+              </div>
+            )}
+            {ogUploading && (
+              <div className="absolute inset-0 bg-white/80 flex items-center justify-center">
+                <svg className="animate-spin w-5 h-5 text-teal" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v4m0 12v4"/></svg>
+              </div>
+            )}
+          </div>
+
+          <div className="flex-1 space-y-2">
+            <input
+              ref={ogInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={e => {
+                const f = e.target.files?.[0]
+                if (f) handleOgUpload(f)
+                e.target.value = ''
+              }}
+            />
+            <button
+              onClick={() => ogInputRef.current?.click()}
+              disabled={ogUploading}
+              className="flex items-center gap-2 text-xs font-semibold text-teal border border-teal/30 px-4 py-2 rounded-xl hover:bg-teal/5 transition-colors disabled:opacity-50"
+            >
+              <svg viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5">
+                <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clipRule="evenodd"/>
+              </svg>
+              {ogUploading ? 'Subiendo...' : 'Subir imagen'}
+            </button>
+            {form.seo.ogImage && (
+              <p className="text-[11px] text-texto-light font-mono break-all">{form.seo.ogImage}</p>
+            )}
+            {ogError && (
+              <p className="text-xs text-red-500">{ogError}</p>
+            )}
+          </div>
         </div>
-      )}
+      </Section>
     </div>
   )
 }

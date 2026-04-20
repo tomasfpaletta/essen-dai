@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import Link from "next/link";
 import Image from "next/image";
 import { Cliente } from "@/config/cliente";
 import { productos, categorias, type Categoria, type Producto, type Variante } from "@/lib/products";
@@ -136,13 +137,13 @@ function ProductoCard({ p }: { p: Producto }) {
             >
               Consultar
             </a>
-            <a
-              href="#productos"
+            <Link
+              href={`/productos/${p.id}`}
               className="text-sm font-medium transition-colors hover:opacity-70"
               style={{ color: variante.hex }}
             >
               Ver detalles &rsaquo;
-            </a>
+            </Link>
           </div>
         </div>
       </div>

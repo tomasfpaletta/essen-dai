@@ -82,8 +82,23 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             })}
           </nav>
 
-          {/* Logout */}
-          <div className="p-3" style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+          {/* Ver web + Logout */}
+          <div className="p-3 space-y-1" style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+            <a
+              href="/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all"
+              style={{ color: 'rgba(126,207,202,0.8)' }}
+              onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background = 'rgba(88,163,157,0.15)'; (e.currentTarget as HTMLAnchorElement).style.color = '#7ECFCA' }}
+              onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background = ''; (e.currentTarget as HTMLAnchorElement).style.color = 'rgba(126,207,202,0.8)' }}
+            >
+              <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 flex-shrink-0">
+                <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z"/>
+                <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z"/>
+              </svg>
+              Ver mi web
+            </a>
             <button
               onClick={handleLogout}
               disabled={loggingOut}

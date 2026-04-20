@@ -3,6 +3,7 @@ import Hero from "@/components/Hero";
 import Productos from "@/components/Productos";
 import Promociones from "@/components/Promociones";
 import Editorial from "@/components/Editorial";
+import Testimonios from "@/components/Testimonios";
 import SumateEquipo from "@/components/SumateEquipo";
 import FAQ from "@/components/FAQ";
 import Contacto from "@/components/Contacto";
@@ -18,6 +19,7 @@ export default function Home() {
       <Promociones />
       <Productos />
       <Editorial />
+      <Testimonios />
       <SumateEquipo />
       <FAQ />
       <Contacto />

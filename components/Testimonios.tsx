@@ -1,69 +1,83 @@
-const REVIEWS = [
-  { name: "Laura M.",    city: "Palermo, CABA",     text: "Compre la cacerola de 24cm y es increible. Se calienta parejo y no se pega nada. Daisy me ayudo a elegir el tamaño correcto.", stars: 5 },
-  { name: "Carlos R.",   city: "Rosario, Santa Fe", text: "Recibi todo en 3 dias. El packaging perfecto y los productos tal cual se muestran. Muy conforme con la atencion.", stars: 5 },
-  { name: "Patricia G.", city: "Córdoba Capital",   text: "Tenia dudas sobre que modelo elegir. Daisy me explico todo con paciencia. Termine comprando el flip y lo uso todos los dias.", stars: 5 },
-  { name: "Marcela T.",  city: "Mendoza",           text: "Los mejores utensilios que tuve. La sarten de 24cm es perfecta para hacer tortillas. Super recomendable.", stars: 5 },
-  { name: "Diego F.",    city: "La Plata, BA",      text: "Excelente atencion de Daisy. Me oriento bien sobre los productos y el envio fue rapido. Volvere a comprar.", stars: 5 },
-  { name: "Romina A.",   city: "Tucumán",           text: "La cafetera es una maravilla. El cafe sale perfecto cada mañana. Y el precio con cuotas muy conveniente.", stars: 5 },
-  { name: "Pablo S.",    city: "Mar del Plata",     text: "Me regalo la cacerola de 18cm a mi señora y quedo encantada. Ahora ya compramos el wok tambien. Calidad premium.", stars: 5 },
-  { name: "Valeria C.",  city: "Salta",             text: "Primera vez que compro Essen y no sera la ultima. Calidad increible y Daisy siempre disponible para consultas.", stars: 5 },
-  { name: "Hernan B.",   city: "Santa Fe",          text: "El set de utensilios es impecable. Material solido, facil de limpiar. Lo recomiendo a cualquiera.", stars: 5 },
-  { name: "Monica P.",   city: "Neuquén",           text: "Daisy conoce muy bien cada producto. Me guio perfecto y el envio llego intacto. Muy profesional.", stars: 5 },
-  { name: "Gustavo L.",  city: "Entre Ríos",        text: "La cuadrada Essen es espectacular para carnes. Me ahorre el aceite y los resultados son increibles.", stars: 5 },
-  { name: "Silvana R.",  city: "Chaco",             text: "Excelente. Compre para mi mama y ella quedo super feliz. Los productos son de primera calidad.", stars: 5 },
+import { Cliente } from "@/config/cliente";
+
+const TESTIMONIOS = [
+  {
+    nombre: "María L.",
+    lugar:  "Palermo, CABA",
+    texto:  "Hermosas ollas, llegaron rapidísimo y Daisy me asesoró perfecto. ¡Re recomiendo a todas!",
+    estrellas: 5,
+  },
+  {
+    nombre: "Carla V.",
+    lugar:  "San Isidro",
+    texto:  "Compré el set completo y estoy encantada. Cocino muchísimo mejor y se ve precioso en la cocina.",
+    estrellas: 5,
+  },
+  {
+    nombre: "Florencia M.",
+    lugar:  "Belgrano, CABA",
+    texto:  "Superó mis expectativas. La atención de Daisy es increíble, siempre disponible y muy amable.",
+    estrellas: 5,
+  },
 ];
 
-// Accent colors from the brand palette
-const ACCENTS = ["#58A39D", "#89BCAF", "#BB9EC5", "#58A39D"];
-
-function TestimonioCard({ r, idx }: { r: typeof REVIEWS[0]; idx: number }) {
-  const accent = ACCENTS[idx % ACCENTS.length];
+function Stars({ n }: { n: number }) {
   return (
-    <div className="w-72 flex-shrink-0 bg-white rounded-2xl p-6 border border-teal/10 mx-3 shadow-sm whitespace-normal"
-      style={{ borderLeftColor: accent, borderLeftWidth: "3px" }}>
-      <div className="flex gap-0.5 mb-3">
-        {[...Array(r.stars)].map((_, i) => (
-          <span key={i} style={{ color: accent }} className="text-sm">★</span>
-        ))}
-      </div>
-      <p className="text-texto-muted text-sm leading-relaxed italic mb-4">&ldquo;{r.text}&rdquo;</p>
-      <div>
-        <p className="text-texto font-semibold text-sm">{r.name}</p>
-        <p className="text-texto-light text-xs">{r.city}</p>
-      </div>
+    <div className="flex gap-0.5">
+      {Array.from({ length: n }).map((_, i) => (
+        <svg key={i} viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5 text-amber-400">
+          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+        </svg>
+      ))}
     </div>
   );
 }
 
 export default function Testimonios() {
-  const row1 = REVIEWS.slice(0, 6);
-  const row2 = REVIEWS.slice(6, 12);
+  const waHref = `${Cliente.whatsapp.link}?text=${encodeURIComponent("Hola Daisy! Quiero saber más sobre los productos Essen.")}`;
 
   return (
-    <section id="testimonios" className="py-24 bg-gradient-to-b from-fondo to-white overflow-hidden section-angle-both">
-      {/* Header */}
-      <div className="px-6 sm:px-12 lg:px-20 mb-12">
-        <p className="text-teal text-xs font-semibold uppercase tracking-[0.2em] mb-3">Opiniones</p>
-        <div className="flex flex-col sm:flex-row sm:items-end gap-4">
-          <h2 className="display-hero text-texto leading-none">
-            LO QUE<br /><span className="text-teal">DICEN.</span>
+    <section id="testimonios" className="py-16 bg-white px-6 sm:px-12 lg:px-20">
+      <div className="max-w-5xl mx-auto">
+
+        {/* Header */}
+        <div className="text-center mb-10">
+          <p className="text-teal text-xs font-semibold uppercase tracking-[0.2em] mb-2">Opiniones</p>
+          <h2 className="font-heading text-texto text-2xl sm:text-3xl">
+            Lo que dicen las clientas
           </h2>
-          <p className="text-texto-light text-sm sm:mb-3 sm:ml-4">★★★★★ 4.9 · 150+ opiniones</p>
         </div>
-      </div>
 
-      {/* Row 1 — scrolls left */}
-      <div className="flex whitespace-nowrap animate-marquee mb-4" style={{ animationDuration: "50s" }}>
-        {[...row1, ...row1].map((r, i) => (
-          <TestimonioCard key={i} r={r} idx={i} />
-        ))}
-      </div>
+        {/* Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {TESTIMONIOS.map((t) => (
+            <div
+              key={t.nombre}
+              className="bg-fondo rounded-2xl border border-teal/10 p-5 flex flex-col gap-3"
+            >
+              <Stars n={t.estrellas} />
+              <p className="text-texto text-sm leading-relaxed flex-1">
+                &ldquo;{t.texto}&rdquo;
+              </p>
+              <div className="border-t border-teal/10 pt-3">
+                <p className="text-texto font-semibold text-xs">{t.nombre}</p>
+                <p className="text-texto-muted text-[11px]">{t.lugar}</p>
+              </div>
+            </div>
+          ))}
+        </div>
 
-      {/* Row 2 — scrolls right */}
-      <div className="flex whitespace-nowrap" style={{ animation: "marquee 65s linear infinite reverse" }}>
-        {[...row2, ...row2].map((r, i) => (
-          <TestimonioCard key={i} r={r} idx={i + 1} />
-        ))}
+        {/* CTA */}
+        <div className="text-center mt-8">
+          <a
+            href={waHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-teal text-sm font-semibold hover:text-teal-dark transition-colors"
+          >
+            ¿Tenés dudas? Hablá con Daisy →
+          </a>
+        </div>
       </div>
     </section>
   );
