@@ -126,7 +126,7 @@ export const productos: Producto[] = [
       {
         "color": "Rosa",
         "hex": "#FFB6C1",
-        "imagen": ""
+        "imagen": "/images/products/sarten-24cm-rosa.webp"
       },
       {
         "color": "Terra",
