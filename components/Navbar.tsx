@@ -7,7 +7,7 @@ import { Cliente } from "@/config/cliente";
 const LINKS = [
   { href: "#productos",   label: "Productos" },
   { href: "#nosotros",    label: "Nosotros" },
-  { href: "#testimonios", label: "Opiniones" },
+  { href: "#equipo",      label: "Sumate" },
   { href: "#contacto",    label: "Contacto" },
 ];
 

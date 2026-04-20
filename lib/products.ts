@@ -83,37 +83,6 @@ export const productos: Producto[] = [
     "badge": "Top familia"
   },
   {
-    "id": "flip-22",
-    "nombre": "Testeando",
-    "categoria": "bazar",
-    "descripcion": "1Test",
-    "tags": [
-      "1Test"
-    ],
-    "variantes": [
-      {
-        "color": "Rosa",
-        "hex": "#FFB6C1",
-        "imagen": "/products/flip-22-rosa.webp"
-      },
-      {
-        "color": "Terra",
-        "hex": "#808080",
-        "imagen": "/products/flip-22-terra.webp"
-      },
-      {
-        "color": "Capri",
-        "hex": "#1A9EC0",
-        "imagen": "/products/flip-22-capri.webp"
-      }
-    ],
-    "destacado": true,
-    "badge": "Testeando",
-    "stockBajo": true,
-    "ofertaEspecial": true,
-    "descuento": 99
-  },
-  {
     "id": "sarten-24cm",
     "nombre": "Sarten 24cm",
     "categoria": "contemporanea",

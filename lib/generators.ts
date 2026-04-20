@@ -68,6 +68,7 @@ export type Descuento = {
   banco: string
   logo: string
   descuento: string
+  detalle: string
   condicion: string
   color: string
   activo: boolean

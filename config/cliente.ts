@@ -15,10 +15,10 @@ export const Cliente = {
     "lng": -58.3816
   },
   "whatsapp": {
-    "numero": "1156951464",
-    "display": "+54 9 11 115695-1464",
+    "numero": "5491156951464",
+    "display": "+54 9 11 5695-1464",
     "mensajeDefecto": "Hola Daisy! Estoy mirando los productos Essen y queria consultar.",
-    "link": "https://wa.me/1156951464"
+    "link": "https://wa.me/5491156951464"
   },
   "instagram": {
     "usuario": "master_essen",
