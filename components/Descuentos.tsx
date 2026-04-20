@@ -14,9 +14,8 @@ function BancoCard({ d, active }: { d: Descuento; active: boolean }) {
 
   return (
     <div
-      className={`flex-shrink-0 w-72 sm:w-80 bg-white rounded-2xl overflow-hidden border transition-all duration-200 select-none ${
-        active ? "border-gray-200 shadow-lg" : "border-gray-100 shadow-sm opacity-80"
-      }`}
+      className={`flex-shrink-0 w-72 sm:w-80 bg-white rounded-2xl overflow-hidden border transition-all duration-200 select-none ${active ? "border-gray-200 shadow-lg" : "border-gray-100 shadow-sm opacity-80"
+        }`}
     >
       {/* Cuerpo */}
       <div className="p-5 flex items-start gap-4">
@@ -60,11 +59,11 @@ function BancoCard({ d, active }: { d: Descuento; active: boolean }) {
 }
 
 export default function Descuentos() {
-  const activos = descuentos.filter(d => d.activo);
-  if (!descuentosConfig.visible || activos.length === 0) return null;
-
   const scrollRef = useRef<HTMLDivElement>(null);
   const [current, setCurrent] = useState(0);
+
+  const activos = descuentos.filter(d => d.activo);
+  if (!descuentosConfig.visible || activos.length === 0) return null;
 
   function scrollTo(idx: number) {
     const el = scrollRef.current;
@@ -98,7 +97,7 @@ export default function Descuentos() {
               className="w-9 h-9 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50 hover:border-gray-300 transition-colors disabled:opacity-30"
             >
               <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
-                <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd"/>
+                <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
               </svg>
             </button>
             <button
@@ -107,7 +106,7 @@ export default function Descuentos() {
               className="w-9 h-9 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50 hover:border-gray-300 transition-colors disabled:opacity-30"
             >
               <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
-                <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd"/>
+                <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
               </svg>
             </button>
           </div>
@@ -141,11 +140,10 @@ export default function Descuentos() {
             <button
               key={i}
               onClick={() => scrollTo(i)}
-              className={`rounded-full transition-all duration-200 ${
-                i === current
+              className={`rounded-full transition-all duration-200 ${i === current
                   ? "w-5 h-2 bg-teal"
                   : "w-2 h-2 bg-gray-200 hover:bg-gray-300"
-              }`}
+                }`}
             />
           ))}
         </div>
@@ -175,7 +173,7 @@ export default function Descuentos() {
         </div>
 
         <p className="text-xs text-gray-400 mt-4">
-          * Descuentos válidos al {descuentosConfig.vigencia}. Consultá condiciones con tu banco.
+          * Descuentos válidos en {descuentosConfig.vigencia}. Consultá condiciones con tu banco.
         </p>
       </div>
     </section>
