@@ -26,8 +26,8 @@ export const HEX: Record<string, string> = {
 export const productos: Producto[] = [
   {
     "id": "cacerola-18cm",
-    "nombre": "Cacerola 18cm",
-    "categoria": "contemporanea",
+    "nombre": "El Rey",
+    "categoria": "bazar",
     "descripcion": "Aluminio fundido de alta calidad. Cocción uniforme, ideal para 2 personas.",
     "tags": [
       "2,1 lts",
@@ -51,11 +51,14 @@ export const productos: Producto[] = [
       }
     ],
     "destacado": true,
-    "badge": "Mas vendida"
+    "badge": "Mas vendida",
+    "stockBajo": true,
+    "ofertaEspecial": true,
+    "descuento": 20
   },
   {
     "id": "cacerola-24cm",
-    "nombre": "2",
+    "nombre": "",
     "categoria": "contemporanea",
     "descripcion": "Pieza ideal para familia de 4. Base de aluminio fundido y revestimiento antiadherente.",
     "tags": [
