@@ -1,36 +1,38 @@
-import { Metadata } from "next";
-import { notFound } from "next/navigation";
-import Link from "next/link";
-import { Cliente } from "@/config/cliente";
-import { getProductoById, productos, type Producto } from "@/lib/products";
-import ProductoClient from "./ProductoClient";
+import { notFound } from 'next/navigation'
+import { getProductoById, productos } from '@/lib/products'
+import { Cliente } from '@/config/cliente'
+import DetalleInteractivo from './DetalleInteractivo'
 
-interface Props {
-  params: { id: string };
+export async function generateStaticParams() {
+  return productos.map((p) => ({ id: p.id }))
 }
 
-export function generateStaticParams() {
-  return productos.map(p => ({ id: p.id }));
-}
-
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const producto = getProductoById(params.id);
-  if (!producto) return { title: "Producto no encontrado" };
-
+export async function generateMetadata({ params }: { params: { id: string } }) {
+  const p = getProductoById(params.id)
+  if (!p) return {}
   return {
-    title: `${producto.nombre} | ${Cliente.marca}`,
-    description: `${producto.descripcion} Consultá precio y disponibilidad con ${Cliente.nombre}, distribuidora oficial Essen en ${Cliente.ciudad}.`,
+    title: `${p.nombre} | ${Cliente.marca}`,
+    description: p.descripcion,
     openGraph: {
-      title: `${producto.nombre} — ${Cliente.marca}`,
-      description: producto.descripcion,
-      url: `${Cliente.seo.baseUrl}/productos/${producto.id}`,
+      title: `${p.nombre} | ${Cliente.marca}`,
+      description: p.descripcion,
     },
-  };
+  }
 }
 
-export default function ProductoPage({ params }: Props) {
-  const producto = getProductoById(params.id);
-  if (!producto) notFound();
+export default function ProductoDetallePage({ params }: { params: { id: string } }) {
+  const p = getProductoById(params.id)
+  if (!p) notFound()
 
-  return <ProductoClient producto={producto} />;
+  const relacionados = productos
+    .filter(r => r.categoria === p.categoria && r.id !== p.id)
+    .slice(0, 4)
+
+  return (
+    <DetalleInteractivo
+      producto={p}
+      relacionados={relacionados}
+      cliente={JSON.parse(JSON.stringify(Cliente))}
+    />
+  )
 }
