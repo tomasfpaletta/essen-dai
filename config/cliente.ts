@@ -68,7 +68,7 @@ export const Cliente = {
     "navbarLogo": "",
     "favicon": ""
   },
-  "fuente": "elegante",
+  "fuente": "moderna",
   "stats": [
     "150+ clientes",
     "5 años vendiendo Essen",
