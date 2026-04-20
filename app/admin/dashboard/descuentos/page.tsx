@@ -78,7 +78,7 @@ export default function DescuentosPage() {
       })
       const data = await res.json()
       if (res.ok) {
-        setResult({ ok: true, prUrl: data.prUrl })
+        setResult({ ok: true })
         localStorage.removeItem(STORAGE_KEY)
         setHasChanges(false)
       } else {
@@ -270,14 +270,8 @@ export default function DescuentosPage() {
         <div className={`rounded-2xl p-5 ${result.ok ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
           {result.ok ? (
             <>
-              <p className="font-semibold text-green-700 text-sm">Cambios enviados correctamente</p>
-              <p className="text-green-600 text-xs mt-1">Tomas los va a revisar y publicar pronto.</p>
-              {result.prUrl && (
-                <a href={result.prUrl} target="_blank" rel="noopener noreferrer"
-                  className="text-teal text-xs underline mt-2 inline-block">
-                  Ver solicitud en GitHub
-                </a>
-              )}
+              <p className="font-semibold text-green-700 text-sm">¡Publicado correctamente!</p>
+              <p className="text-green-600 text-xs mt-1">Vercel desplegará los cambios en aproximadamente 30 segundos.</p>
             </>
           ) : (
             <p className="text-red-600 text-sm">{result.error}</p>
