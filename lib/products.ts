@@ -55,7 +55,7 @@ export const productos: Producto[] = [
   },
   {
     "id": "cacerola-24cm",
-    "nombre": "Cacerola 24cm",
+    "nombre": "2",
     "categoria": "contemporanea",
     "descripcion": "Pieza ideal para familia de 4. Base de aluminio fundido y revestimiento antiadherente.",
     "tags": [
@@ -85,7 +85,7 @@ export const productos: Producto[] = [
   },
   {
     "id": "flip-22",
-    "nombre": "Testeando",
+    "nombre": "1",
     "categoria": "bazar",
     "descripcion": "1Test",
     "tags": [
@@ -139,7 +139,9 @@ export const productos: Producto[] = [
         "hex": "#1A9EC0",
         "imagen": ""
       }
-    ]
+    ],
+    "stockBajo": true,
+    "destacado": true
   },
   {
     "id": "sarten-31cm",
@@ -162,7 +164,9 @@ export const productos: Producto[] = [
         "imagen": ""
       }
     ],
-    "descuento": 15
+    "descuento": 15,
+    "stockBajo": true,
+    "ofertaEspecial": true
   },
   {
     "id": "cuadrada-29cm",
@@ -219,7 +223,9 @@ export const productos: Producto[] = [
         "imagen": ""
       }
     ],
-    "destacado": true
+    "destacado": true,
+    "ofertaEspecial": true,
+    "stockBajo": true
   },
   {
     "id": "cafetera",
