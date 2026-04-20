@@ -67,7 +67,14 @@ export const Cliente = {
     "og": "",
     "navbarLogo": "",
     "favicon": ""
-  }
+  },
+  "fuente": "amigable",
+  "stats": [
+    "150+ clientes",
+    "5 años vendiendo Essen",
+    "Envío gratis a todo el país",
+    "2 años de garantía oficial"
+  ]
 } as const;
 
 export type ClienteType = typeof Cliente;
