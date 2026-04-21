@@ -45,4 +45,4 @@ export const faqItems: FaqItem[] = [
     "q": "¿Cuánto tardan en llegar los pedidos?",
     "a": "En CABA el envío suele llegar en 1-2 días hábiles. Para el interior del país, entre 3 y 7 días hábiles dependiendo la zona."
   }
-]
+];
