@@ -102,31 +102,36 @@ export async function createPR(title: string, body: string, head: string, base =
 /**
  * Crea o actualiza un archivo directamente en main.
  * No requiere rama ni PR — los cambios se publican al instante (Vercel deploya en ~30s).
- * Reintenta hasta 3 veces si hay conflicto de SHA (error 409).
+ * Reintenta hasta 5 veces si hay conflicto de SHA (error 409) con backoff exponencial.
  */
 export async function publishFile(path: string, content: string, message: string) {
   const base64 = Buffer.from(content, 'utf-8').toString('base64')
-  const MAX_RETRIES = 3
+  const MAX_RETRIES = 5
 
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    // Siempre obtener el SHA fresco antes de cada intento
     let sha: string | undefined
     try {
       const existing = await getFile(path)
       sha = existing.sha
     } catch {
-      // El archivo no existe aún → lo creamos
+      // El archivo no existe aún → lo creamos (sha = undefined)
     }
 
     try {
       return await uploadFile(path, base64, message, sha, 'main')
     } catch (err) {
-      const is409 = err instanceof Error && err.message.includes('"status":"409"')
+      const msg = err instanceof Error ? err.message : ''
+      const is409 = msg.includes('409') || msg.includes('"status":"409"')
       if (is409 && attempt < MAX_RETRIES) {
-        // SHA desincronizado — esperar un poco y reintentar con el SHA fresco
-        await new Promise(r => setTimeout(r, 600 * attempt))
+        // SHA desincronizado — esperar con backoff exponencial y reintentar
+        const delay = 500 * Math.pow(2, attempt - 1) // 500, 1000, 2000, 4000 ms
+        await new Promise(r => setTimeout(r, delay))
         continue
       }
       throw err
     }
   }
+
+  throw new Error(`publishFile: máximo de intentos alcanzado para ${path}`)
 }

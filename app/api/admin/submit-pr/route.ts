@@ -12,65 +12,63 @@ export async function POST(req: Request) {
   }
 
   try {
-    const promises: Promise<unknown>[] = []
-
+    // Publicar en secuencia — evita conflictos de SHA cuando GitHub recibe
+    // múltiples commits simultáneos en la misma rama (error 409).
     if (cliente) {
-      promises.push(publishFile(
+      await publishFile(
         'config/cliente.ts',
         generateClienteTs(cliente),
         'admin: actualizar configuración del sitio'
-      ))
+      )
     }
 
     if (productos) {
-      promises.push(publishFile(
+      await publishFile(
         'lib/products.ts',
         generateProductsTs(hex, productos, categorias),
         'admin: actualizar catálogo de productos'
-      ))
+      )
     }
 
     if (descuentos) {
-      promises.push(publishFile(
+      await publishFile(
         'config/descuentos.ts',
         generateDescuentosTs(descuentos),
         'admin: actualizar descuentos bancarios'
-      ))
+      )
     }
 
     if (promociones) {
-      promises.push(publishFile(
+      await publishFile(
         'config/promociones.ts',
         generatePromocionesTs(promociones),
         'admin: actualizar promociones y ediciones limitadas'
-      ))
+      )
     }
 
     if (videos) {
-      promises.push(publishFile(
+      await publishFile(
         'config/videos.ts',
         generateVideosTs(videos),
         'admin: actualizar videos de la landing'
-      ))
+      )
     }
 
     if (testimonios) {
-      promises.push(publishFile(
+      await publishFile(
         'config/testimonios.ts',
         generateTestimoniosTs(testimonios),
         'admin: actualizar testimonios'
-      ))
+      )
     }
 
     if (faq) {
-      promises.push(publishFile(
+      await publishFile(
         'config/faq.ts',
         generateFaqTs(faq),
         'admin: actualizar preguntas frecuentes'
-      ))
+      )
     }
-
-    await Promise.all(promises)
 
     return NextResponse.json({ ok: true })
   } catch (err: unknown) {
