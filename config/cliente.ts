@@ -69,6 +69,22 @@ export const Cliente = {
     "favicon": ""
   },
   "fuente": "moderna",
+  "sumateEquipo": {
+    "visible": true,
+    "badge": "Oportunidad Essen",
+    "titulo": "Transformá tu pasión en un negocio próspero",
+    "descripcion": "Unite a nuestra comunidad de emprendedoras. Gestioná tus tiempos, obtené ganancias desde el primer día y convertite en una experta culinaria. No necesitás experiencia previa, nosotros te capacitamos.",
+    "beneficios": [
+      "Sin inversión inicial obligatoria",
+      "Capacitaciones exclusivas y gratuitas",
+      "Premios y viajes por objetivos",
+      "Respaldo de una marca con 30 años de historia"
+    ],
+    "ctaTexto": "Quiero ser emprendedora",
+    "imagenEquipo": "",
+    "badgeNumero": "30+",
+    "badgeTexto": "años de marca"
+  },
   "stats": [
     "150+ clientes",
     "5 años vendiendo Essen",

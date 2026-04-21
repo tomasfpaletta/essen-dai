@@ -5,6 +5,7 @@ import Promociones from "@/components/Promociones";
 import Editorial from "@/components/Editorial";
 import Testimonios from "@/components/Testimonios";
 import SumateEquipo from "@/components/SumateEquipo";
+import VideosCarousel from "@/components/VideosCarousel";
 import FAQ from "@/components/FAQ";
 import Contacto from "@/components/Contacto";
 import Footer from "@/components/Footer";
@@ -19,6 +20,7 @@ export default function Home() {
       <Promociones />
       <Productos />
       <Editorial />
+      <VideosCarousel />
       <Testimonios />
       <SumateEquipo />
       <FAQ />

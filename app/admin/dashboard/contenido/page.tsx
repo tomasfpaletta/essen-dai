@@ -1,16 +1,17 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Cliente } from '@/config/cliente'
+import { videos as initialVideos, type Video } from '@/config/videos'
 
 const STORAGE_KEY = 'admin_contenido_draft'
 
 const FONT_OPTIONS = [
-  { id: 'moderna',    label: 'Moderna',     heading: 'Fredoka One',        body: 'Plus Jakarta Sans', preview: 'Ff' },
-  { id: 'elegante',   label: 'Elegante',    heading: 'Playfair Display',   body: 'Lato',              preview: 'Ff' },
-  { id: 'clasica',    label: 'Clásica',     heading: 'Cormorant Garamond', body: 'Lato',              preview: 'Ff' },
-  { id: 'bold',       label: 'Impactante',  heading: 'Bebas Neue',         body: 'Inter',             preview: 'FF' },
-  { id: 'amigable',   label: 'Amigable',    heading: 'Nunito',             body: 'Nunito',            preview: 'Ff' },
-  { id: 'manuscrita', label: 'Manuscrita',  heading: 'Dancing Script',     body: 'Plus Jakarta Sans', preview: 'Ff' },
+  { id: 'moderna',    label: 'Moderna',     heading: 'Fredoka One',        body: 'Plus Jakarta Sans' },
+  { id: 'elegante',   label: 'Elegante',    heading: 'Playfair Display',   body: 'Lato' },
+  { id: 'clasica',    label: 'Clásica',     heading: 'Cormorant Garamond', body: 'Lato' },
+  { id: 'bold',       label: 'Impactante',  heading: 'Bebas Neue',         body: 'Inter' },
+  { id: 'amigable',   label: 'Amigable',    heading: 'Nunito',             body: 'Nunito' },
+  { id: 'manuscrita', label: 'Manuscrita',  heading: 'Dancing Script',     body: 'Plus Jakarta Sans' },
 ]
 
 type HeroData = {
@@ -18,6 +19,19 @@ type HeroData = {
   descripcion: string; cta1Texto: string; cta2Texto: string; stats: string[]
 }
 
+type SumateData = {
+  visible: boolean
+  badge: string
+  titulo: string
+  descripcion: string
+  beneficios: string[]
+  ctaTexto: string
+  imagenEquipo: string
+  badgeNumero: string
+  badgeTexto: string
+}
+
+// ── Helpers de UI ─────────────────────────────────────────────────────────────
 function ChevronDown() {
   return <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 text-texto-light"><path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd"/></svg>
 }
@@ -25,13 +39,14 @@ function ChevronUp() {
   return <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 text-texto-light"><path fillRule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clipRule="evenodd"/></svg>
 }
 
-function Seccion({ title, children, defaultOpen = false }: { title: string; children: React.ReactNode; defaultOpen?: boolean }) {
+function Seccion({ title, badge, children, defaultOpen = false }: { title: string; badge?: string; children: React.ReactNode; defaultOpen?: boolean }) {
   const [open, setOpen] = useState(defaultOpen)
   return (
     <div className="bg-white rounded-2xl border border-teal/10 overflow-hidden">
       <button onClick={() => setOpen(!open)}
         className="w-full flex items-center gap-3 p-5 hover:bg-fondo transition-colors text-left">
         <span className="font-semibold text-texto text-sm flex-1">{title}</span>
+        {badge && <span className="text-xs bg-teal/10 text-teal px-2.5 py-0.5 rounded-full font-medium">{badge}</span>}
         {open ? <ChevronUp /> : <ChevronDown />}
       </button>
       {open && <div className="border-t border-teal/10 p-5 space-y-4 bg-fondo/30">{children}</div>}
@@ -56,47 +71,149 @@ function Field({ label, value, onChange, textarea, placeholder, hint }: {
   )
 }
 
+// ── Extrae thumbnail de YouTube ───────────────────────────────────────────────
+function toThumb(url: string): string | null {
+  const short = url.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/)
+  if (short) return `https://img.youtube.com/vi/${short[1]}/mqdefault.jpg`
+  const long = url.match(/[?&]v=([a-zA-Z0-9_-]{11})/)
+  if (long) return `https://img.youtube.com/vi/${long[1]}/mqdefault.jpg`
+  return null
+}
+
+function uid() {
+  return `vid-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`
+}
+
+// ── Página principal ──────────────────────────────────────────────────────────
 export default function ContenidoPage() {
   const currentFuente = (Cliente as Record<string, unknown>).fuente as string || 'moderna'
+  const currentSumate = (Cliente as Record<string, unknown>).sumateEquipo as SumateData | undefined
+
   const [hero, setHero] = useState<HeroData>({ ...Cliente.hero, stats: [...Cliente.hero.stats] })
   const [fuente, setFuente] = useState(currentFuente)
+  const [sumate, setSumate] = useState<SumateData>(currentSumate ?? {
+    visible: true,
+    badge: 'Oportunidad Essen',
+    titulo: 'Transformá tu pasión en un negocio próspero',
+    descripcion: 'Unite a nuestra comunidad de emprendedoras.',
+    beneficios: ['Sin inversión inicial obligatoria'],
+    ctaTexto: 'Quiero ser emprendedora',
+    imagenEquipo: '',
+    badgeNumero: '30+',
+    badgeTexto: 'años de marca',
+  })
+  const [videosList, setVideosList] = useState<Video[]>(initialVideos.map(v => ({ ...v })))
+  const [newVideoUrl, setNewVideoUrl] = useState('')
+  const [newVideoTitulo, setNewVideoTitulo] = useState('')
+  const [newVideoDesc, setNewVideoDesc] = useState('')
+  const [editingVideoId, setEditingVideoId] = useState<string | null>(null)
+
   const [hasChanges, setHasChanges] = useState(false)
   const [publishing, setPublishing] = useState(false)
   const [status, setStatus] = useState<'idle' | 'ok' | 'error'>('idle')
   const [errorMsg, setErrorMsg] = useState('')
+
+  // Imagen Sumate al Equipo
+  const sumateImgRef = useRef<HTMLInputElement>(null)
+  const [sumateImgUploading, setSumateImgUploading] = useState(false)
 
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY)
     if (saved) {
       try {
         const d = JSON.parse(saved)
-        if (d.hero && typeof d.hero === 'object') {
-          setHero(prev => ({
-            ...prev,
-            ...d.hero,
-            stats: Array.isArray(d.hero.stats) ? d.hero.stats : prev.stats,
-          }))
-        }
+        if (d.hero)   setHero(prev => ({ ...prev, ...d.hero, stats: Array.isArray(d.hero.stats) ? d.hero.stats : prev.stats }))
         if (d.fuente) setFuente(d.fuente)
+        if (d.sumate) setSumate(prev => ({ ...prev, ...d.sumate }))
+        if (d.videos) setVideosList(d.videos)
         setHasChanges(true)
       } catch {
         localStorage.removeItem(STORAGE_KEY)
       }
     }
-  }, [currentFuente])
+  }, [])
 
   useEffect(() => {
-    if (hasChanges) localStorage.setItem(STORAGE_KEY, JSON.stringify({ hero, fuente }))
-  }, [hero, fuente, hasChanges])
+    if (hasChanges) localStorage.setItem(STORAGE_KEY, JSON.stringify({ hero, fuente, sumate, videos: videosList }))
+  }, [hero, fuente, sumate, videosList, hasChanges])
+
+  function mark() { setHasChanges(true); setStatus('idle') }
 
   function setHeroField(key: keyof HeroData, value: string) {
-    setHero(prev => ({ ...prev, [key]: value })); setHasChanges(true)
+    setHero(prev => ({ ...prev, [key]: value })); mark()
   }
-  function setStat(idx: number, value: string) {
-    setHero(prev => { const stats = [...prev.stats]; stats[idx] = value; return { ...prev, stats } }); setHasChanges(true)
+  function setStat(idx: number, v: string) {
+    setHero(prev => { const s = [...prev.stats]; s[idx] = v; return { ...prev, stats: s } }); mark()
   }
-  function addStat() { setHero(prev => ({ ...prev, stats: [...prev.stats, 'Nueva estadística'] })); setHasChanges(true) }
-  function removeStat(idx: number) { setHero(prev => ({ ...prev, stats: prev.stats.filter((_, i) => i !== idx) })); setHasChanges(true) }
+  function addStat() { setHero(prev => ({ ...prev, stats: [...prev.stats, 'Nueva estadística'] })); mark() }
+  function removeStat(idx: number) { setHero(prev => ({ ...prev, stats: prev.stats.filter((_, i) => i !== idx) })); mark() }
+
+  function patchSumate(key: keyof SumateData, val: unknown) {
+    setSumate(prev => ({ ...prev, [key]: val })); mark()
+  }
+  function patchBeneficio(idx: number, val: string) {
+    setSumate(prev => { const b = [...prev.beneficios]; b[idx] = val; return { ...prev, beneficios: b } }); mark()
+  }
+  function addBeneficio() {
+    setSumate(prev => ({ ...prev, beneficios: [...prev.beneficios, 'Nuevo beneficio'] })); mark()
+  }
+  function removeBeneficio(idx: number) {
+    setSumate(prev => ({ ...prev, beneficios: prev.beneficios.filter((_, i) => i !== idx) })); mark()
+  }
+
+  async function uploadSumateImg(file: File) {
+    setSumateImgUploading(true)
+    try {
+      const fd = new FormData()
+      fd.append('file', file)
+      fd.append('filename', 'equipo')
+      fd.append('folder', 'equipo')
+      const res = await fetch('/api/admin/upload', { method: 'POST', body: fd })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error)
+      patchSumate('imagenEquipo', data.path)
+    } catch (e: unknown) {
+      alert(e instanceof Error ? e.message : 'Error al subir imagen')
+    } finally {
+      setSumateImgUploading(false)
+    }
+  }
+
+  // Videos
+  function addVideo() {
+    const url = newVideoUrl.trim()
+    if (!url) return
+    const newV: Video = {
+      id: uid(),
+      titulo: newVideoTitulo.trim(),
+      descripcion: newVideoDesc.trim(),
+      url,
+      activo: true,
+    }
+    setVideosList(prev => [...prev, newV])
+    setNewVideoUrl(''); setNewVideoTitulo(''); setNewVideoDesc('')
+    mark()
+  }
+  function removeVideo(id: string) {
+    setVideosList(prev => prev.filter(v => v.id !== id)); mark()
+  }
+  function toggleVideo(id: string) {
+    setVideosList(prev => prev.map(v => v.id === id ? { ...v, activo: !v.activo } : v)); mark()
+  }
+  function patchVideo(id: string, key: keyof Video, val: string | boolean) {
+    setVideosList(prev => prev.map(v => v.id === id ? { ...v, [key]: val } : v)); mark()
+  }
+  function moveVideo(id: string, dir: -1 | 1) {
+    setVideosList(prev => {
+      const idx = prev.findIndex(v => v.id === id)
+      if (idx < 0) return prev
+      const next = idx + dir
+      if (next < 0 || next >= prev.length) return prev
+      const arr = [...prev];
+      [arr[idx], arr[next]] = [arr[next], arr[idx]]
+      return arr
+    }); mark()
+  }
 
   async function handlePublish() {
     setPublishing(true); setStatus('idle')
@@ -105,7 +222,7 @@ export default function ContenidoPage() {
         ...Cliente,
         hero,
         fuente,
-        // Quitar "as const" readonly para poder serializar
+        sumateEquipo: sumate,
         whatsapp: { ...Cliente.whatsapp },
         instagram: { ...Cliente.instagram },
         seo: { ...Cliente.seo, keywords: [...Cliente.seo.keywords] },
@@ -117,7 +234,7 @@ export default function ContenidoPage() {
       const res = await fetch('/api/admin/submit-pr', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cliente: clienteData }),
+        body: JSON.stringify({ cliente: clienteData, videos: videosList }),
       })
       const data = await res.json()
       if (res.ok) {
@@ -138,24 +255,21 @@ export default function ContenidoPage() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-texto">Contenido de la web</h1>
-          <p className="text-texto-muted text-sm mt-1">Editá los textos y el estilo. Los cambios se publican al instante.</p>
+          <p className="text-texto-muted text-sm mt-1">Textos, estilo, videos y sección de equipo.</p>
         </div>
         <div className="flex items-center gap-3 flex-shrink-0">
           {hasChanges && (
-            <span className="text-xs bg-amber-100 text-amber-700 px-3 py-1.5 rounded-full font-medium">
-              Sin publicar
-            </span>
+            <span className="text-xs bg-amber-100 text-amber-700 px-3 py-1.5 rounded-full font-medium">Sin publicar</span>
           )}
           <button
             onClick={handlePublish}
             disabled={publishing || !hasChanges}
             className="flex items-center gap-2 bg-teal text-white font-semibold px-5 py-2.5 rounded-xl text-sm hover:bg-teal-dark transition-colors disabled:opacity-40"
           >
-            {publishing ? (
-              <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48 2.83 2.83"/></svg>
-            ) : (
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4"><path d="M5 12l5 5L20 7"/></svg>
-            )}
+            {publishing
+              ? <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48 2.83 2.83"/></svg>
+              : <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4"><path d="M5 12l5 5L20 7"/></svg>
+            }
             {publishing ? 'Publicando…' : 'Publicar cambios'}
           </button>
         </div>
@@ -164,7 +278,7 @@ export default function ContenidoPage() {
       {status === 'ok' && (
         <div className="bg-green-50 border border-green-200 text-green-800 rounded-xl px-4 py-3 text-sm flex items-center gap-2">
           <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 flex-shrink-0"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/></svg>
-          ¡Publicado! Vercel desplegará los cambios en aproximadamente 30 segundos.
+          ¡Publicado! Los cambios se verán en la web en ~30 segundos.
         </div>
       )}
       {status === 'error' && (
@@ -173,12 +287,12 @@ export default function ContenidoPage() {
 
       {/* ── Fuente ── */}
       <Seccion title="Estilo de letra" defaultOpen>
-        <p className="text-xs text-texto-muted">Elegí la familia tipográfica de la web. El cambio afecta títulos y textos en todo el sitio.</p>
+        <p className="text-xs text-texto-muted">El cambio afecta títulos y textos en todo el sitio.</p>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {FONT_OPTIONS.map(opt => (
             <button
               key={opt.id}
-              onClick={() => { setFuente(opt.id); setHasChanges(true) }}
+              onClick={() => { setFuente(opt.id); mark() }}
               className={`relative rounded-2xl border-2 p-4 text-left transition-all hover:border-teal/50 ${fuente === opt.id ? 'border-teal bg-teal/5' : 'border-gray-100 bg-white'}`}
             >
               {fuente === opt.id && (
@@ -186,11 +300,7 @@ export default function ContenidoPage() {
                   <svg viewBox="0 0 12 12" fill="white" className="w-2.5 h-2.5"><path d="M2 6l3 3 5-5"/></svg>
                 </span>
               )}
-              {/* Preview */}
-              <div className="text-2xl font-bold text-texto mb-1 leading-none"
-                style={{ fontFamily: opt.heading }}>
-                Aa
-              </div>
+              <div className="text-2xl font-bold text-texto mb-1 leading-none" style={{ fontFamily: opt.heading }}>Aa</div>
               <p className="text-xs font-semibold text-texto">{opt.label}</p>
               <p className="text-[10px] text-texto-light mt-0.5">{opt.heading}</p>
             </button>
@@ -202,22 +312,21 @@ export default function ContenidoPage() {
       <Seccion title="Hero — Portada principal">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Field label="Texto del badge" value={hero.badge} onChange={v => setHeroField('badge', v)} placeholder="Distribuidora Oficial · CABA" />
-          <Field label="Subtítulo" value={hero.subtitulo} onChange={v => setHeroField('subtitulo', v)} placeholder="Vivís mejor." />
+          <Field label="Subtítulo" value={hero.subtitulo} onChange={v => setHeroField('subtitulo', v)} />
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Field label="Título línea 1 (blanco)" value={hero.titulo1} onChange={v => setHeroField('titulo1', v)} placeholder="COCINÁS" />
           <Field label="Título línea 2 (teal)" value={hero.titulo2} onChange={v => setHeroField('titulo2', v)} placeholder="MEJOR." />
         </div>
-        <Field label="Descripción" value={hero.descripcion} onChange={v => setHeroField('descripcion', v)} textarea placeholder="Texto debajo del título..." />
+        <Field label="Descripción" value={hero.descripcion} onChange={v => setHeroField('descripcion', v)} textarea />
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Field label='Botón principal (va a productos)' value={hero.cta1Texto} onChange={v => setHeroField('cta1Texto', v)} placeholder="Ver productos" />
-          <Field label="Botón secundario (WhatsApp)" value={hero.cta2Texto} onChange={v => setHeroField('cta2Texto', v)} placeholder="Hablar con Daisy" />
+          <Field label="Botón principal" value={hero.cta1Texto} onChange={v => setHeroField('cta1Texto', v)} />
+          <Field label="Botón secundario (WhatsApp)" value={hero.cta2Texto} onChange={v => setHeroField('cta2Texto', v)} />
         </div>
       </Seccion>
 
       {/* ── Stats ── */}
-      <Seccion title="Estadísticas — Debajo de los botones">
-        <p className="text-xs text-texto-muted">Aparecen en la fila de estadísticas del hero.</p>
+      <Seccion title="Estadísticas del hero">
         <div className="space-y-2">
           {hero.stats.map((stat, i) => (
             <div key={i} className="flex gap-2">
@@ -228,7 +337,216 @@ export default function ContenidoPage() {
             </div>
           ))}
         </div>
-        <button onClick={addStat} className="text-xs text-teal hover:text-teal-dark font-medium transition-colors">+ Agregar estadística</button>
+        <button onClick={addStat} className="text-xs text-teal hover:text-teal-dark font-medium">+ Agregar estadística</button>
+      </Seccion>
+
+      {/* ── Videos ── */}
+      <Seccion title="Videos" badge={`${videosList.filter(v => v.activo).length} activos`}>
+        <p className="text-xs text-texto-muted -mt-1">
+          Pegá el link de YouTube de cada video. Se muestran en un carrusel en la landing.
+        </p>
+
+        {/* Lista existente */}
+        {videosList.length > 0 && (
+          <div className="space-y-2">
+            {videosList.map((v, idx) => {
+              const thumb = toThumb(v.url)
+              const isEditing = editingVideoId === v.id
+              return (
+                <div key={v.id} className="border border-gray-100 rounded-xl overflow-hidden">
+                  {/* Fila */}
+                  <div className="flex items-center gap-3 px-4 py-3">
+                    {/* Thumbnail */}
+                    <div className="w-16 h-10 rounded-lg overflow-hidden flex-shrink-0 bg-fondo border border-teal/10">
+                      {thumb
+                        ? <img src={thumb} alt={v.titulo} className="w-full h-full object-cover" /> // eslint-disable-line @next/next/no-img-element
+                        : <div className="w-full h-full flex items-center justify-center"><svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-teal/30"><path d="M8 5v14l11-7z"/></svg></div>
+                      }
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-texto truncate">{v.titulo || 'Sin título'}</p>
+                      <p className="text-xs text-texto-muted truncate">{v.url}</p>
+                    </div>
+
+                    {/* Toggle activo */}
+                    <button
+                      onClick={() => toggleVideo(v.id)}
+                      className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors flex-shrink-0 ${v.activo ? 'bg-teal' : 'bg-gray-200'}`}
+                    >
+                      <span
+                        className="inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform"
+                        style={{ transform: `translateX(${v.activo ? '18px' : '2px'})` }}
+                      />
+                    </button>
+
+                    {/* Mover */}
+                    <div className="flex gap-0.5 flex-shrink-0">
+                      <button onClick={() => moveVideo(v.id, -1)} disabled={idx === 0}
+                        className="p-1 rounded hover:bg-gray-100 disabled:opacity-30 text-texto-muted">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="18 15 12 9 6 15"/></svg>
+                      </button>
+                      <button onClick={() => moveVideo(v.id, 1)} disabled={idx === videosList.length - 1}
+                        className="p-1 rounded hover:bg-gray-100 disabled:opacity-30 text-texto-muted">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                      </button>
+                    </div>
+
+                    {/* Editar */}
+                    <button onClick={() => setEditingVideoId(isEditing ? null : v.id)}
+                      className="p-1.5 rounded-lg hover:bg-teal/10 text-teal-dark/50 hover:text-teal transition-colors flex-shrink-0">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </button>
+
+                    {/* Eliminar */}
+                    <button onClick={() => removeVideo(v.id)}
+                      className="p-1.5 rounded-lg hover:bg-red-50 hover:text-red-500 text-texto-muted transition-colors flex-shrink-0">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6m4-6v6"/><path d="M9 6V4h6v2"/></svg>
+                    </button>
+                  </div>
+
+                  {/* Panel de edición */}
+                  {isEditing && (
+                    <div className="border-t border-gray-100 bg-gray-50/50 p-4 space-y-3">
+                      <div>
+                        <label className="text-xs font-medium text-texto-muted mb-1 block">URL de YouTube</label>
+                        <input value={v.url} onChange={e => patchVideo(v.id, 'url', e.target.value)}
+                          className="w-full px-3 py-2 rounded-xl border border-teal/20 focus:outline-none focus:border-teal text-sm bg-white text-texto"
+                          placeholder="https://youtube.com/watch?v=..." />
+                      </div>
+                      <div>
+                        <label className="text-xs font-medium text-texto-muted mb-1 block">Título</label>
+                        <input value={v.titulo} onChange={e => patchVideo(v.id, 'titulo', e.target.value)}
+                          className="w-full px-3 py-2 rounded-xl border border-teal/20 focus:outline-none focus:border-teal text-sm bg-white text-texto" />
+                      </div>
+                      <div>
+                        <label className="text-xs font-medium text-texto-muted mb-1 block">Descripción</label>
+                        <textarea value={v.descripcion} onChange={e => patchVideo(v.id, 'descripcion', e.target.value)} rows={2}
+                          className="w-full px-3 py-2 rounded-xl border border-teal/20 focus:outline-none focus:border-teal text-sm bg-white text-texto resize-none" />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        )}
+
+        {/* Agregar nuevo video */}
+        <div className="bg-white rounded-xl border border-teal/15 p-4 space-y-3">
+          <p className="text-xs font-semibold text-texto-muted uppercase tracking-widest">Agregar video</p>
+          <div>
+            <label className="text-xs font-medium text-texto-muted mb-1 block">Link de YouTube *</label>
+            <input
+              value={newVideoUrl}
+              onChange={e => setNewVideoUrl(e.target.value)}
+              placeholder="https://youtube.com/watch?v=... o https://youtu.be/..."
+              className="w-full px-3 py-2 rounded-xl border border-teal/20 focus:outline-none focus:border-teal text-sm bg-fondo text-texto"
+            />
+          </div>
+          <div className="grid sm:grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-medium text-texto-muted mb-1 block">Título (opcional)</label>
+              <input value={newVideoTitulo} onChange={e => setNewVideoTitulo(e.target.value)}
+                placeholder="Ej: Cómo usar tu cacerola Essen"
+                className="w-full px-3 py-2 rounded-xl border border-teal/20 focus:outline-none focus:border-teal text-sm bg-fondo text-texto" />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-texto-muted mb-1 block">Descripción (opcional)</label>
+              <input value={newVideoDesc} onChange={e => setNewVideoDesc(e.target.value)}
+                placeholder="Breve descripción..."
+                className="w-full px-3 py-2 rounded-xl border border-teal/20 focus:outline-none focus:border-teal text-sm bg-fondo text-texto" />
+            </div>
+          </div>
+          <button
+            onClick={addVideo}
+            disabled={!newVideoUrl.trim()}
+            className="flex items-center gap-2 bg-teal/10 text-teal font-semibold px-4 py-2 rounded-xl text-sm hover:bg-teal/20 transition-colors disabled:opacity-40"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Agregar video
+          </button>
+        </div>
+      </Seccion>
+
+      {/* ── Sumate al equipo ── */}
+      <Seccion title="Sumate al equipo">
+        <div className="flex items-center justify-between">
+          <p className="text-xs text-texto-muted">Sección visible en la landing</p>
+          <button
+            onClick={() => patchSumate('visible', !sumate.visible)}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${sumate.visible ? 'bg-teal' : 'bg-gray-200'}`}
+          >
+            <span className="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform"
+              style={{ transform: `translateX(${sumate.visible ? '24px' : '4px'})` }} />
+          </button>
+        </div>
+
+        {!sumate.visible && (
+          <p className="text-xs bg-amber-50 border border-amber-200 text-amber-700 rounded-xl px-3 py-2">
+            La sección está <strong>oculta</strong> en el sitio.
+          </p>
+        )}
+
+        <div className="grid sm:grid-cols-2 gap-4">
+          <Field label="Badge" value={sumate.badge} onChange={v => patchSumate('badge', v)} placeholder="Oportunidad Essen" />
+          <Field label="Número del badge flotante" value={sumate.badgeNumero} onChange={v => patchSumate('badgeNumero', v)} placeholder="30+" />
+        </div>
+        <div className="grid sm:grid-cols-2 gap-4">
+          <Field label="Texto del badge flotante" value={sumate.badgeTexto} onChange={v => patchSumate('badgeTexto', v)} placeholder="años de marca" />
+          <Field label="Texto del botón CTA" value={sumate.ctaTexto} onChange={v => patchSumate('ctaTexto', v)} />
+        </div>
+        <Field label="Título" value={sumate.titulo} onChange={v => patchSumate('titulo', v)} />
+        <Field label="Descripción" value={sumate.descripcion} onChange={v => patchSumate('descripcion', v)} textarea />
+
+        {/* Beneficios */}
+        <div>
+          <label className="block text-xs font-medium text-texto mb-2">Beneficios</label>
+          <div className="space-y-2">
+            {sumate.beneficios.map((b, i) => (
+              <div key={i} className="flex gap-2">
+                <input value={b} onChange={e => patchBeneficio(i, e.target.value)}
+                  className="flex-1 px-3 py-2 rounded-xl border border-teal/20 focus:outline-none focus:border-teal text-sm bg-white text-texto" />
+                <button onClick={() => removeBeneficio(i)}
+                  className="px-3 py-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors text-sm">✕</button>
+              </div>
+            ))}
+          </div>
+          <button onClick={addBeneficio} className="text-xs text-teal hover:text-teal-dark font-medium mt-2">+ Agregar beneficio</button>
+        </div>
+
+        {/* Imagen del equipo */}
+        <div>
+          <label className="block text-xs font-medium text-texto mb-2">Foto del equipo</label>
+          <div className="flex items-start gap-4">
+            <div
+              className="w-24 h-32 rounded-xl border-2 border-dashed border-teal/20 overflow-hidden flex-shrink-0 cursor-pointer hover:border-teal/40 transition-colors bg-fondo flex items-center justify-center"
+              onClick={() => sumateImgRef.current?.click()}
+            >
+              {sumate.imagenEquipo
+                ? <img src={sumate.imagenEquipo} alt="equipo" className="w-full h-full object-cover" /> // eslint-disable-line @next/next/no-img-element
+                : <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-8 h-8 text-gray-300"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4.418 3.582-8 8-8s8 3.582 8 8"/></svg>
+              }
+              {sumateImgUploading && (
+                <div className="absolute inset-0 bg-white/80 flex items-center justify-center">
+                  <svg className="animate-spin w-5 h-5 text-teal" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v4m0 12v4"/></svg>
+                </div>
+              )}
+            </div>
+            <div className="flex flex-col gap-2 pt-1">
+              <button onClick={() => sumateImgRef.current?.click()} disabled={sumateImgUploading}
+                className="text-xs text-teal border border-teal/30 font-semibold px-4 py-2 rounded-xl hover:bg-teal/5 transition-colors disabled:opacity-50">
+                {sumate.imagenEquipo ? 'Cambiar foto' : 'Subir foto'}
+              </button>
+              {sumate.imagenEquipo && (
+                <button onClick={() => patchSumate('imagenEquipo', '')} className="text-xs text-red-400 hover:text-red-600 transition-colors">Quitar foto</button>
+              )}
+              <p className="text-xs text-texto-muted">Recomendado: formato 4:5 o vertical</p>
+            </div>
+          </div>
+          <input ref={sumateImgRef} type="file" accept="image/*" className="hidden"
+            onChange={e => { const f = e.target.files?.[0]; if (f) uploadSumateImg(f); e.target.value = '' }} />
+        </div>
       </Seccion>
     </div>
   )

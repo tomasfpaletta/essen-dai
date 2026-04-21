@@ -123,3 +123,22 @@ export function getProductosByCategoria(cat: Categoria): Producto[] {
 export const categorias: { value: Categoria; label: string }[] = ${JSON.stringify(categorias, null, 2)};
 `
 }
+
+/** Genera el contenido de config/videos.ts */
+export function generateVideosTs(videosList: unknown[]): string {
+  return `// ─────────────────────────────────────────────────────────────────────────────
+//  VIDEOS — Carrusel de videos en la landing
+//  Última actualización: panel de administración
+// ─────────────────────────────────────────────────────────────────────────────
+
+export type Video = {
+  id: string
+  titulo: string
+  descripcion: string
+  url: string
+  activo: boolean
+}
+
+export const videos: Video[] = ${JSON.stringify(videosList, null, 2)};
+`
+}
