@@ -145,7 +145,13 @@ export default function ContenidoPage() {
   const [newVideoDesc, setNewVideoDesc] = useState('')
   const [editingVideoId, setEditingVideoId] = useState<string | null>(null)
 
-  const [hasChanges, setHasChanges] = useState(false)
+  // Tracking por sección — solo se publica lo que realmente cambió
+  const [dirtyCliente, setDirtyCliente] = useState(false)
+  const [dirtyVideos,  setDirtyVideos]  = useState(false)
+  const [dirtyTestimonios, setDirtyTestimonios] = useState(false)
+  const [dirtyFaq, setDirtyFaq] = useState(false)
+  const hasChanges = dirtyCliente || dirtyVideos || dirtyTestimonios || dirtyFaq
+
   const [publishing, setPublishing] = useState(false)
   const [status, setStatus] = useState<'idle' | 'ok' | 'error'>('idle')
   const [errorMsg, setErrorMsg] = useState('')
@@ -159,14 +165,13 @@ export default function ContenidoPage() {
     if (saved) {
       try {
         const d = JSON.parse(saved)
-        if (d.hero)       setHero(prev => ({ ...prev, ...d.hero, stats: Array.isArray(d.hero.stats) ? d.hero.stats : prev.stats }))
-        if (d.fuente)     setFuente(d.fuente)
-        if (d.sumate)     setSumate(prev => ({ ...prev, ...d.sumate }))
-        if (d.editorial)  setEditorial(prev => ({ ...prev, ...d.editorial }))
-        if (d.videos)     setVideosList(d.videos)
-        if (d.testimonios) setTestimoniosList(d.testimonios)
-        if (d.faq)        setFaqList(d.faq)
-        setHasChanges(true)
+        if (d.hero)        { setHero(prev => ({ ...prev, ...d.hero, stats: Array.isArray(d.hero.stats) ? d.hero.stats : prev.stats })); setDirtyCliente(true) }
+        if (d.fuente)      { setFuente(d.fuente); setDirtyCliente(true) }
+        if (d.sumate)      { setSumate(prev => ({ ...prev, ...d.sumate })); setDirtyCliente(true) }
+        if (d.editorial)   { setEditorial(prev => ({ ...prev, ...d.editorial })); setDirtyCliente(true) }
+        if (d.videos)      { setVideosList(d.videos); setDirtyVideos(true) }
+        if (d.testimonios) { setTestimoniosList(d.testimonios); setDirtyTestimonios(true) }
+        if (d.faq)         { setFaqList(d.faq); setDirtyFaq(true) }
       } catch {
         localStorage.removeItem(STORAGE_KEY)
       }
@@ -174,80 +179,94 @@ export default function ContenidoPage() {
   }, [])
 
   useEffect(() => {
-    if (hasChanges) localStorage.setItem(STORAGE_KEY, JSON.stringify({
-      hero, fuente, sumate, editorial, videos: videosList, testimonios: testimoniosList, faq: faqList
-    }))
-  }, [hero, fuente, sumate, editorial, videosList, testimoniosList, faqList, hasChanges])
+    if (!hasChanges) return
+    const draft: Record<string, unknown> = {}
+    if (dirtyCliente)     { draft.hero = hero; draft.fuente = fuente; draft.sumate = sumate; draft.editorial = editorial }
+    if (dirtyVideos)      { draft.videos = videosList }
+    if (dirtyTestimonios) { draft.testimonios = testimoniosList }
+    if (dirtyFaq)         { draft.faq = faqList }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(draft))
+  }, [hero, fuente, sumate, editorial, videosList, testimoniosList, faqList,
+      dirtyCliente, dirtyVideos, dirtyTestimonios, dirtyFaq, hasChanges])
 
-  function mark() { setHasChanges(true); setStatus('idle') }
+  function markCliente() { setDirtyCliente(true); setStatus('idle') }
+  function markVideos()  { setDirtyVideos(true);  setStatus('idle') }
+  function markTestimonios() { setDirtyTestimonios(true); setStatus('idle') }
+  function markFaq()     { setDirtyFaq(true);     setStatus('idle') }
 
   function setHeroField(key: keyof HeroData, value: string) {
-    setHero(prev => ({ ...prev, [key]: value })); mark()
+    setHero(prev => ({ ...prev, [key]: value })); markCliente()
   }
   function setStat(idx: number, v: string) {
-    setHero(prev => { const s = [...prev.stats]; s[idx] = v; return { ...prev, stats: s } }); mark()
+    setHero(prev => { const s = [...prev.stats]; s[idx] = v; return { ...prev, stats: s } }); markCliente()
   }
-  function addStat() { setHero(prev => ({ ...prev, stats: [...prev.stats, 'Nueva estadística'] })); mark() }
-  function removeStat(idx: number) { setHero(prev => ({ ...prev, stats: prev.stats.filter((_, i) => i !== idx) })); mark() }
+  function addStat() { setHero(prev => ({ ...prev, stats: [...prev.stats, 'Nueva estadística'] })); markCliente() }
+  function removeStat(idx: number) { setHero(prev => ({ ...prev, stats: prev.stats.filter((_, i) => i !== idx) })); markCliente() }
 
   function patchSumate(key: keyof SumateData, val: unknown) {
-    setSumate(prev => ({ ...prev, [key]: val })); mark()
+    setSumate(prev => ({ ...prev, [key]: val })); markCliente()
   }
   function patchBeneficio(idx: number, val: string) {
-    setSumate(prev => { const b = [...prev.beneficios]; b[idx] = val; return { ...prev, beneficios: b } }); mark()
+    setSumate(prev => { const b = [...prev.beneficios]; b[idx] = val; return { ...prev, beneficios: b } }); markCliente()
   }
   function addBeneficio() {
-    setSumate(prev => ({ ...prev, beneficios: [...prev.beneficios, 'Nuevo beneficio'] })); mark()
+    setSumate(prev => ({ ...prev, beneficios: [...prev.beneficios, 'Nuevo beneficio'] })); markCliente()
   }
   function removeBeneficio(idx: number) {
-    setSumate(prev => ({ ...prev, beneficios: prev.beneficios.filter((_, i) => i !== idx) })); mark()
+    setSumate(prev => ({ ...prev, beneficios: prev.beneficios.filter((_, i) => i !== idx) })); markCliente()
   }
 
   // Editorial helpers
   function patchEditorial(key: keyof EditorialData, val: unknown) {
-    setEditorial(prev => ({ ...prev, [key]: val })); mark()
+    setEditorial(prev => ({ ...prev, [key]: val })); markCliente()
   }
   function patchEditorialStat(idx: number, key: 'n' | 'label', val: string) {
     setEditorial(prev => {
       const s = [...prev.stats]; s[idx] = { ...s[idx], [key]: val }; return { ...prev, stats: s }
-    }); mark()
+    }); markCliente()
   }
   function addEditorialStat() {
-    setEditorial(prev => ({ ...prev, stats: [...prev.stats, { n: '', label: '' }] })); mark()
+    setEditorial(prev => ({ ...prev, stats: [...prev.stats, { n: '', label: '' }] })); markCliente()
   }
   function removeEditorialStat(idx: number) {
-    setEditorial(prev => ({ ...prev, stats: prev.stats.filter((_, i) => i !== idx) })); mark()
+    setEditorial(prev => ({ ...prev, stats: prev.stats.filter((_, i) => i !== idx) })); markCliente()
   }
   function patchEditorialBullet(idx: number, val: string) {
-    setEditorial(prev => { const b = [...prev.bullets]; b[idx] = val; return { ...prev, bullets: b } }); mark()
+    setEditorial(prev => { const b = [...prev.bullets]; b[idx] = val; return { ...prev, bullets: b } }); markCliente()
   }
   function addEditorialBullet() {
-    setEditorial(prev => ({ ...prev, bullets: [...prev.bullets, ''] })); mark()
+    setEditorial(prev => ({ ...prev, bullets: [...prev.bullets, ''] })); markCliente()
   }
   function removeEditorialBullet(idx: number) {
-    setEditorial(prev => ({ ...prev, bullets: prev.bullets.filter((_, i) => i !== idx) })); mark()
+    setEditorial(prev => ({ ...prev, bullets: prev.bullets.filter((_, i) => i !== idx) })); markCliente()
   }
 
   // Testimonios helpers
   function patchTestimonio(id: string, key: keyof Testimonio, val: string | number) {
-    setTestimoniosList(prev => prev.map(t => t.id === id ? { ...t, [key]: val } : t)); mark()
+    setTestimoniosList(prev => prev.map(t => t.id === id ? { ...t, [key]: val } : t)); markTestimonios()
   }
   function addTestimonio() {
-    setTestimoniosList(prev => [...prev, { id: uidItem(), nombre: '', lugar: '', texto: '', estrellas: 5 }]); mark()
+    setTestimoniosList(prev => [...prev, { id: uidItem(), nombre: '', lugar: '', texto: '', estrellas: 5 }]); markTestimonios()
   }
   function removeTestimonio(id: string) {
-    setTestimoniosList(prev => prev.filter(t => t.id !== id)); mark()
+    const t = testimoniosList.find(x => x.id === id)
+    const label = t?.nombre ? `el testimonio de "${t.nombre}"` : 'este testimonio'
+    if (!confirm(`¿Eliminar ${label}? Esta acción no se puede deshacer.`)) return
+    setTestimoniosList(prev => prev.filter(t => t.id !== id)); markTestimonios()
   }
 
   // FAQ helpers
   function patchFaq(id: string, key: 'q' | 'a', val: string) {
-    setFaqList(prev => prev.map(f => f.id === id ? { ...f, [key]: val } : f)); mark()
+    setFaqList(prev => prev.map(f => f.id === id ? { ...f, [key]: val } : f)); markFaq()
   }
   function addFaq() {
-    setFaqList(prev => [...prev, { id: uidItem(), q: '', a: '' }]); mark()
+    setFaqList(prev => [...prev, { id: uidItem(), q: '', a: '' }]); markFaq()
   }
   function removeFaq(id: string) {
-    setFaqList(prev => prev.filter(f => f.id !== id)); mark()
+    const f = faqList.find(x => x.id === id)
+    const label = f?.q ? `"${f.q.slice(0, 50)}${f.q.length > 50 ? '…' : ''}"` : 'esta pregunta'
+    if (!confirm(`¿Eliminar ${label}? Esta acción no se puede deshacer.`)) return
+    setFaqList(prev => prev.filter(f => f.id !== id)); markFaq()
   }
   function moveFaq(id: string, dir: -1 | 1) {
     setFaqList(prev => {
@@ -258,7 +277,7 @@ export default function ContenidoPage() {
       const arr = [...prev];
       [arr[idx], arr[next]] = [arr[next], arr[idx]]
       return arr
-    }); mark()
+    }); markFaq()
   }
 
   async function uploadSumateImg(file: File) {
@@ -292,16 +311,19 @@ export default function ContenidoPage() {
     }
     setVideosList(prev => [...prev, newV])
     setNewVideoUrl(''); setNewVideoTitulo(''); setNewVideoDesc('')
-    mark()
+    markVideos()
   }
   function removeVideo(id: string) {
-    setVideosList(prev => prev.filter(v => v.id !== id)); mark()
+    const v = videosList.find(x => x.id === id)
+    const label = v?.titulo ? `"${v.titulo}"` : 'este video'
+    if (!confirm(`¿Eliminar ${label}? Esta acción no se puede deshacer.`)) return
+    setVideosList(prev => prev.filter(v => v.id !== id)); markVideos()
   }
   function toggleVideo(id: string) {
-    setVideosList(prev => prev.map(v => v.id === id ? { ...v, activo: !v.activo } : v)); mark()
+    setVideosList(prev => prev.map(v => v.id === id ? { ...v, activo: !v.activo } : v)); markVideos()
   }
   function patchVideo(id: string, key: keyof Video, val: string | boolean) {
-    setVideosList(prev => prev.map(v => v.id === id ? { ...v, [key]: val } : v)); mark()
+    setVideosList(prev => prev.map(v => v.id === id ? { ...v, [key]: val } : v)); markVideos()
   }
   function moveVideo(id: string, dir: -1 | 1) {
     setVideosList(prev => {
@@ -312,39 +334,45 @@ export default function ContenidoPage() {
       const arr = [...prev];
       [arr[idx], arr[next]] = [arr[next], arr[idx]]
       return arr
-    }); mark()
+    }); markVideos()
   }
 
   async function handlePublish() {
     setPublishing(true); setStatus('idle')
     try {
-      const clienteData = {
-        ...Cliente,
-        hero,
-        fuente,
-        sumateEquipo: sumate,
-        editorial,
-        whatsapp: { ...Cliente.whatsapp },
-        instagram: { ...Cliente.instagram },
-        seo: { ...Cliente.seo, keywords: [...Cliente.seo.keywords] },
-        colores: { ...Cliente.colores },
-        coordenadas: { ...Cliente.coordenadas },
-        imagenes: { ...Cliente.imagenes },
-        stats: [...hero.stats],
+      const payload: Record<string, unknown> = {}
+
+      if (dirtyCliente) {
+        payload.cliente = {
+          ...Cliente,
+          hero,
+          fuente,
+          sumateEquipo: sumate,
+          editorial,
+          whatsapp: { ...Cliente.whatsapp },
+          instagram: { ...Cliente.instagram },
+          seo: { ...Cliente.seo, keywords: [...Cliente.seo.keywords] },
+          colores: { ...Cliente.colores },
+          coordenadas: { ...Cliente.coordenadas },
+          imagenes: { ...Cliente.imagenes },
+          stats: [...hero.stats],
+        }
       }
+      if (dirtyVideos)      payload.videos      = videosList
+      if (dirtyTestimonios) payload.testimonios = testimoniosList
+      if (dirtyFaq)         payload.faq         = faqList
+
       const res = await fetch('/api/admin/submit-pr', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          cliente: clienteData,
-          videos: videosList,
-          testimonios: testimoniosList,
-          faq: faqList,
-        }),
+        body: JSON.stringify(payload),
       })
       const data = await res.json()
       if (res.ok) {
-        setStatus('ok'); setHasChanges(false); localStorage.removeItem(STORAGE_KEY)
+        setStatus('ok')
+        setDirtyCliente(false); setDirtyVideos(false)
+        setDirtyTestimonios(false); setDirtyFaq(false)
+        localStorage.removeItem(STORAGE_KEY)
       } else {
         setStatus('error'); setErrorMsg(data.error || 'Error desconocido')
       }
@@ -398,7 +426,7 @@ export default function ContenidoPage() {
           {FONT_OPTIONS.map(opt => (
             <button
               key={opt.id}
-              onClick={() => { setFuente(opt.id); mark() }}
+              onClick={() => { setFuente(opt.id); markCliente() }}
               className={`relative rounded-2xl border-2 p-4 text-left transition-all hover:border-teal/50 ${fuente === opt.id ? 'border-teal bg-teal/5' : 'border-gray-100 bg-white'}`}
             >
               {fuente === opt.id && (
