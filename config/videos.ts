@@ -13,9 +13,9 @@ export type Video = {
 
 export const videos: Video[] = [
   {
-    "id": "vid-1776788342613-fbw7",
-    "titulo": "prueba 2",
-    "descripcion": "prueba2",
+    "id": "vid-1776788523408-dqgn",
+    "titulo": "prueba2",
+    "descripcion": "prueba 2",
     "url": "https://youtube.com/shorts/g9M_gr1KOl8",
     "activo": true
   },
