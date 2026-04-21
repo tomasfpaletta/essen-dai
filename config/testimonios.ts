@@ -33,4 +33,4 @@ export const testimonios: Testimonio[] = [
     "texto": "Superó mis expectativas. La atención de Daisy es increíble, siempre disponible y muy amable.",
     "estrellas": 5
   }
-]
+];
