@@ -12,8 +12,6 @@ export type Producto = {
   destacado?: boolean;
   badge?: string;
   stockBajo?: boolean;
-  precio?: string;
-  mostrarPrecio?: boolean;
 };
 
 export const HEX: Record<string, string> = {

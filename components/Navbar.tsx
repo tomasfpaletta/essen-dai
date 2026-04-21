@@ -5,10 +5,10 @@ import { useState, useEffect } from "react";
 import { Cliente } from "@/config/cliente";
 
 const LINKS = [
-  { href: "#productos",   label: "Productos" },
-  { href: "#nosotros",    label: "Nosotros" },
-  { href: "#equipo",      label: "Sumate" },
-  { href: "#contacto",    label: "Contacto" },
+  { href: "/#productos",   label: "Productos" },
+  { href: "/#nosotros",    label: "Nosotros" },
+  { href: "/#equipo",      label: "Sumate" },
+  { href: "/#contacto",    label: "Contacto" },
 ];
 
 function IgIcon() {

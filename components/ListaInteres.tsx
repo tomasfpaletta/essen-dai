@@ -83,9 +83,6 @@ export default function ListaInteres() {
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-texto text-sm leading-tight truncate">{p.nombre}</p>
                     {v.color && <p className="text-texto-muted text-xs mt-0.5">{v.color}</p>}
-                    {p.mostrarPrecio && p.precio && (
-                      <p className="text-teal font-bold text-xs mt-0.5">{p.precio}</p>
-                    )}
                   </div>
 
                   {/* Remove */}

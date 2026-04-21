@@ -156,11 +156,6 @@ function ProductoCard({ p }: { p: Producto }) {
           {/* Nombre */}
           <h3 className="font-semibold text-texto text-sm leading-tight">{p.nombre}</h3>
 
-          {/* Precio — solo si mostrarPrecio */}
-          {p.mostrarPrecio && p.precio && (
-            <p className="text-teal font-bold text-sm leading-tight">{p.precio}</p>
-          )}
-
           {/* Descripción — 1 sola línea */}
           <p className="text-texto-muted text-xs leading-snug line-clamp-1">{p.descripcion}</p>
 

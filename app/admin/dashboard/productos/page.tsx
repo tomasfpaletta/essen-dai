@@ -603,31 +603,6 @@ export default function ProductosPage() {
                       </div>
                     </div>
 
-                    {/* Precio (opcional) */}
-                    <div className="flex items-end gap-3 bg-teal/5 rounded-2xl p-4 border border-teal/10">
-                      <div className="flex-1">
-                        <label className="text-xs font-medium text-texto mb-1.5 block">
-                          Precio <span className="font-normal text-texto-muted">(ej: $45.000)</span>
-                        </label>
-                        <input
-                          value={p.precio || ''}
-                          onChange={e => updateProduct(p.id, { precio: e.target.value || undefined })}
-                          className="w-full px-3 py-2 text-sm rounded-xl border border-teal/20 focus:outline-none focus:border-teal bg-white text-texto"
-                          placeholder="Ej: $45.000 — $55.000"
-                        />
-                      </div>
-                      <label className="flex items-center gap-2 cursor-pointer flex-shrink-0 mb-2">
-                        <div
-                          className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${p.mostrarPrecio ? 'bg-teal' : 'bg-gray-200'}`}
-                          onClick={() => updateProduct(p.id, { mostrarPrecio: !p.mostrarPrecio || undefined })}
-                        >
-                          <span className="inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform"
-                            style={{ transform: `translateX(${p.mostrarPrecio ? '18px' : '2px'})` }} />
-                        </div>
-                        <span className="text-xs text-texto-muted">Mostrar precio</span>
-                      </label>
-                    </div>
-
                     {/* Variantes */}
                     <div>
                       <label className="text-xs font-medium text-texto-muted mb-3 block">

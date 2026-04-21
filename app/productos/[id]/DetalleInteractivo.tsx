@@ -165,9 +165,6 @@ export default function DetalleInteractivo({ producto: p, relacionados, cliente 
                 {p.categoria}
               </p>
               <h1 className="font-heading text-3xl sm:text-4xl text-texto leading-tight">{p.nombre}</h1>
-              {p.mostrarPrecio && p.precio && (
-                <p className="text-teal font-bold text-2xl mt-2">{p.precio}</p>
-              )}
               <p className="text-texto-muted mt-3 leading-relaxed text-sm sm:text-base">{p.descripcion}</p>
             </div>
 
