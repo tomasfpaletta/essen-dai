@@ -95,10 +95,22 @@ export const Cliente = {
     "bio1": "Soy distribuidora oficial de Essen en Buenos Aires. Llevo años ayudando a familias a elegir los productos perfectos para su cocina, con atención personalizada y honesta.",
     "bio2": "Cada producto que ofrezco es 100% original, con garantía oficial y enviado directamente a tu puerta desde CABA.",
     "stats": [
-      { "n": "200+", "label": "familias equipadas" },
-      { "n": "30", "label": "años de la marca Essen" },
-      { "n": "2", "label": "años de garantía oficial" },
-      { "n": "100%", "label": "productos originales" }
+      {
+        "n": "200+",
+        "label": "familias equipadas"
+      },
+      {
+        "n": "30",
+        "label": "años de la marca Essen"
+      },
+      {
+        "n": "2",
+        "label": "años de garantía oficial"
+      },
+      {
+        "n": "100%",
+        "label": "productos originales"
+      }
     ],
     "bullets": [
       "Entrega a todo Argentina con Andreani",
