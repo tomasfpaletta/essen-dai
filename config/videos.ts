@@ -11,4 +11,12 @@ export type Video = {
   activo: boolean
 }
 
-export const videos: Video[] = [];
+export const videos: Video[] = [
+  {
+    "id": "vid-1776802681172-qedy",
+    "titulo": "prueba",
+    "descripcion": "prueba",
+    "url": "https://youtube.com/shorts/g9M_gr1KOl8",
+    "activo": true
+  }
+];
