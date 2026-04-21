@@ -1,26 +1,106 @@
 "use client";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { videos, type Video } from "@/config/videos";
 
-// ── Extraer ID de YouTube para embed ──────────────────────────────────────────
-function toEmbedUrl(raw: string): string {
+// ── Extraer ID de YouTube (soporta todos los formatos) ───────────────────────
+function extractYouTubeId(raw: string): string | null {
   // youtu.be/ID
   const short = raw.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
-  if (short) return `https://www.youtube.com/embed/${short[1]}?rel=0`;
-  // youtube.com/watch?v=ID
-  const long = raw.match(/[?&]v=([a-zA-Z0-9_-]{11})/);
-  if (long) return `https://www.youtube.com/embed/${long[1]}?rel=0`;
-  // ya es embed u otro formato — devolver tal cual
+  if (short) return short[1];
+  // watch?v=ID  o  &v=ID
+  const watch = raw.match(/[?&]v=([a-zA-Z0-9_-]{11})/);
+  if (watch) return watch[1];
+  // /shorts/ID
+  const shorts = raw.match(/\/shorts\/([a-zA-Z0-9_-]{11})/);
+  if (shorts) return shorts[1];
+  // /embed/ID (ya es embed)
+  const embed = raw.match(/\/embed\/([a-zA-Z0-9_-]{11})/);
+  if (embed) return embed[1];
+  // m.youtube.com/watch?v=ID
+  const mobile = raw.match(/m\.youtube\.com\/watch\?.*v=([a-zA-Z0-9_-]{11})/);
+  if (mobile) return mobile[1];
+  return null;
+}
+
+function toEmbedUrl(raw: string): string {
+  const id = extractYouTubeId(raw);
+  if (id) return `https://www.youtube.com/embed/${id}?rel=0`;
   return raw;
 }
 
-// ── Extraer thumbnail de YouTube ──────────────────────────────────────────────
 function toThumb(raw: string): string | null {
-  const short = raw.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
-  if (short) return `https://img.youtube.com/vi/${short[1]}/mqdefault.jpg`;
-  const long = raw.match(/[?&]v=([a-zA-Z0-9_-]{11})/);
-  if (long) return `https://img.youtube.com/vi/${long[1]}/mqdefault.jpg`;
+  const id = extractYouTubeId(raw);
+  if (id) return `https://img.youtube.com/vi/${id}/mqdefault.jpg`;
   return null;
+}
+
+function toWatchUrl(raw: string): string {
+  const id = extractYouTubeId(raw);
+  if (id) return `https://www.youtube.com/watch?v=${id}`;
+  return raw;
+}
+
+// ── Reproductor con click-to-play (evita iframe en blanco) ───────────────────
+function VideoPlayer({ video }: { video: Video }) {
+  const [playing, setPlaying] = useState(false);
+  const thumb = toThumb(video.url);
+  const embedUrl = toEmbedUrl(video.url);
+  const watchUrl = toWatchUrl(video.url);
+  const hasId = !!extractYouTubeId(video.url);
+
+  const play = useCallback(() => setPlaying(true), []);
+
+  if (playing) {
+    return (
+      <iframe
+        src={`${embedUrl}&autoplay=1`}
+        title={video.titulo}
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowFullScreen
+        className="absolute inset-0 w-full h-full"
+      />
+    );
+  }
+
+  return (
+    <>
+      {/* Thumbnail o fondo degradado */}
+      {thumb ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={thumb} alt={video.titulo} className="absolute inset-0 w-full h-full object-cover" />
+      ) : (
+        <div className="absolute inset-0 bg-gradient-to-br from-teal/20 to-teal-dark/40" />
+      )}
+
+      {/* Overlay oscuro */}
+      <div className="absolute inset-0 bg-black/30" />
+
+      {/* Botón play */}
+      <button
+        onClick={play}
+        className="absolute inset-0 flex items-center justify-center group"
+        aria-label="Reproducir video"
+      >
+        <div className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center shadow-xl group-hover:scale-110 group-hover:bg-white transition-all duration-200">
+          <svg viewBox="0 0 24 24" fill="currentColor" className="w-7 h-7 text-teal ml-1">
+            <path d="M8 5v14l11-7z"/>
+          </svg>
+        </div>
+      </button>
+
+      {/* Si no es un video de YouTube válido, mostrar link externo */}
+      {!hasId && (
+        <a
+          href={watchUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="absolute bottom-3 right-3 text-xs bg-black/60 text-white px-3 py-1.5 rounded-full hover:bg-black/80 transition-colors"
+        >
+          Abrir en YouTube →
+        </a>
+      )}
+    </>
+  );
 }
 
 // ── Componente principal ──────────────────────────────────────────────────────
@@ -99,14 +179,7 @@ export default function VideosCarousel() {
           <div className="flex flex-col gap-4">
             <div className="relative rounded-2xl overflow-hidden shadow-lg shadow-black/10 bg-black"
               style={{ aspectRatio: '16/9' }}>
-              <iframe
-                key={current.id}
-                src={toEmbedUrl(current.url)}
-                title={current.titulo}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowFullScreen
-                className="absolute inset-0 w-full h-full"
-              />
+              <VideoPlayer key={current.id} video={current} />
             </div>
 
             {/* Título y descripción */}
