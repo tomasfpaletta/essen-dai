@@ -1,6 +1,6 @@
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
-import Productos from "@/components/Productos";
+import WishlistSection from "@/components/WishlistSection";
 import Promociones from "@/components/Promociones";
 import Editorial from "@/components/Editorial";
 import Testimonios from "@/components/Testimonios";
@@ -18,7 +18,7 @@ export default function Home() {
       <Navbar />
       <Hero />
       <Promociones />
-      <Productos />
+      <WishlistSection />
       <Editorial />
       <VideosCarousel />
       <Testimonios />

@@ -35,7 +35,10 @@ function Lightbox({ src, alt, onClose }: { src: string; alt: string; onClose: ()
 // ── Componente principal ──────────────────────────────────────────────────────
 export default function Promociones() {
   const config = promocionesBanner ?? null;
-  const items = (promocionesItems ?? []).filter((i) => i.activo);
+  const hoy = new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
+  const items = (promocionesItems ?? []).filter((i) =>
+    i.activo && (!i.fechaFin || i.fechaFin >= hoy)
+  );
   const [zoom, setZoom] = useState(false);
 
   if (!config || !config.visible || items.length === 0) return null;

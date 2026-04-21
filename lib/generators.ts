@@ -105,6 +105,8 @@ export type Producto = {
   destacado?: boolean;
   badge?: string;
   stockBajo?: boolean;
+  precio?: string;
+  mostrarPrecio?: boolean;
 };
 
 export const HEX: Record<string, string> = ${JSON.stringify(hex, null, 2)};
@@ -140,5 +142,41 @@ export type Video = {
 }
 
 export const videos: Video[] = ${JSON.stringify(videosList, null, 2)};
+`
+}
+
+/** Genera el contenido de config/testimonios.ts */
+export function generateTestimoniosTs(list: unknown[]): string {
+  return `// ─────────────────────────────────────────────────────────────────────────────
+//  TESTIMONIOS — Opiniones de clientes
+//  Última actualización: panel de administración
+// ─────────────────────────────────────────────────────────────────────────────
+
+export type Testimonio = {
+  id: string
+  nombre: string
+  lugar: string
+  texto: string
+  estrellas: number
+}
+
+export const testimonios: Testimonio[] = ${JSON.stringify(list, null, 2)};
+`
+}
+
+/** Genera el contenido de config/faq.ts */
+export function generateFaqTs(list: unknown[]): string {
+  return `// ─────────────────────────────────────────────────────────────────────────────
+//  FAQ — Preguntas frecuentes
+//  Última actualización: panel de administración
+// ─────────────────────────────────────────────────────────────────────────────
+
+export type FaqItem = {
+  id: string
+  q: string
+  a: string
+}
+
+export const faqItems: FaqItem[] = ${JSON.stringify(list, null, 2)};
 `
 }

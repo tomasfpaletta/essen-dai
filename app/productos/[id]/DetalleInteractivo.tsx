@@ -35,9 +35,10 @@ function Lightbox({ src, alt, onClose }: { src: string; alt: string; onClose: ()
 }
 
 export default function DetalleInteractivo({ producto: p, relacionados, cliente }: Props) {
+  const variantesConFoto = p.variantes.filter(v => !!v.imagen)
   const [varIdx, setVarIdx]     = useState(0)
   const [lightbox, setLightbox] = useState(false)
-  const variante = p.variantes[varIdx]
+  const variante = variantesConFoto[varIdx] ?? p.variantes[0]
   const tieneImagen = !!variante.imagen
 
   const bgFrom = hexToRgba(variante.hex, 0.10)
@@ -136,9 +137,9 @@ export default function DetalleInteractivo({ producto: p, relacionados, cliente 
             </div>
 
             {/* Miniaturas de colores */}
-            {p.variantes.length > 1 && (
+            {variantesConFoto.length > 1 && (
               <div className="flex gap-2 flex-wrap">
-                {p.variantes.map((v, i) => (
+                {variantesConFoto.map((v, i) => (
                   <button
                     key={v.color}
                     onClick={() => setVarIdx(i)}
@@ -148,13 +149,7 @@ export default function DetalleInteractivo({ producto: p, relacionados, cliente 
                     }`}
                     style={{ background: `radial-gradient(ellipse, ${hexToRgba(v.hex, 0.4)}, ${hexToRgba(v.hex, 0.12)})` }}
                   >
-                    {v.imagen ? (
-                      <Image src={v.imagen} alt={v.color} fill className="object-cover" sizes="64px" />
-                    ) : (
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="w-5 h-5 rounded-full" style={{ background: v.hex }} />
-                      </div>
-                    )}
+                    <Image src={v.imagen} alt={v.color} fill className="object-cover" sizes="64px" />
                   </button>
                 ))}
               </div>
@@ -170,6 +165,9 @@ export default function DetalleInteractivo({ producto: p, relacionados, cliente 
                 {p.categoria}
               </p>
               <h1 className="font-heading text-3xl sm:text-4xl text-texto leading-tight">{p.nombre}</h1>
+              {p.mostrarPrecio && p.precio && (
+                <p className="text-teal font-bold text-2xl mt-2">{p.precio}</p>
+              )}
               <p className="text-texto-muted mt-3 leading-relaxed text-sm sm:text-base">{p.descripcion}</p>
             </div>
 
@@ -192,7 +190,7 @@ export default function DetalleInteractivo({ producto: p, relacionados, cliente 
                 Color: <span className="text-texto normal-case font-bold">{variante.color}</span>
               </p>
               <div className="flex flex-wrap gap-2">
-                {p.variantes.map((v, i) => (
+                {variantesConFoto.map((v, i) => (
                   <button
                     key={v.color}
                     onClick={() => setVarIdx(i)}

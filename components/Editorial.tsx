@@ -1,23 +1,33 @@
 import { Cliente } from "@/config/cliente";
 
-const STATS = [
-  { n: "200+", label: "familias equipadas" },
-  { n: "30",   label: "años de la marca Essen" },
-  { n: "2",    label: "años de garantía oficial" },
-  { n: "100%", label: "productos originales" },
-];
-
-const BULLETS = [
-  "Entrega a todo Argentina con Andreani",
-  "Pago en cuotas sin interés",
-  "Asesoramiento personalizado por WhatsApp",
-  "Garantía oficial de 2 años en todos los productos",
-  "Stock permanente disponible",
-];
+type EditorialConfig = {
+  bio1: string
+  bio2: string
+  stats: Array<{ n: string; label: string }>
+  bullets: string[]
+}
 
 const MARQUEE_ITEMS = ["ESSEN", "CALIDAD", "GARANTÍA", "CABA", "ARGENTINA", "ORIGINAL", "ESSEN", "CALIDAD", "GARANTÍA", "CABA", "ARGENTINA", "ORIGINAL"];
 
 export default function Editorial() {
+  const cfg = (Cliente as Record<string, unknown>).editorial as EditorialConfig | undefined
+
+  const stats  = cfg?.stats  ?? [
+    { n: "200+", label: "familias equipadas" },
+    { n: "30",   label: "años de la marca Essen" },
+    { n: "2",    label: "años de garantía oficial" },
+    { n: "100%", label: "productos originales" },
+  ]
+  const bullets = cfg?.bullets ?? [
+    "Entrega a todo Argentina con Andreani",
+    "Pago en cuotas sin interés",
+    "Asesoramiento personalizado por WhatsApp",
+    "Garantía oficial de 2 años en todos los productos",
+    "Stock permanente disponible",
+  ]
+  const bio1 = cfg?.bio1 ?? "Soy distribuidora oficial de Essen en Buenos Aires. Llevo años ayudando a familias a elegir los productos perfectos para su cocina, con atención personalizada y honesta."
+  const bio2 = cfg?.bio2 ?? "Cada producto que ofrezco es 100% original, con garantía oficial y enviado directamente a tu puerta desde CABA."
+
   return (
     <section id="nosotros" className="bg-[#1A3330] overflow-hidden section-angle-both">
 
@@ -25,7 +35,7 @@ export default function Editorial() {
       <div className="max-w-7xl mx-auto px-6 sm:px-12 lg:px-20 pt-24 pb-16">
         <p className="text-teal/60 text-xs font-semibold uppercase tracking-[0.2em] mb-12">¿Por qué Essen?</p>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-0 md:divide-x divide-white/10">
-          {STATS.map(s => (
+          {stats.map((s: { n: string; label: string }) => (
             <div key={s.n} className="md:px-10 first:pl-0">
               <div className="display-number text-teal mb-2">{s.n}</div>
               <div className="h-px bg-lila/50 w-8 mb-3" />
@@ -109,17 +119,13 @@ export default function Editorial() {
 
             <div>
               <p className="text-teal/60 text-[11px] font-semibold uppercase tracking-[0.2em] mb-4">Mi historia</p>
-              <p className="text-white/70 text-base leading-relaxed mb-3">
-                Soy distribuidora oficial de Essen en Buenos Aires. Llevo años ayudando a familias a elegir los productos perfectos para su cocina, con atención personalizada y honesta.
-              </p>
-              <p className="text-white/50 text-sm leading-relaxed">
-                Cada producto que ofrezco es 100% original, con garantía oficial y enviado directamente a tu puerta desde CABA.
-              </p>
+              <p className="text-white/70 text-base leading-relaxed mb-3">{bio1}</p>
+              <p className="text-white/50 text-sm leading-relaxed">{bio2}</p>
             </div>
 
             {/* Bullets */}
             <div className="grid sm:grid-cols-2 gap-2">
-              {BULLETS.map(item => (
+              {bullets.map((item: string) => (
                 <div key={item} className="flex items-start gap-3 group">
                   <span className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 group-hover:bg-teal/25 transition-colors"
                     style={{ background: 'rgba(88,163,157,0.15)' }}>

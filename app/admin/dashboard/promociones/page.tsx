@@ -654,6 +654,25 @@ export default function PromocionesPage() {
                   <Field label="Descripción">
                     <Textarea value={item.descripcion} onChange={v => patchItem(item.id, 'descripcion', v)} rows={2} />
                   </Field>
+                  <Field label="Vence el (opcional)">
+                    <div className="flex gap-2 items-center">
+                      <input
+                        type="date"
+                        value={item.fechaFin || ''}
+                        onChange={e => patchItem(item.id, 'fechaFin', e.target.value)}
+                        className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-teal/50"
+                      />
+                      {item.fechaFin && (
+                        <button
+                          onClick={() => patchItem(item.id, 'fechaFin', '')}
+                          className="text-xs text-gray-400 hover:text-red-400 transition-colors px-2 py-2"
+                        >
+                          Quitar
+                        </button>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-400 mt-1">La promo se ocultará automáticamente después de esta fecha.</p>
+                  </Field>
                   <div className="space-y-4">
                     <Field label="Color de fondo">
                       <ColorSwatch value={item.colorFondo} onChange={v => patchItem(item.id, 'colorFondo', v)} />

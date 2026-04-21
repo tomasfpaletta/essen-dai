@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Cliente } from "@/config/cliente";
 import { productos, categorias, type Categoria, type Producto, type Variante } from "@/lib/products";
+import { useWishlist } from "@/lib/wishlist-context";
 
 // ── WhatsApp link ─────────────────────────────────────────────────────────────
 function waLink(p: Producto, v: Variante) {
@@ -50,6 +51,8 @@ function ProductoCard({ p }: { p: Producto }) {
   const [varIdx, setVarIdx] = useState(0);
   const [lightbox, setLightbox] = useState(false);
   const variante = variantesConFoto[varIdx] ?? p.variantes[0];
+  const { toggle, has } = useWishlist();
+  const enLista = has(p.id);
   const tieneImagen = !!variante.imagen;
 
   const bgFrom = hexToRgba(variante.hex, 0.10);
@@ -153,11 +156,16 @@ function ProductoCard({ p }: { p: Producto }) {
           {/* Nombre */}
           <h3 className="font-semibold text-texto text-sm leading-tight">{p.nombre}</h3>
 
+          {/* Precio — solo si mostrarPrecio */}
+          {p.mostrarPrecio && p.precio && (
+            <p className="text-teal font-bold text-sm leading-tight">{p.precio}</p>
+          )}
+
           {/* Descripción — 1 sola línea */}
           <p className="text-texto-muted text-xs leading-snug line-clamp-1">{p.descripcion}</p>
 
           {/* CTAs */}
-          <div className="flex items-center gap-3 pt-0.5">
+          <div className="flex items-center gap-2 pt-0.5">
             <a
               href={waLink(p, variante)}
               target="_blank"
@@ -169,11 +177,23 @@ function ProductoCard({ p }: { p: Producto }) {
             </a>
             <Link
               href={`/productos/${p.id}`}
-              className="text-xs font-medium transition-opacity hover:opacity-60"
+              className="text-xs font-medium transition-opacity hover:opacity-60 flex-1"
               style={{ color: variante.hex }}
             >
               Ver detalles ›
             </Link>
+            {/* Agregar a lista */}
+            <button
+              onClick={e => { e.stopPropagation(); toggle(p, variante) }}
+              title={enLista ? "Quitar de la lista" : "Agregar a mi lista"}
+              className={`flex-shrink-0 p-1 rounded-full transition-colors ${
+                enLista ? 'text-teal' : 'text-texto-muted hover:text-teal'
+              }`}
+            >
+              <svg viewBox="0 0 24 24" fill={enLista ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" className="w-4 h-4">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+              </svg>
+            </button>
           </div>
         </div>
       </div>
@@ -184,15 +204,27 @@ function ProductoCard({ p }: { p: Producto }) {
 // ── Sección principal ─────────────────────────────────────────────────────────
 export default function Productos() {
   const [cat, setCat] = useState<Categoria>("todos");
+  const [busqueda, setBusqueda] = useState("");
+
   const filtered = (cat === "todos" ? productos : productos.filter(p => p.categoria === cat))
-    .filter(p => p.variantes.some(v => !!v.imagen));
+    .filter(p => p.variantes.some(v => !!v.imagen))
+    .filter(p => {
+      if (!busqueda.trim()) return true;
+      const q = busqueda.toLowerCase();
+      return (
+        p.nombre.toLowerCase().includes(q) ||
+        p.descripcion.toLowerCase().includes(q) ||
+        p.tags.some(t => t.toLowerCase().includes(q)) ||
+        p.categoria.toLowerCase().includes(q)
+      );
+    });
 
   return (
     <section id="productos" className="py-24 bg-fondo px-6 sm:px-12 lg:px-20">
       <div className="max-w-7xl mx-auto">
 
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
           <div>
             <p className="text-teal text-xs font-semibold uppercase tracking-[0.2em] mb-3">Catálogo</p>
             <h2 className="display-hero text-texto leading-none">
@@ -200,29 +232,62 @@ export default function Productos() {
             </h2>
           </div>
 
-          {/* Filtros */}
-          <div className="flex flex-wrap gap-2">
-            {categorias.map(c => (
+          {/* Buscador */}
+          <div className="relative w-full md:w-64">
+            <svg viewBox="0 0 20 20" fill="currentColor" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-texto-muted pointer-events-none">
+              <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd"/>
+            </svg>
+            <input
+              type="text"
+              value={busqueda}
+              onChange={e => setBusqueda(e.target.value)}
+              placeholder="Buscar productos…"
+              className="w-full pl-9 pr-4 py-2 rounded-full border border-teal/20 bg-white text-sm text-texto placeholder-texto-muted focus:outline-none focus:border-teal focus:ring-2 focus:ring-teal/10 transition-colors"
+            />
+            {busqueda && (
               <button
-                key={c.value}
-                onClick={() => setCat(c.value)}
-                className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-all ${
-                  cat === c.value
-                    ? "bg-teal border-teal text-white shadow-sm shadow-teal/25"
-                    : "border-teal/25 text-texto-muted hover:border-teal/50 hover:text-teal bg-white"
-                }`}
+                onClick={() => setBusqueda("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-texto-muted hover:text-texto transition-colors"
               >
-                {c.label}
+                <svg viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5">
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd"/>
+                </svg>
               </button>
-            ))}
+            )}
           </div>
+        </div>
+
+        {/* Filtros de categoría */}
+        <div className="flex flex-wrap gap-2 mb-10">
+          {categorias.map(c => (
+            <button
+              key={c.value}
+              onClick={() => setCat(c.value)}
+              className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-all ${
+                cat === c.value
+                  ? "bg-teal border-teal text-white shadow-sm shadow-teal/25"
+                  : "border-teal/25 text-texto-muted hover:border-teal/50 hover:text-teal bg-white"
+              }`}
+            >
+              {c.label}
+            </button>
+          ))}
         </div>
 
         {/* Grilla */}
         {filtered.length === 0 ? (
           <div className="text-center py-20 text-texto-light">
-            <p className="text-lg font-heading text-teal">Próximos productos disponibles.</p>
-            <p className="text-sm mt-2">Consultá por WhatsApp para ver disponibilidad.</p>
+            {busqueda ? (
+              <>
+                <p className="text-lg font-heading text-teal">Sin resultados para &ldquo;{busqueda}&rdquo;</p>
+                <button onClick={() => setBusqueda("")} className="text-sm mt-2 text-teal hover:underline">Limpiar búsqueda</button>
+              </>
+            ) : (
+              <>
+                <p className="text-lg font-heading text-teal">Próximos productos disponibles.</p>
+                <p className="text-sm mt-2">Consultá por WhatsApp para ver disponibilidad.</p>
+              </>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">

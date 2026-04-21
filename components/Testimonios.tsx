@@ -1,25 +1,5 @@
 import { Cliente } from "@/config/cliente";
-
-const TESTIMONIOS = [
-  {
-    nombre: "María L.",
-    lugar:  "Palermo, CABA",
-    texto:  "Hermosas ollas, llegaron rapidísimo y Daisy me asesoró perfecto. ¡Re recomiendo a todas!",
-    estrellas: 5,
-  },
-  {
-    nombre: "Carla V.",
-    lugar:  "San Isidro",
-    texto:  "Compré el set completo y estoy encantada. Cocino muchísimo mejor y se ve precioso en la cocina.",
-    estrellas: 5,
-  },
-  {
-    nombre: "Florencia M.",
-    lugar:  "Belgrano, CABA",
-    texto:  "Superó mis expectativas. La atención de Daisy es increíble, siempre disponible y muy amable.",
-    estrellas: 5,
-  },
-];
+import { testimonios, type Testimonio } from "@/config/testimonios";
 
 function Stars({ n }: { n: number }) {
   return (
@@ -35,6 +15,9 @@ function Stars({ n }: { n: number }) {
 
 export default function Testimonios() {
   const waHref = `${Cliente.whatsapp.link}?text=${encodeURIComponent("Hola Daisy! Quiero saber más sobre los productos Essen.")}`;
+  const activos = testimonios.filter((t: Testimonio) => t.texto.trim() !== '');
+
+  if (activos.length === 0) return null;
 
   return (
     <section id="testimonios" className="py-16 bg-white px-6 sm:px-12 lg:px-20">
@@ -50,9 +33,9 @@ export default function Testimonios() {
 
         {/* Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {TESTIMONIOS.map((t) => (
+          {activos.map((t: Testimonio) => (
             <div
-              key={t.nombre}
+              key={t.id}
               className="bg-fondo rounded-2xl border border-teal/10 p-5 flex flex-col gap-3"
             >
               <Stars n={t.estrellas} />

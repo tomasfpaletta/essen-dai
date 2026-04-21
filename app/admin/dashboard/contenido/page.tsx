@@ -2,6 +2,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { Cliente } from '@/config/cliente'
 import { videos as initialVideos, type Video } from '@/config/videos'
+import { testimonios as initialTestimonios, type Testimonio } from '@/config/testimonios'
+import { faqItems as initialFaq, type FaqItem } from '@/config/faq'
 
 const STORAGE_KEY = 'admin_contenido_draft'
 
@@ -29,6 +31,13 @@ type SumateData = {
   imagenEquipo: string
   badgeNumero: string
   badgeTexto: string
+}
+
+type EditorialData = {
+  bio1: string
+  bio2: string
+  stats: Array<{ n: string; label: string }>
+  bullets: string[]
 }
 
 // ── Helpers de UI ─────────────────────────────────────────────────────────────
@@ -84,10 +93,15 @@ function uid() {
   return `vid-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`
 }
 
+function uidItem() {
+  return `item-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`
+}
+
 // ── Página principal ──────────────────────────────────────────────────────────
 export default function ContenidoPage() {
   const currentFuente = (Cliente as Record<string, unknown>).fuente as string || 'moderna'
   const currentSumate = (Cliente as Record<string, unknown>).sumateEquipo as SumateData | undefined
+  const currentEditorial = (Cliente as Record<string, unknown>).editorial as EditorialData | undefined
 
   const [hero, setHero] = useState<HeroData>({ ...Cliente.hero, stats: [...Cliente.hero.stats] })
   const [fuente, setFuente] = useState(currentFuente)
@@ -102,6 +116,29 @@ export default function ContenidoPage() {
     badgeNumero: '30+',
     badgeTexto: 'años de marca',
   })
+  const [editorial, setEditorial] = useState<EditorialData>(currentEditorial ?? {
+    bio1: 'Soy distribuidora oficial de Essen en Buenos Aires.',
+    bio2: 'Cada producto que ofrezco es 100% original.',
+    stats: [
+      { n: '200+', label: 'familias equipadas' },
+      { n: '30', label: 'años de la marca Essen' },
+      { n: '2', label: 'años de garantía oficial' },
+      { n: '100%', label: 'productos originales' },
+    ],
+    bullets: [
+      'Entrega a todo Argentina con Andreani',
+      'Pago en cuotas sin interés',
+      'Asesoramiento personalizado por WhatsApp',
+      'Garantía oficial de 2 años en todos los productos',
+      'Stock permanente disponible',
+    ],
+  })
+  const [testimoniosList, setTestimoniosList] = useState<Testimonio[]>(
+    initialTestimonios.map(t => ({ ...t }))
+  )
+  const [faqList, setFaqList] = useState<FaqItem[]>(
+    initialFaq.map(f => ({ ...f }))
+  )
   const [videosList, setVideosList] = useState<Video[]>(initialVideos.map(v => ({ ...v })))
   const [newVideoUrl, setNewVideoUrl] = useState('')
   const [newVideoTitulo, setNewVideoTitulo] = useState('')
@@ -122,10 +159,13 @@ export default function ContenidoPage() {
     if (saved) {
       try {
         const d = JSON.parse(saved)
-        if (d.hero)   setHero(prev => ({ ...prev, ...d.hero, stats: Array.isArray(d.hero.stats) ? d.hero.stats : prev.stats }))
-        if (d.fuente) setFuente(d.fuente)
-        if (d.sumate) setSumate(prev => ({ ...prev, ...d.sumate }))
-        if (d.videos) setVideosList(d.videos)
+        if (d.hero)       setHero(prev => ({ ...prev, ...d.hero, stats: Array.isArray(d.hero.stats) ? d.hero.stats : prev.stats }))
+        if (d.fuente)     setFuente(d.fuente)
+        if (d.sumate)     setSumate(prev => ({ ...prev, ...d.sumate }))
+        if (d.editorial)  setEditorial(prev => ({ ...prev, ...d.editorial }))
+        if (d.videos)     setVideosList(d.videos)
+        if (d.testimonios) setTestimoniosList(d.testimonios)
+        if (d.faq)        setFaqList(d.faq)
         setHasChanges(true)
       } catch {
         localStorage.removeItem(STORAGE_KEY)
@@ -134,8 +174,10 @@ export default function ContenidoPage() {
   }, [])
 
   useEffect(() => {
-    if (hasChanges) localStorage.setItem(STORAGE_KEY, JSON.stringify({ hero, fuente, sumate, videos: videosList }))
-  }, [hero, fuente, sumate, videosList, hasChanges])
+    if (hasChanges) localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      hero, fuente, sumate, editorial, videos: videosList, testimonios: testimoniosList, faq: faqList
+    }))
+  }, [hero, fuente, sumate, editorial, videosList, testimoniosList, faqList, hasChanges])
 
   function mark() { setHasChanges(true); setStatus('idle') }
 
@@ -159,6 +201,64 @@ export default function ContenidoPage() {
   }
   function removeBeneficio(idx: number) {
     setSumate(prev => ({ ...prev, beneficios: prev.beneficios.filter((_, i) => i !== idx) })); mark()
+  }
+
+  // Editorial helpers
+  function patchEditorial(key: keyof EditorialData, val: unknown) {
+    setEditorial(prev => ({ ...prev, [key]: val })); mark()
+  }
+  function patchEditorialStat(idx: number, key: 'n' | 'label', val: string) {
+    setEditorial(prev => {
+      const s = [...prev.stats]; s[idx] = { ...s[idx], [key]: val }; return { ...prev, stats: s }
+    }); mark()
+  }
+  function addEditorialStat() {
+    setEditorial(prev => ({ ...prev, stats: [...prev.stats, { n: '', label: '' }] })); mark()
+  }
+  function removeEditorialStat(idx: number) {
+    setEditorial(prev => ({ ...prev, stats: prev.stats.filter((_, i) => i !== idx) })); mark()
+  }
+  function patchEditorialBullet(idx: number, val: string) {
+    setEditorial(prev => { const b = [...prev.bullets]; b[idx] = val; return { ...prev, bullets: b } }); mark()
+  }
+  function addEditorialBullet() {
+    setEditorial(prev => ({ ...prev, bullets: [...prev.bullets, ''] })); mark()
+  }
+  function removeEditorialBullet(idx: number) {
+    setEditorial(prev => ({ ...prev, bullets: prev.bullets.filter((_, i) => i !== idx) })); mark()
+  }
+
+  // Testimonios helpers
+  function patchTestimonio(id: string, key: keyof Testimonio, val: string | number) {
+    setTestimoniosList(prev => prev.map(t => t.id === id ? { ...t, [key]: val } : t)); mark()
+  }
+  function addTestimonio() {
+    setTestimoniosList(prev => [...prev, { id: uidItem(), nombre: '', lugar: '', texto: '', estrellas: 5 }]); mark()
+  }
+  function removeTestimonio(id: string) {
+    setTestimoniosList(prev => prev.filter(t => t.id !== id)); mark()
+  }
+
+  // FAQ helpers
+  function patchFaq(id: string, key: 'q' | 'a', val: string) {
+    setFaqList(prev => prev.map(f => f.id === id ? { ...f, [key]: val } : f)); mark()
+  }
+  function addFaq() {
+    setFaqList(prev => [...prev, { id: uidItem(), q: '', a: '' }]); mark()
+  }
+  function removeFaq(id: string) {
+    setFaqList(prev => prev.filter(f => f.id !== id)); mark()
+  }
+  function moveFaq(id: string, dir: -1 | 1) {
+    setFaqList(prev => {
+      const idx = prev.findIndex(f => f.id === id)
+      if (idx < 0) return prev
+      const next = idx + dir
+      if (next < 0 || next >= prev.length) return prev
+      const arr = [...prev];
+      [arr[idx], arr[next]] = [arr[next], arr[idx]]
+      return arr
+    }); mark()
   }
 
   async function uploadSumateImg(file: File) {
@@ -223,6 +323,7 @@ export default function ContenidoPage() {
         hero,
         fuente,
         sumateEquipo: sumate,
+        editorial,
         whatsapp: { ...Cliente.whatsapp },
         instagram: { ...Cliente.instagram },
         seo: { ...Cliente.seo, keywords: [...Cliente.seo.keywords] },
@@ -234,7 +335,12 @@ export default function ContenidoPage() {
       const res = await fetch('/api/admin/submit-pr', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cliente: clienteData, videos: videosList }),
+        body: JSON.stringify({
+          cliente: clienteData,
+          videos: videosList,
+          testimonios: testimoniosList,
+          faq: faqList,
+        }),
       })
       const data = await res.json()
       if (res.ok) {
@@ -467,6 +573,141 @@ export default function ContenidoPage() {
             Agregar video
           </button>
         </div>
+      </Seccion>
+
+      {/* ── Editorial: Quién soy ── */}
+      <Seccion title="Quién soy — Sección &quot;Daisy Benítez&quot;">
+        <Field label="Párrafo bio 1" value={editorial.bio1} onChange={v => patchEditorial('bio1', v)} textarea />
+        <Field label="Párrafo bio 2" value={editorial.bio2} onChange={v => patchEditorial('bio2', v)} textarea />
+
+        {/* Stats */}
+        <div>
+          <label className="block text-xs font-medium text-texto mb-2">Números destacados</label>
+          <div className="space-y-2">
+            {editorial.stats.map((s, i) => (
+              <div key={i} className="flex gap-2 items-center">
+                <input value={s.n} onChange={e => patchEditorialStat(i, 'n', e.target.value)}
+                  placeholder="200+"
+                  className="w-20 px-3 py-2 rounded-xl border border-teal/20 focus:outline-none focus:border-teal text-sm bg-white text-texto font-bold text-center" />
+                <input value={s.label} onChange={e => patchEditorialStat(i, 'label', e.target.value)}
+                  placeholder="familias equipadas"
+                  className="flex-1 px-3 py-2 rounded-xl border border-teal/20 focus:outline-none focus:border-teal text-sm bg-white text-texto" />
+                <button onClick={() => removeEditorialStat(i)}
+                  className="px-2.5 py-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors text-sm">✕</button>
+              </div>
+            ))}
+          </div>
+          <button onClick={addEditorialStat} className="text-xs text-teal hover:text-teal-dark font-medium mt-2">+ Agregar número</button>
+        </div>
+
+        {/* Bullets */}
+        <div>
+          <label className="block text-xs font-medium text-texto mb-2">Puntos destacados</label>
+          <div className="space-y-2">
+            {editorial.bullets.map((b, i) => (
+              <div key={i} className="flex gap-2">
+                <input value={b} onChange={e => patchEditorialBullet(i, e.target.value)}
+                  className="flex-1 px-3 py-2 rounded-xl border border-teal/20 focus:outline-none focus:border-teal text-sm bg-white text-texto" />
+                <button onClick={() => removeEditorialBullet(i)}
+                  className="px-3 py-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors text-sm">✕</button>
+              </div>
+            ))}
+          </div>
+          <button onClick={addEditorialBullet} className="text-xs text-teal hover:text-teal-dark font-medium mt-2">+ Agregar punto</button>
+        </div>
+      </Seccion>
+
+      {/* ── Testimonios ── */}
+      <Seccion title="Testimonios" badge={`${testimoniosList.length} opiniones`}>
+        <p className="text-xs text-texto-muted -mt-1">Opiniones de clientas que se muestran en la landing.</p>
+        <div className="space-y-4">
+          {testimoniosList.map((t, idx) => (
+            <div key={t.id} className="bg-white rounded-xl border border-teal/10 p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-semibold text-texto-muted uppercase tracking-widest">Testimonio {idx + 1}</p>
+                <button onClick={() => removeTestimonio(t.id)}
+                  className="p-1.5 rounded-lg hover:bg-red-50 hover:text-red-500 text-texto-muted transition-colors">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6m4-6v6"/><path d="M9 6V4h6v2"/></svg>
+                </button>
+              </div>
+              <div className="grid sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-medium text-texto-muted mb-1 block">Nombre</label>
+                  <input value={t.nombre} onChange={e => patchTestimonio(t.id, 'nombre', e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl border border-teal/20 focus:outline-none focus:border-teal text-sm bg-fondo text-texto" placeholder="María L." />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-texto-muted mb-1 block">Lugar</label>
+                  <input value={t.lugar} onChange={e => patchTestimonio(t.id, 'lugar', e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl border border-teal/20 focus:outline-none focus:border-teal text-sm bg-fondo text-texto" placeholder="Palermo, CABA" />
+                </div>
+              </div>
+              <div>
+                <label className="text-xs font-medium text-texto-muted mb-1 block">Opinión</label>
+                <textarea value={t.texto} onChange={e => patchTestimonio(t.id, 'texto', e.target.value)} rows={2}
+                  className="w-full px-3 py-2 rounded-xl border border-teal/20 focus:outline-none focus:border-teal text-sm bg-fondo text-texto resize-none" />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-texto-muted mb-1 block">Estrellas</label>
+                <div className="flex gap-1">
+                  {[1,2,3,4,5].map(n => (
+                    <button key={n} onClick={() => patchTestimonio(t.id, 'estrellas', n)}
+                      className={`w-7 h-7 rounded-lg text-sm transition-colors ${n <= t.estrellas ? 'text-amber-400 bg-amber-50' : 'text-gray-300 bg-gray-50'}`}>
+                      ★
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <button onClick={addTestimonio}
+          className="flex items-center gap-2 bg-teal/10 text-teal font-semibold px-4 py-2 rounded-xl text-sm hover:bg-teal/20 transition-colors">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Agregar testimonio
+        </button>
+      </Seccion>
+
+      {/* ── FAQ ── */}
+      <Seccion title="Preguntas frecuentes" badge={`${faqList.length} preguntas`}>
+        <div className="space-y-3">
+          {faqList.map((f, idx) => (
+            <div key={f.id} className="bg-white rounded-xl border border-teal/10 p-4 space-y-3">
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-xs font-semibold text-texto-muted uppercase tracking-widest">Pregunta {idx + 1}</p>
+                <div className="flex gap-1 flex-shrink-0">
+                  <button onClick={() => moveFaq(f.id, -1)} disabled={idx === 0}
+                    className="p-1 rounded hover:bg-gray-100 disabled:opacity-30 text-texto-muted">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="18 15 12 9 6 15"/></svg>
+                  </button>
+                  <button onClick={() => moveFaq(f.id, 1)} disabled={idx === faqList.length - 1}
+                    className="p-1 rounded hover:bg-gray-100 disabled:opacity-30 text-texto-muted">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                  </button>
+                  <button onClick={() => removeFaq(f.id)}
+                    className="p-1.5 rounded-lg hover:bg-red-50 hover:text-red-500 text-texto-muted transition-colors ml-1">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6m4-6v6"/><path d="M9 6V4h6v2"/></svg>
+                  </button>
+                </div>
+              </div>
+              <div>
+                <label className="text-xs font-medium text-texto-muted mb-1 block">Pregunta</label>
+                <input value={f.q} onChange={e => patchFaq(f.id, 'q', e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl border border-teal/20 focus:outline-none focus:border-teal text-sm bg-fondo text-texto" />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-texto-muted mb-1 block">Respuesta</label>
+                <textarea value={f.a} onChange={e => patchFaq(f.id, 'a', e.target.value)} rows={3}
+                  className="w-full px-3 py-2 rounded-xl border border-teal/20 focus:outline-none focus:border-teal text-sm bg-fondo text-texto resize-y" />
+              </div>
+            </div>
+          ))}
+        </div>
+        <button onClick={addFaq}
+          className="flex items-center gap-2 bg-teal/10 text-teal font-semibold px-4 py-2 rounded-xl text-sm hover:bg-teal/20 transition-colors">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Agregar pregunta
+        </button>
       </Seccion>
 
       {/* ── Sumate al equipo ── */}
