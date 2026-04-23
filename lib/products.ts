@@ -25,40 +25,55 @@ export const HEX: Record<string, string> = {
 
 export const productos: Producto[] = [
   {
-    "id": "cacerola-18cm",
-    "nombre": "El Rey",
+    "id": "producto-1776974658776",
+    "nombre": "Nuevo productotest",
+    "descripcion": "Hola mundo",
     "categoria": "bazar",
-    "descripcion": "Aluminio fundido de alta calidad. Cocción uniforme, ideal para 2 personas.",
+    "tags": [],
+    "variantes": [
+      {
+        "color": "Nuit",
+        "hex": "#2D2D2D",
+        "imagen": "/images/products/producto-1776974658776-negro.webp"
+      }
+    ],
+    "ofertaEspecial": false,
+    "badge": "hi"
+  },
+  {
+    "id": "cacerola-18cm",
+    "nombre": "1Test",
+    "categoria": "nuit",
+    "descripcion": "Aluminio fundido de alta calidad.",
     "tags": [
       "2,1 lts",
       "Todos los fuegos"
     ],
     "variantes": [
       {
+        "color": "Terra",
+        "hex": "#808080",
+        "imagen": "/images/products/cacerola-18cm-rosa.webp"
+      },
+      {
         "color": "Rosa",
         "hex": "#FFB6C1",
-        "imagen": "/images/products/cacerola-18cm-rosa.webp"
+        "imagen": "/images/products/cacerola-18cm-terra.webp"
       },
       {
         "color": "Terra",
         "hex": "#808080",
-        "imagen": ""
-      },
-      {
-        "color": "Capri",
-        "hex": "#1A9EC0",
-        "imagen": ""
+        "imagen": "/images/products/cacerola-18cm-capri.webp"
       }
     ],
     "destacado": true,
-    "badge": "Mas vendida",
-    "stockBajo": true,
+    "badge": "Oportunidad única",
     "ofertaEspecial": true,
-    "descuento": 20
+    "descuento": 30
   },
   {
     "id": "cacerola-24cm",
-    "nombre": "",
+    "nombre": "ni idea",
     "categoria": "contemporanea",
     "descripcion": "Pieza ideal para familia de 4. Base de aluminio fundido y revestimiento antiadherente.",
     "tags": [
@@ -77,14 +92,13 @@ export const productos: Producto[] = [
         "imagen": ""
       },
       {
-        "color": "Capri",
-        "hex": "#1A9EC0",
-        "imagen": ""
+        "color": "Rosa",
+        "hex": "#FFB6C1",
+        "imagen": "/images/products/cacerola-24cm-capri.webp"
       }
     ],
     "destacado": true,
-    "badge": "Top familia",
-    "descuento": 30
+    "badge": "Top familia"
   },
   {
     "id": "flip-22",
@@ -147,31 +161,6 @@ export const productos: Producto[] = [
     "destacado": true
   },
   {
-    "id": "sarten-31cm",
-    "nombre": "Sarten 31cm",
-    "categoria": "contemporanea",
-    "descripcion": "La más grande de la línea. Perfecta para porciones generosas.",
-    "tags": [
-      "31cm",
-      "Gran capacidad"
-    ],
-    "variantes": [
-      {
-        "color": "Terra",
-        "hex": "#808080",
-        "imagen": ""
-      },
-      {
-        "color": "Capri",
-        "hex": "#1A9EC0",
-        "imagen": ""
-      }
-    ],
-    "descuento": 15,
-    "stockBajo": true,
-    "ofertaEspecial": true
-  },
-  {
     "id": "cuadrada-29cm",
     "nombre": "Cuadrada 29cm",
     "categoria": "contemporanea",
@@ -199,36 +188,6 @@ export const productos: Producto[] = [
     ],
     "descuento": 20,
     "ofertaEspecial": true
-  },
-  {
-    "id": "wok-32cm",
-    "nombre": "Wok 32cm",
-    "categoria": "contemporanea",
-    "descripcion": "Gran capacidad y paredes altas. Ideal para salteados, arroces y pastas.",
-    "tags": [
-      "32cm",
-      "Alta pared"
-    ],
-    "variantes": [
-      {
-        "color": "Rosa",
-        "hex": "#FFB6C1",
-        "imagen": ""
-      },
-      {
-        "color": "Terra",
-        "hex": "#808080",
-        "imagen": ""
-      },
-      {
-        "color": "Capri",
-        "hex": "#1A9EC0",
-        "imagen": ""
-      }
-    ],
-    "destacado": true,
-    "ofertaEspecial": true,
-    "stockBajo": true
   },
   {
     "id": "cafetera",
