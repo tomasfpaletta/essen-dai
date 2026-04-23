@@ -12,7 +12,6 @@ export type PromoItem = {
   colorTexto: string
   imagen: string
   activo: boolean
-  fechaFin?: string  // ISO date string "YYYY-MM-DD", optional expiry
 }
 
 export type PromocionesConfig = {
