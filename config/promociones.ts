@@ -69,7 +69,7 @@ export const promocionesItems: PromoItem[] = [
     "badge": "Financiación",
     "colorFondo": "#BB9EC5",
     "colorTexto": "#FFFFFF",
-    "imagen": "",
+    "imagen": "/images/promociones/promo-promo-cuotas-whatsapp-image-2026-04-23-at-4-35-57-pm-2-.webp",
     "activo": true
   }
 ];
