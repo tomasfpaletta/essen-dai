@@ -49,8 +49,16 @@ export default function DetalleInteractivo({ producto: p, relacionados, cliente 
     return `${cliente.whatsapp.link}?text=${encodeURIComponent(msg)}`
   }
 
+  const accentBg2    = hexToRgba(variante.hex, 0.13)
+  const accentBorder = hexToRgba(variante.hex, 0.22)
+
   return (
-    <div className="min-h-screen bg-fondo">
+    <div
+      className="min-h-screen"
+      style={{
+        background: `linear-gradient(160deg, ${hexToRgba(variante.hex, 0.11)} 0%, #f4f7f6 38%, #f4f7f6 100%)`,
+      }}
+    >
       <Navbar />
 
       {lightbox && tieneImagen && (
@@ -60,6 +68,12 @@ export default function DetalleInteractivo({ producto: p, relacionados, cliente 
           onClose={() => setLightbox(false)}
         />
       )}
+
+      {/* Franja de color superior (acento del producto) */}
+      <div
+        className="absolute top-0 left-0 right-0 h-1.5 z-20"
+        style={{ background: `linear-gradient(90deg, ${variante.hex}, ${hexToRgba(variante.hex, 0.4)})` }}
+      />
 
       <div className="max-w-6xl mx-auto px-6 pt-28 pb-20">
 
@@ -157,7 +171,10 @@ export default function DetalleInteractivo({ producto: p, relacionados, cliente 
           </div>
 
           {/* ── Columna derecha: info ── */}
-          <div className="space-y-6 lg:sticky lg:top-28">
+          <div
+            className="space-y-6 lg:sticky lg:top-28 rounded-3xl p-6 sm:p-8 border"
+            style={{ background: hexToRgba(variante.hex, 0.04), borderColor: accentBorder }}
+          >
 
             {/* Categoría + título */}
             <div>
@@ -179,7 +196,7 @@ export default function DetalleInteractivo({ producto: p, relacionados, cliente 
               </div>
             )}
 
-            <hr className="border-teal/10" />
+            <hr style={{ borderColor: accentBorder }} />
 
             {/* Selector de color */}
             <div>
@@ -193,9 +210,13 @@ export default function DetalleInteractivo({ producto: p, relacionados, cliente 
                     onClick={() => setVarIdx(i)}
                     className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-sm font-medium transition-all ${
                       i === varIdx
-                        ? 'border-teal bg-teal/5 text-teal shadow-sm'
-                        : 'border-teal/15 text-texto-muted hover:border-teal/40 hover:text-texto bg-white'
+                        ? 'shadow-sm'
+                        : 'text-texto-muted hover:text-texto'
                     }`}
+                    style={i === varIdx
+                      ? { borderColor: variante.hex, background: hexToRgba(variante.hex, 0.10), color: variante.hex }
+                      : { borderColor: accentBorder, background: hexToRgba(variante.hex, 0.04) }
+                    }
                   >
                     <span className="w-3.5 h-3.5 rounded-full flex-shrink-0 border border-black/10" style={{ background: v.hex }} />
                     {v.color}
@@ -204,7 +225,7 @@ export default function DetalleInteractivo({ producto: p, relacionados, cliente 
               </div>
             </div>
 
-            <hr className="border-teal/10" />
+            <hr style={{ borderColor: accentBorder }} />
 
             {/* Trust signals */}
             <div className="grid grid-cols-3 gap-2">
@@ -213,7 +234,11 @@ export default function DetalleInteractivo({ producto: p, relacionados, cliente 
                 { emoji: '📦', label: 'Envío a todo el país' },
                 { emoji: '✅', label: 'Producto original' },
               ].map(s => (
-                <div key={s.label} className="bg-white rounded-xl p-3 text-center border border-teal/10">
+                <div
+                  key={s.label}
+                  className="rounded-xl p-3 text-center border"
+                  style={{ background: accentBg2, borderColor: accentBorder }}
+                >
                   <p className="text-xl mb-1">{s.emoji}</p>
                   <p className="text-[11px] text-texto-muted leading-snug font-medium">{s.label}</p>
                 </div>

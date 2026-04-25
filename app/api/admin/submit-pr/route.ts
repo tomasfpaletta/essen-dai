@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { publishFile } from '@/lib/github'
+import { publishFiles } from '@/lib/github'
 import { generateClienteTs, generateProductsTs, generateDescuentosTs, generatePromocionesTs, generateVideosTs, generateTestimoniosTs, generateFaqTs } from '@/lib/generators'
 
 export const maxDuration = 60
@@ -12,63 +12,39 @@ export async function POST(req: Request) {
   }
 
   try {
-    // Publicar en secuencia — evita conflictos de SHA cuando GitHub recibe
-    // múltiples commits simultáneos en la misma rama (error 409).
+    // Recolectamos todos los archivos a publicar y los subimos en UN SOLO commit
+    // atómico usando la Git Trees API → cero conflictos de SHA.
+    const files: Array<{ path: string; content: string }> = []
+
     if (cliente) {
-      await publishFile(
-        'config/cliente.ts',
-        generateClienteTs(cliente),
-        'admin: actualizar configuración del sitio'
-      )
+      files.push({ path: 'config/cliente.ts', content: generateClienteTs(cliente) })
     }
 
     if (productos) {
-      await publishFile(
-        'lib/products.ts',
-        generateProductsTs(hex, productos, categorias),
-        'admin: actualizar catálogo de productos'
-      )
+      files.push({ path: 'lib/products.ts', content: generateProductsTs(hex, productos, categorias) })
     }
 
     if (descuentos) {
-      await publishFile(
-        'config/descuentos.ts',
-        generateDescuentosTs(descuentos),
-        'admin: actualizar descuentos bancarios'
-      )
+      files.push({ path: 'config/descuentos.ts', content: generateDescuentosTs(descuentos) })
     }
 
     if (promociones) {
-      await publishFile(
-        'config/promociones.ts',
-        generatePromocionesTs(promociones),
-        'admin: actualizar promociones y ediciones limitadas'
-      )
+      files.push({ path: 'config/promociones.ts', content: generatePromocionesTs(promociones) })
     }
 
     if (videos) {
-      await publishFile(
-        'config/videos.ts',
-        generateVideosTs(videos),
-        'admin: actualizar videos de la landing'
-      )
+      files.push({ path: 'config/videos.ts', content: generateVideosTs(videos) })
     }
 
     if (testimonios) {
-      await publishFile(
-        'config/testimonios.ts',
-        generateTestimoniosTs(testimonios),
-        'admin: actualizar testimonios'
-      )
+      files.push({ path: 'config/testimonios.ts', content: generateTestimoniosTs(testimonios) })
     }
 
     if (faq) {
-      await publishFile(
-        'config/faq.ts',
-        generateFaqTs(faq),
-        'admin: actualizar preguntas frecuentes'
-      )
+      files.push({ path: 'config/faq.ts', content: generateFaqTs(faq) })
     }
+
+    await publishFiles(files, 'admin: publicar cambios del sitio')
 
     return NextResponse.json({ ok: true })
   } catch (err: unknown) {
