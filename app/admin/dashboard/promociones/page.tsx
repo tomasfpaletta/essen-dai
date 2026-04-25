@@ -1,6 +1,5 @@
 'use client'
 import { useState, useRef } from 'react'
-import Image from 'next/image'
 import { promocionesBanner, promocionesItems, type PromoItem, type PromocionesConfig } from '@/config/promociones'
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -86,6 +85,7 @@ function PromoImageUploader({
 }) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
+  const [localPreview, setLocalPreview] = useState<string | null>(null)
   const [error, setError] = useState('')
 
   async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
@@ -93,6 +93,9 @@ function PromoImageUploader({
     if (!file) return
     setUploading(true)
     setError('')
+    // Preview inmediato con blob URL
+    const blobUrl = URL.createObjectURL(file)
+    setLocalPreview(blobUrl)
     try {
       const form = new FormData()
       form.append('file', file)
@@ -102,13 +105,17 @@ function PromoImageUploader({
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Error al subir')
       onChange(data.path)
+      setLocalPreview(null) // el valor real ya está en `value`
     } catch (err: unknown) {
+      setLocalPreview(null)
       setError(err instanceof Error ? err.message : 'Error al subir imagen')
     } finally {
       setUploading(false)
       if (inputRef.current) inputRef.current.value = ''
     }
   }
+
+  const displaySrc = localPreview ?? (value ? `${value}?t=${Date.now()}` : null)
 
   return (
     <div>
@@ -119,8 +126,9 @@ function PromoImageUploader({
           className="w-24 h-24 rounded-xl border-2 border-dashed border-gray-200 flex items-center justify-center overflow-hidden flex-shrink-0 cursor-pointer hover:border-teal/40 transition-colors bg-gray-50"
           onClick={() => inputRef.current?.click()}
         >
-          {value ? (
-            <Image src={value} alt="preview" width={96} height={96} className="w-full h-full object-cover" />
+          {displaySrc ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={displaySrc} alt="preview" className="w-full h-full object-cover" />
           ) : (
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-8 h-8 text-gray-300">
               <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
@@ -378,15 +386,23 @@ export default function PromocionesPage() {
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState('')
+  const [hasChanges, setHasChanges] = useState(false)
+  const [dirtyIds, setDirtyIds] = useState<Set<string>>(new Set())
+
+  function markChanged(id?: string) {
+    setHasChanges(true)
+    setSaved(false)
+    if (id) setDirtyIds(prev => new Set(prev).add(id))
+  }
 
   // Banner helpers
   function patchBanner(key: keyof PromocionesConfig, val: string | boolean) {
-    setBanner(b => ({ ...b, [key]: val }))
+    setBanner(b => ({ ...b, [key]: val })); markChanged()
   }
 
   // Items helpers
   function patchItem(id: string, key: keyof PromoItem, val: string | boolean) {
-    setItems(prev => prev.map(i => i.id === id ? { ...i, [key]: val } : i))
+    setItems(prev => prev.map(i => i.id === id ? { ...i, [key]: val } : i)); markChanged(id)
   }
 
   function addItem() {
@@ -402,11 +418,16 @@ export default function PromocionesPage() {
     }
     setItems(prev => [...prev, newItem])
     setEditingId(newItem.id)
+    markChanged(newItem.id)
   }
 
   function removeItem(id: string) {
+    const it = items.find(i => i.id === id)
+    const label = it?.titulo ? `"${it.titulo}"` : 'esta promoción'
+    if (!confirm(`¿Eliminar ${label}? Esta acción no se puede deshacer.`)) return
     setItems(prev => prev.filter(i => i.id !== id))
     if (editingId === id) setEditingId(null)
+    markChanged()
   }
 
   function moveItem(id: string, dir: -1 | 1) {
@@ -418,7 +439,7 @@ export default function PromocionesPage() {
       const arr = [...prev]
       ;[arr[idx], arr[next]] = [arr[next], arr[idx]]
       return arr
-    })
+    }); markChanged()
   }
 
   // Save
@@ -438,6 +459,8 @@ export default function PromocionesPage() {
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Error al guardar')
       setSaved(true)
+      setHasChanges(false)
+      setDirtyIds(new Set())
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Error desconocido')
     } finally {
@@ -457,10 +480,14 @@ export default function PromocionesPage() {
             Ediciones limitadas, ofertas y banners especiales.
           </p>
         </div>
+        <div className="flex items-center gap-3 flex-shrink-0">
+          {hasChanges && (
+            <span className="text-xs bg-amber-100 text-amber-700 px-3 py-1.5 rounded-full font-medium">Sin publicar</span>
+          )}
         <button
           onClick={handleSave}
-          disabled={saving}
-          className="flex items-center gap-2 bg-teal text-white font-semibold px-5 py-2.5 rounded-xl text-sm hover:bg-teal-dark transition-colors disabled:opacity-50 flex-shrink-0"
+          disabled={saving || !hasChanges}
+          className="flex items-center gap-2 bg-teal text-white font-semibold px-5 py-2.5 rounded-xl text-sm hover:bg-teal-dark transition-colors disabled:opacity-40 flex-shrink-0"
         >
           {saving ? (
             <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48 2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48 2.83-2.83"/></svg>
@@ -469,6 +496,7 @@ export default function PromocionesPage() {
           )}
           {saving ? 'Publicando…' : 'Publicar cambios'}
         </button>
+        </div>
       </div>
 
       {saved && (
@@ -592,7 +620,12 @@ export default function PromocionesPage() {
 
                 {/* Name */}
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-texto truncate">{item.titulo}</p>
+                  <div className="flex items-center gap-1.5">
+                    <p className="text-sm font-semibold text-texto truncate">{item.titulo}</p>
+                    {dirtyIds.has(item.id) && (
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-400 flex-shrink-0" title="Sin publicar" />
+                    )}
+                  </div>
                   <p className="text-xs text-texto-muted truncate">{item.badge}</p>
                 </div>
 

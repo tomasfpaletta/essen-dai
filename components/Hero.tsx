@@ -106,22 +106,6 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* ── Rotating badge ── */}
-      <div className="absolute bottom-20 right-10 lg:right-24 w-28 h-28 hidden md:flex items-center justify-center">
-        <svg viewBox="0 0 100 100" className="absolute w-full h-full animate-spin" style={{ animationDuration: "20s" }}>
-          <defs>
-            <path id="circle-path" d="M 50,50 m -30,0 a 30,30 0 1,1 60,0 a 30,30 0 1,1 -60,0" />
-          </defs>
-          <text style={{ fontSize: "9px", letterSpacing: "2px", fill: "#58A39D", opacity: 0.6 }}>
-            <textPath href="#circle-path">MASTER ESSEN · BUENOS AIRES · 2025 · </textPath>
-          </text>
-        </svg>
-        <div className="w-12 h-12 rounded-full flex items-center justify-center"
-          style={{ background: "rgba(88,163,157,0.2)", border: "1px solid rgba(88,163,157,0.4)" }}>
-          <span className="font-heading text-sm" style={{ color: "#58A39D" }}>ME</span>
-        </div>
-      </div>
-
       {/* ── Scroll hint ── */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 animate-bounce">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4" style={{ color: "rgba(255,255,255,0.2)" }}>

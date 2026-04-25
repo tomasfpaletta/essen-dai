@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { publishFile } from '@/lib/github'
 import { generateClienteTs, generateProductsTs, generateDescuentosTs, generatePromocionesTs, generateVideosTs, generateTestimoniosTs, generateFaqTs } from '@/lib/generators'
 
-export const maxDuration = 30
+export const maxDuration = 60
 
 export async function POST(req: Request) {
   const { cliente, productos, hex, categorias, descuentos, promociones, videos, testimonios, faq } = await req.json()

@@ -46,6 +46,9 @@ export default function ProductosPage() {
   const [filterCaracteristica, setFilterCaracteristica] = useState<string>('')
   const [filterTexto, setFilterTexto]                 = useState<string>('')
 
+  // Buffer de texto crudo para el campo de tags (evita que la coma se coma sola al escribir)
+  const [tagsRaw, setTagsRaw] = useState<Record<string, string>>({})
+
   // Cargar borrador
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY)
@@ -560,10 +563,13 @@ export default function ProductosPage() {
                         Tags <span className="font-normal">(separados por coma)</span>
                       </label>
                       <input
-                        value={p.tags.join(', ')}
-                        onChange={e => updateProduct(p.id, {
-                          tags: e.target.value.split(',').map(t => t.trim()).filter(Boolean)
-                        })}
+                        value={tagsRaw[p.id] ?? p.tags.join(', ')}
+                        onChange={e => setTagsRaw(prev => ({ ...prev, [p.id]: e.target.value }))}
+                        onBlur={e => {
+                          const tags = e.target.value.split(',').map(t => t.trim()).filter(Boolean)
+                          updateProduct(p.id, { tags })
+                          setTagsRaw(prev => ({ ...prev, [p.id]: tags.join(', ') }))
+                        }}
                         className="w-full px-3 py-2 text-sm rounded-xl border border-teal/20 focus:outline-none focus:border-teal bg-white text-texto"
                         placeholder="2,1 lts, Todos los fuegos"
                       />
