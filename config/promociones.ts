@@ -12,6 +12,7 @@ export type PromoItem = {
   colorTexto: string
   imagen: string
   activo: boolean
+  fechaFin?: string
 }
 
 export type PromocionesConfig = {
