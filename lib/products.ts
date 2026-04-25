@@ -25,28 +25,6 @@ export const HEX: Record<string, string> = {
 
 export const productos: Producto[] = [
   {
-    "id": "producto-1777134152832",
-    "nombre": "coso rosa",
-    "descripcion": "Descripción del producto.",
-    "categoria": "bazar",
-    "tags": [
-      "2.1lts",
-      "gratis"
-    ],
-    "variantes": [
-      {
-        "color": "Rosa",
-        "hex": "#FFB6C1",
-        "imagen": "/images/products/producto-1777134152832-negro.webp"
-      }
-    ],
-    "destacado": true,
-    "ofertaEspecial": false,
-    "stockBajo": true,
-    "badge": "gratis",
-    "descuento": 15
-  },
-  {
     "id": "producto-1777129531995",
     "nombre": "4x3",
     "descripcion": "Descripción del producto.",
@@ -74,7 +52,7 @@ export const productos: Producto[] = [
   },
   {
     "id": "cacerola-24cm",
-    "nombre": "cacerola",
+    "nombre": "ni idea",
     "categoria": "contemporanea",
     "descripcion": "Pieza ideal para familia de 4. Base de aluminio fundido y revestimiento antiadherente.",
     "tags": [
