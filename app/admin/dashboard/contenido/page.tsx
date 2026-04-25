@@ -4,8 +4,9 @@ import { Cliente } from '@/config/cliente'
 import { videos as initialVideos, type Video } from '@/config/videos'
 import { testimonios as initialTestimonios, type Testimonio } from '@/config/testimonios'
 import { faqItems as initialFaq, type FaqItem } from '@/config/faq'
+import { writePendingSection, DRAFT_KEYS, PUBLISHED_EVENT } from '@/lib/admin-pending'
 
-const STORAGE_KEY = 'admin_contenido_draft'
+const STORAGE_KEY = DRAFT_KEYS.contenido
 
 const FONT_OPTIONS = [
   { id: 'moderna',    label: 'Moderna',     heading: 'Fredoka One',        body: 'Plus Jakarta Sans' },
@@ -152,9 +153,6 @@ export default function ContenidoPage() {
   const [dirtyFaq, setDirtyFaq] = useState(false)
   const hasChanges = dirtyCliente || dirtyVideos || dirtyTestimonios || dirtyFaq
 
-  const [publishing, setPublishing] = useState(false)
-  const [status, setStatus] = useState<'idle' | 'ok' | 'error'>('idle')
-  const [errorMsg, setErrorMsg] = useState('')
 
   // Imagen Sumate al Equipo
   const sumateImgRef = useRef<HTMLInputElement>(null)
@@ -178,21 +176,43 @@ export default function ContenidoPage() {
     }
   }, [])
 
+  // Guarda borrador local (restauración al recargar) y payload global pendiente
   useEffect(() => {
     if (!hasChanges) return
     const draft: Record<string, unknown> = {}
-    if (dirtyCliente)     { draft.hero = hero; draft.fuente = fuente; draft.sumate = sumate; draft.editorial = editorial }
-    if (dirtyVideos)      { draft.videos = videosList }
-    if (dirtyTestimonios) { draft.testimonios = testimoniosList }
-    if (dirtyFaq)         { draft.faq = faqList }
+    const pending: Record<string, unknown> = {}
+    if (dirtyCliente) {
+      draft.hero = hero; draft.fuente = fuente; draft.sumate = sumate; draft.editorial = editorial
+      pending.cliente = {
+        ...Cliente, hero, fuente, sumateEquipo: sumate, editorial,
+        whatsapp: { ...Cliente.whatsapp }, instagram: { ...Cliente.instagram },
+        seo: { ...Cliente.seo, keywords: [...Cliente.seo.keywords] },
+        colores: { ...Cliente.colores }, coordenadas: { ...Cliente.coordenadas },
+        imagenes: { ...Cliente.imagenes }, stats: [...hero.stats],
+      }
+    }
+    if (dirtyVideos)      { draft.videos = videosList;           pending.videos = videosList }
+    if (dirtyTestimonios) { draft.testimonios = testimoniosList; pending.testimonios = testimoniosList }
+    if (dirtyFaq)         { draft.faq = faqList;                 pending.faq = faqList }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(draft))
+    writePendingSection('contenido', pending)
   }, [hero, fuente, sumate, editorial, videosList, testimoniosList, faqList,
       dirtyCliente, dirtyVideos, dirtyTestimonios, dirtyFaq, hasChanges])
 
-  function markCliente() { setDirtyCliente(true); setStatus('idle') }
-  function markVideos()  { setDirtyVideos(true);  setStatus('idle') }
-  function markTestimonios() { setDirtyTestimonios(true); setStatus('idle') }
-  function markFaq()     { setDirtyFaq(true);     setStatus('idle') }
+  // Limpia estado al publicar desde el PublishBar global
+  useEffect(() => {
+    function onPublished() {
+      setDirtyCliente(false); setDirtyVideos(false)
+      setDirtyTestimonios(false); setDirtyFaq(false)
+    }
+    window.addEventListener(PUBLISHED_EVENT, onPublished)
+    return () => window.removeEventListener(PUBLISHED_EVENT, onPublished)
+  }, [])
+
+  function markCliente() { setDirtyCliente(true) }
+  function markVideos()  { setDirtyVideos(true) }
+  function markTestimonios() { setDirtyTestimonios(true) }
+  function markFaq()     { setDirtyFaq(true) }
 
   function setHeroField(key: keyof HeroData, value: string) {
     setHero(prev => ({ ...prev, [key]: value })); markCliente()
@@ -337,52 +357,6 @@ export default function ContenidoPage() {
     }); markVideos()
   }
 
-  async function handlePublish() {
-    setPublishing(true); setStatus('idle')
-    try {
-      const payload: Record<string, unknown> = {}
-
-      if (dirtyCliente) {
-        payload.cliente = {
-          ...Cliente,
-          hero,
-          fuente,
-          sumateEquipo: sumate,
-          editorial,
-          whatsapp: { ...Cliente.whatsapp },
-          instagram: { ...Cliente.instagram },
-          seo: { ...Cliente.seo, keywords: [...Cliente.seo.keywords] },
-          colores: { ...Cliente.colores },
-          coordenadas: { ...Cliente.coordenadas },
-          imagenes: { ...Cliente.imagenes },
-          stats: [...hero.stats],
-        }
-      }
-      if (dirtyVideos)      payload.videos      = videosList
-      if (dirtyTestimonios) payload.testimonios = testimoniosList
-      if (dirtyFaq)         payload.faq         = faqList
-
-      const res = await fetch('/api/admin/submit-pr', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      })
-      const data = await res.json()
-      if (res.ok) {
-        setStatus('ok')
-        setDirtyCliente(false); setDirtyVideos(false)
-        setDirtyTestimonios(false); setDirtyFaq(false)
-        localStorage.removeItem(STORAGE_KEY)
-      } else {
-        setStatus('error'); setErrorMsg(data.error || 'Error desconocido')
-      }
-    } catch {
-      setStatus('error'); setErrorMsg('Error de conexión')
-    } finally {
-      setPublishing(false)
-    }
-  }
-
   return (
     <div className="space-y-4">
       {/* Header */}
@@ -391,33 +365,10 @@ export default function ContenidoPage() {
           <h1 className="text-2xl font-bold text-texto">Contenido de la web</h1>
           <p className="text-texto-muted text-sm mt-1">Textos, estilo, videos y sección de equipo.</p>
         </div>
-        <div className="flex items-center gap-3 flex-shrink-0">
-          {hasChanges && (
-            <span className="text-xs bg-amber-100 text-amber-700 px-3 py-1.5 rounded-full font-medium">Sin publicar</span>
-          )}
-          <button
-            onClick={handlePublish}
-            disabled={publishing || !hasChanges}
-            className="flex items-center gap-2 bg-teal text-white font-semibold px-5 py-2.5 rounded-xl text-sm hover:bg-teal-dark transition-colors disabled:opacity-40"
-          >
-            {publishing
-              ? <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48 2.83 2.83"/></svg>
-              : <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4"><path d="M5 12l5 5L20 7"/></svg>
-            }
-            {publishing ? 'Publicando…' : 'Publicar cambios'}
-          </button>
-        </div>
+        {hasChanges && (
+          <span className="text-xs bg-amber-100 text-amber-700 px-3 py-1.5 rounded-full font-medium flex-shrink-0">Sin publicar</span>
+        )}
       </div>
-
-      {status === 'ok' && (
-        <div className="bg-green-50 border border-green-200 text-green-800 rounded-xl px-4 py-3 text-sm flex items-center gap-2">
-          <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 flex-shrink-0"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/></svg>
-          ¡Publicado! Los cambios se verán en la web en ~30 segundos.
-        </div>
-      )}
-      {status === 'error' && (
-        <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm">{errorMsg}</div>
-      )}
 
       {/* ── Fuente ── */}
       <Seccion title="Estilo de letra" defaultOpen>

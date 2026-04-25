@@ -1,8 +1,9 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { descuentos as initialDescuentos, descuentosConfig as initialConfig, type Descuento } from '@/config/descuentos'
+import { writePendingSection, DRAFT_KEYS, PUBLISHED_EVENT } from '@/lib/admin-pending'
 
-const STORAGE_KEY = 'admin_descuentos_draft'
+const STORAGE_KEY = DRAFT_KEYS.descuentos
 
 type Config = {
   visible: boolean
@@ -32,10 +33,19 @@ export default function DescuentosPage() {
     }
   }, [])
 
-  // Auto-guardar
+  // Auto-guardar borrador + pending global
   useEffect(() => {
-    if (hasChanges) localStorage.setItem(STORAGE_KEY, JSON.stringify({ items, config }))
+    if (!hasChanges) return
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ items, config }))
+    writePendingSection('descuentos', { descuentos: { descuentos: items, config } })
   }, [items, config, hasChanges])
+
+  // Limpiar al publicar desde el PublishBar global
+  useEffect(() => {
+    function onPublished() { setHasChanges(false) }
+    window.addEventListener(PUBLISHED_EVENT, onPublished)
+    return () => window.removeEventListener(PUBLISHED_EVENT, onPublished)
+  }, [])
 
   function updateItem(idx: number, updates: Partial<Descuento>) {
     setItems(prev => prev.map((d, i) => i === idx ? { ...d, ...updates } : d))
@@ -65,34 +75,6 @@ export default function DescuentosPage() {
     setHasChanges(true)
   }
 
-  async function handlePublish() {
-    setPublishing(true)
-    setStatus('idle')
-    try {
-      const res = await fetch('/api/admin/submit-pr', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          descuentos: { descuentos: items, config },
-        }),
-      })
-      const data = await res.json()
-      if (res.ok) {
-        setStatus('ok')
-        localStorage.removeItem(STORAGE_KEY)
-        setHasChanges(false)
-      } else {
-        setStatus('error')
-        setErrorMsg(data.error || 'Error desconocido')
-      }
-    } catch {
-      setStatus('error')
-      setErrorMsg('Error de conexión. Intentá de nuevo.')
-    } finally {
-      setPublishing(false)
-    }
-  }
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -103,36 +85,12 @@ export default function DescuentosPage() {
             Gestioná las promociones y beneficios por banco que se muestran en la web
           </p>
         </div>
-        <div className="flex items-center gap-3 flex-shrink-0">
-          {hasChanges && (
-            <span className="text-xs bg-amber-100 text-amber-700 px-3 py-1.5 rounded-full font-medium">
-              Sin publicar
-            </span>
-          )}
-          <button
-            onClick={handlePublish}
-            disabled={publishing || !hasChanges}
-            className="flex items-center gap-2 bg-teal text-white font-semibold px-5 py-2.5 rounded-xl text-sm hover:bg-teal-dark transition-colors disabled:opacity-40"
-          >
-            {publishing ? (
-              <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48 2.83 2.83"/></svg>
-            ) : (
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4"><path d="M5 12l5 5L20 7"/></svg>
-            )}
-            {publishing ? 'Publicando…' : 'Publicar cambios'}
-          </button>
-        </div>
+        {hasChanges && (
+          <span className="text-xs bg-amber-100 text-amber-700 px-3 py-1.5 rounded-full font-medium flex-shrink-0">
+            Sin publicar
+          </span>
+        )}
       </div>
-
-      {status === 'ok' && (
-        <div className="bg-green-50 border border-green-200 text-green-800 rounded-xl px-4 py-3 text-sm flex items-center gap-2">
-          <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 flex-shrink-0"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/></svg>
-          ¡Publicado! Vercel desplegará los cambios en aproximadamente 30 segundos.
-        </div>
-      )}
-      {status === 'error' && (
-        <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm">{errorMsg}</div>
-      )}
 
       {/* Configuración general */}
       <div className="bg-white rounded-2xl border border-teal/10 p-5 space-y-4">

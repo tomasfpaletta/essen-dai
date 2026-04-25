@@ -1,12 +1,13 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { productos as initialProductos, HEX, categorias as initialCategorias, type Producto, type Variante } from '@/lib/products'
+import { writePendingSection, DRAFT_KEYS, PUBLISHED_EVENT } from '@/lib/admin-pending'
 
 // ── Tipos ────────────────────────────────────────────────────────────────────
 type VarianteEdit = Variante & { preview?: string; uploading?: boolean }
 type ProductoEdit = Omit<Producto, 'variantes'> & { variantes: VarianteEdit[] }
 
-const STORAGE_KEY = 'admin_productos_draft'
+const STORAGE_KEY = DRAFT_KEYS.productos
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function cleanForStorage(items: ProductoEdit[]) {
@@ -57,10 +58,23 @@ export default function ProductosPage() {
     }
   }, [])
 
-  // Auto-guardar
+  // Auto-guardar borrador + pending global
   useEffect(() => {
-    if (hasChanges) localStorage.setItem(STORAGE_KEY, JSON.stringify(cleanForStorage(items)))
-  }, [items, hasChanges])
+    if (!hasChanges) return
+    const cleaned = cleanForStorage(items)
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(cleaned))
+    writePendingSection('productos', { productos: cleaned, hex: HEX, categorias: cats })
+  }, [items, cats, hasChanges])
+
+  // Limpiar dirty al publicar desde el PublishBar global
+  useEffect(() => {
+    function onPublished() {
+      setModifiedIds([])
+      setHasChanges(false)
+    }
+    window.addEventListener(PUBLISHED_EVENT, onPublished)
+    return () => window.removeEventListener(PUBLISHED_EVENT, onPublished)
+  }, [])
 
   function markModified(id: string) {
     setModifiedIds(prev => prev.includes(id) ? prev : [...prev, id])
@@ -182,37 +196,6 @@ export default function ProductosPage() {
     setHasChanges(true)
   }
 
-  async function handlePublish() {
-    setSubmitting(true)
-    setStatus('idle')
-    try {
-      const res = await fetch('/api/admin/submit-pr', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          productos: cleanForStorage(items),
-          hex: HEX,
-          categorias: cats,
-        }),
-      })
-      const data = await res.json()
-      if (res.ok) {
-        setStatus('ok')
-        setModifiedIds([])
-        localStorage.removeItem(STORAGE_KEY)
-        setHasChanges(false)
-      } else {
-        setStatus('error')
-        setErrorMsg(data.error || 'Error desconocido')
-      }
-    } catch {
-      setStatus('error')
-      setErrorMsg('Error de conexión. Intentá de nuevo.')
-    } finally {
-      setSubmitting(false)
-    }
-  }
-
   // Colores únicos en todo el catálogo
   const allColors = Array.from(new Set(items.flatMap(p => p.variantes.map(v => v.color)))).sort()
   const allTags   = Array.from(new Set(items.flatMap(p => p.tags))).sort()
@@ -263,29 +246,11 @@ export default function ProductosPage() {
             </svg>
             Nuevo producto
           </button>
-          <button
-            onClick={handlePublish}
-            disabled={submitting || !hasChanges}
-            className="flex items-center gap-2 bg-teal text-white font-semibold px-4 py-2.5 rounded-xl text-sm hover:bg-teal-dark transition-colors disabled:opacity-40"
-          >
-            {submitting
-              ? <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48 2.83 2.83"/></svg>
-              : <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4"><path d="M5 12l5 5L20 7"/></svg>
-            }
-            {submitting ? 'Publicando…' : 'Publicar'}
-          </button>
+          {hasChanges && (
+            <span className="text-xs bg-amber-100 text-amber-700 px-3 py-1.5 rounded-full font-medium">Sin publicar</span>
+          )}
         </div>
       </div>
-
-      {status === 'ok' && (
-        <div className="bg-green-50 border border-green-200 text-green-800 rounded-xl px-4 py-3 text-sm flex items-center gap-2">
-          <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 flex-shrink-0"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/></svg>
-          ¡Publicado! La web se actualiza en aproximadamente 30 segundos.
-        </div>
-      )}
-      {status === 'error' && (
-        <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm">{errorMsg}</div>
-      )}
 
       {/* Filtros */}
       <div className="bg-white rounded-2xl border border-teal/10 p-4 space-y-3">
@@ -744,17 +709,9 @@ export default function ProductosPage() {
               <span className="hidden sm:inline">Eliminar producto</span>
               <span className="sm:hidden">Eliminar</span>
             </button>
-            <button
-              onClick={handlePublish}
-              disabled={submitting || !hasChanges}
-              className="flex items-center gap-1.5 bg-teal text-white font-semibold px-4 py-2 rounded-xl text-xs hover:bg-teal-dark transition-colors disabled:opacity-40"
-            >
-              {submitting
-                ? <svg className="animate-spin w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48 2.83 2.83"/></svg>
-                : <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5"><path d="M5 12l5 5L20 7"/></svg>
-              }
-              {submitting ? 'Publicando…' : 'Publicar cambios'}
-            </button>
+            {hasChanges && (
+              <span className="text-xs bg-amber-100 text-amber-700 px-3 py-1.5 rounded-full font-medium">Cambios sin publicar ↗</span>
+            )}
           </div>
         </div>
       )}

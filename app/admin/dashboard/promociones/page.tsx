@@ -1,6 +1,7 @@
 'use client'
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { promocionesBanner, promocionesItems, type PromoItem, type PromocionesConfig } from '@/config/promociones'
+import { writePendingSection, PUBLISHED_EVENT } from '@/lib/admin-pending'
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 function uid() {
@@ -383,15 +384,11 @@ export default function PromocionesPage() {
   const [banner, setBanner] = useState<PromocionesConfig>({ ...promocionesBanner })
   const [items, setItems] = useState<PromoItem[]>(promocionesItems.map(i => ({ ...i })))
   const [editingId, setEditingId] = useState<string | null>(null)
-  const [saving, setSaving] = useState(false)
-  const [saved, setSaved] = useState(false)
-  const [error, setError] = useState('')
   const [hasChanges, setHasChanges] = useState(false)
   const [dirtyIds, setDirtyIds] = useState<Set<string>>(new Set())
 
   function markChanged(id?: string) {
     setHasChanges(true)
-    setSaved(false)
     if (id) setDirtyIds(prev => new Set(prev).add(id))
   }
 
@@ -442,31 +439,21 @@ export default function PromocionesPage() {
     }); markChanged()
   }
 
-  // Save
-  async function handleSave() {
-    setSaving(true)
-    setError('')
-    setSaved(false)
-    try {
-      const res = await fetch('/api/admin/submit-pr', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          promociones: { banner, items },
-          descripcion: 'Actualización de la sección de Promociones / Ediciones limitadas.',
-        }),
-      })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Error al guardar')
-      setSaved(true)
+  // Guarda en pending global (PublishBar publica todo junto)
+  useEffect(() => {
+    if (!hasChanges) return
+    writePendingSection('promociones', { promociones: { banner, items } })
+  }, [banner, items, hasChanges])
+
+  // Limpia al publicar desde el PublishBar global
+  useEffect(() => {
+    function onPublished() {
       setHasChanges(false)
       setDirtyIds(new Set())
-    } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Error desconocido')
-    } finally {
-      setSaving(false)
     }
-  }
+    window.addEventListener(PUBLISHED_EVENT, onPublished)
+    return () => window.removeEventListener(PUBLISHED_EVENT, onPublished)
+  }, [])
 
   const editingItem = editingId ? items.find(i => i.id === editingId) : null
 
@@ -480,34 +467,10 @@ export default function PromocionesPage() {
             Ediciones limitadas, ofertas y banners especiales.
           </p>
         </div>
-        <div className="flex items-center gap-3 flex-shrink-0">
-          {hasChanges && (
-            <span className="text-xs bg-amber-100 text-amber-700 px-3 py-1.5 rounded-full font-medium">Sin publicar</span>
-          )}
-        <button
-          onClick={handleSave}
-          disabled={saving || !hasChanges}
-          className="flex items-center gap-2 bg-teal text-white font-semibold px-5 py-2.5 rounded-xl text-sm hover:bg-teal-dark transition-colors disabled:opacity-40 flex-shrink-0"
-        >
-          {saving ? (
-            <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48 2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48 2.83-2.83"/></svg>
-          ) : (
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-          )}
-          {saving ? 'Publicando…' : 'Publicar cambios'}
-        </button>
-        </div>
+        {hasChanges && (
+          <span className="text-xs bg-amber-100 text-amber-700 px-3 py-1.5 rounded-full font-medium flex-shrink-0">Sin publicar</span>
+        )}
       </div>
-
-      {saved && (
-        <div className="bg-green-50 border border-green-200 text-green-800 rounded-xl px-4 py-3 text-sm flex items-center gap-2">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12"/></svg>
-          ¡Publicado! Vercel desplegará los cambios en ~30 segundos.
-        </div>
-      )}
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm">{error}</div>
-      )}
 
       {/* ── Sección: Imagen beneficios bancarios ── */}
       <BancosImageUploader />

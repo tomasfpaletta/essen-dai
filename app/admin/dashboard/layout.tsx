@@ -2,15 +2,17 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import React from 'react'
+import PublishBar from '@/components/admin/PublishBar'
+import { PENDING_KEY } from '@/lib/admin-pending'
 
 const NAV = [
-  { href: '/admin/dashboard',             label: 'Inicio',        icon: 'M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h4a1 1 0 001-1v-3h2v3a1 1 0 001 1h4a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z' },
-  { href: '/admin/dashboard/contenido',   label: 'Contenido web', icon: 'M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zm-1.207 1.207L2 14.172V17h2.828l10.38-10.379-2.83-2.828z' },
-  { href: '/admin/dashboard/productos',   label: 'Productos',     icon: 'M4 3a2 2 0 100 4h12a2 2 0 100-4H4z M3 8h14v7a2 2 0 01-2 2H5a2 2 0 01-2-2V8z' },
-  { href: '/admin/dashboard/promociones', label: 'Promociones',   icon: 'M9 11H3v5a2 2 0 002 2h4v-7zm2 7h4a2 2 0 002-2v-5h-6v7z' },
-  { href: '/admin/dashboard/cliente',     label: 'Configuración', icon: 'M10 13a3 3 0 100-6 3 3 0 000 6z' },
+  { href: '/admin/dashboard',             label: 'Inicio',        section: '',            icon: 'M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h4a1 1 0 001-1v-3h2v3a1 1 0 001 1h4a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z' },
+  { href: '/admin/dashboard/contenido',   label: 'Contenido web', section: 'contenido',   icon: 'M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zm-1.207 1.207L2 14.172V17h2.828l10.38-10.379-2.83-2.828z' },
+  { href: '/admin/dashboard/productos',   label: 'Productos',     section: 'productos',   icon: 'M4 3a2 2 0 100 4h12a2 2 0 100-4H4z M3 8h14v7a2 2 0 01-2 2H5a2 2 0 01-2-2V8z' },
+  { href: '/admin/dashboard/promociones', label: 'Promociones',   section: 'promociones', icon: 'M9 11H3v5a2 2 0 002 2h4v-7zm2 7h4a2 2 0 002-2v-5h-6v7z' },
+  { href: '/admin/dashboard/cliente',     label: 'Configuración', section: '',            icon: 'M10 13a3 3 0 100-6 3 3 0 000 6z' },
 ]
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -18,6 +20,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const router   = useRouter()
   const [loggingOut, setLoggingOut] = useState(false)
   const [open, setOpen] = useState(false)
+  const [pendingSections, setPendingSections] = useState<string[]>([])
+
+  const refreshPending = useCallback(() => {
+    try {
+      const raw = localStorage.getItem(PENDING_KEY)
+      if (!raw) { setPendingSections([]); return }
+      const data = JSON.parse(raw)
+      setPendingSections((data._sections as string[]) ?? [])
+    } catch { setPendingSections([]) }
+  }, [])
+
+  useEffect(() => {
+    refreshPending()
+    const id = setInterval(refreshPending, 800)
+    return () => clearInterval(id)
+  }, [refreshPending])
 
   async function handleLogout() {
     setLoggingOut(true)
@@ -73,9 +91,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     <path fillRule="evenodd" d={item.icon} clipRule="evenodd" />
                   </svg>
                   {item.label}
-                  {isActive && (
-                    <span className="ml-auto w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: '#7ECFCA' }} />
-                  )}
+                  <span className="ml-auto flex items-center gap-1">
+                    {item.section && pendingSections.includes(item.section) && (
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-400 flex-shrink-0" />
+                    )}
+                    {isActive && (
+                      <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: '#7ECFCA' }} />
+                    )}
+                  </span>
                 </Link>
               )
             })}
@@ -140,6 +163,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </main>
         </div>
       </div>
+      <PublishBar />
     </>
   )
 }
