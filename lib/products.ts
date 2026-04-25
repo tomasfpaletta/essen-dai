@@ -25,50 +25,29 @@ export const HEX: Record<string, string> = {
 
 export const productos: Producto[] = [
   {
-    "id": "producto-1776974658776",
-    "nombre": "Nuevo productotest",
-    "descripcion": "Hola mundo",
-    "categoria": "bazar",
-    "tags": [],
-    "variantes": [
-      {
-        "color": "Nuit",
-        "hex": "#2D2D2D",
-        "imagen": "/images/products/producto-1776974658776-negro.webp"
-      }
-    ],
-    "ofertaEspecial": false,
-    "badge": "hi"
-  },
-  {
-    "id": "cacerola-18cm",
-    "nombre": "1Test",
+    "id": "producto-1777129531995",
+    "nombre": "4x3",
+    "descripcion": "Descripción del producto.",
     "categoria": "nuit",
-    "descripcion": "Aluminio fundido de alta calidad.",
     "tags": [
-      "2,1 lts",
-      "Todos los fuegos"
+      "2.1lts",
+      "Linea economica"
     ],
     "variantes": [
-      {
-        "color": "Terra",
-        "hex": "#808080",
-        "imagen": "/images/products/cacerola-18cm-rosa.webp"
-      },
       {
         "color": "Rosa",
         "hex": "#FFB6C1",
-        "imagen": "/images/products/cacerola-18cm-terra.webp"
+        "imagen": "/images/products/producto-1777129531995-negro.webp"
       },
       {
         "color": "Terra",
         "hex": "#808080",
-        "imagen": "/images/products/cacerola-18cm-capri.webp"
+        "imagen": "/images/products/producto-1777129531995-rosa.webp"
       }
     ],
     "destacado": true,
-    "badge": "Oportunidad única",
-    "ofertaEspecial": true,
+    "ofertaEspecial": false,
+    "badge": "30% OFF",
     "descuento": 30
   },
   {
@@ -118,11 +97,6 @@ export const productos: Producto[] = [
         "color": "Terra",
         "hex": "#808080",
         "imagen": "/products/flip-22-terra.webp"
-      },
-      {
-        "color": "Capri",
-        "hex": "#1A9EC0",
-        "imagen": "/products/flip-22-capri.webp"
       }
     ],
     "destacado": true,
@@ -130,64 +104,6 @@ export const productos: Producto[] = [
     "stockBajo": true,
     "ofertaEspecial": true,
     "descuento": 99
-  },
-  {
-    "id": "sarten-24cm",
-    "nombre": "Sarten 24cm",
-    "categoria": "contemporanea",
-    "descripcion": "Antiadherente novapremium. Liviana y versátil para el día a día.",
-    "tags": [
-      "24cm",
-      "Antiadherente"
-    ],
-    "variantes": [
-      {
-        "color": "Rosa",
-        "hex": "#FFB6C1",
-        "imagen": "/images/products/sarten-24cm-rosa.webp"
-      },
-      {
-        "color": "Terra",
-        "hex": "#808080",
-        "imagen": ""
-      },
-      {
-        "color": "Capri",
-        "hex": "#1A9EC0",
-        "imagen": ""
-      }
-    ],
-    "stockBajo": true,
-    "destacado": true
-  },
-  {
-    "id": "cuadrada-29cm",
-    "nombre": "Cuadrada 29cm",
-    "categoria": "contemporanea",
-    "descripcion": "Forma cuadrada para aprovechar el espacio. Perfecta para carnes a la plancha.",
-    "tags": [
-      "29cm",
-      "Todos los fuegos"
-    ],
-    "variantes": [
-      {
-        "color": "Rosa",
-        "hex": "#FFB6C1",
-        "imagen": ""
-      },
-      {
-        "color": "Terra",
-        "hex": "#808080",
-        "imagen": ""
-      },
-      {
-        "color": "Capri",
-        "hex": "#1A9EC0",
-        "imagen": ""
-      }
-    ],
-    "descuento": 20,
-    "ofertaEspecial": true
   },
   {
     "id": "cafetera",
@@ -246,23 +162,6 @@ export const productos: Producto[] = [
     ],
     "destacado": true,
     "badge": "Premium"
-  },
-  {
-    "id": "sarten-nuit-28cm",
-    "nombre": "Sarten Nuit 28cm",
-    "categoria": "nuit",
-    "descripcion": "Sarten de la linea Nuit. Negro mate, maxima performance antiadherente.",
-    "tags": [
-      "28cm",
-      "Antiadherente Nuit"
-    ],
-    "variantes": [
-      {
-        "color": "Nuit",
-        "hex": "#2D2D2D",
-        "imagen": ""
-      }
-    ]
   }
 ];
 
