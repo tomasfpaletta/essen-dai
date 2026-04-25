@@ -67,7 +67,7 @@ export default function PublishBar() {
   if (sections.length === 0 && status === 'idle') return null
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2.5 pointer-events-none">
+    <div className="fixed bottom-20 right-6 z-50 flex flex-col items-end gap-2.5 pointer-events-none">
 
       {/* Toast éxito */}
       {status === 'ok' && (
