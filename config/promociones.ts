@@ -36,9 +36,9 @@ export const promocionesBanner: PromocionesConfig = {
   "descripcion": "Solo por este mes, llevá la elegancia de la línea Nuit a tu cocina con descuentos exclusivos.",
   "gradienteDesde": "#1A3330",
   "gradienteHasta": "#58A39D",
-  "gradienteDireccion": "135deg",
+  "gradienteDireccion": "225deg",
   "ctaTexto": "Ver ofertas",
-  "ctaLink": "#productos"
+  "ctaLink": "/productos/cacerola-18cm"
 };
 
 export const promocionesItems: PromoItem[] = [
