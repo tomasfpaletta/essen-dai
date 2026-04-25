@@ -25,48 +25,6 @@ export const HEX: Record<string, string> = {
 
 export const productos: Producto[] = [
   {
-    "id": "producto-1777130456144",
-    "nombre": "prueba2",
-    "descripcion": "Descripción del producto.",
-    "categoria": "combos",
-    "tags": [
-      "2.3lts",
-      "Combo"
-    ],
-    "variantes": [
-      {
-        "color": "Nuit",
-        "hex": "#2D2D2D",
-        "imagen": "/images/products/producto-1777130456144-negro.webp"
-      }
-    ],
-    "destacado": false,
-    "ofertaEspecial": true,
-    "badge": "30% OFF",
-    "descuento": 30
-  },
-  {
-    "id": "producto-1777130411077",
-    "nombre": "pruebas",
-    "descripcion": "Descripción del producto.",
-    "categoria": "combos",
-    "tags": [
-      "familia",
-      "compra"
-    ],
-    "variantes": [
-      {
-        "color": "Capri",
-        "hex": "#1A9EC0",
-        "imagen": "/images/products/producto-1777130411077-negro.webp"
-      }
-    ],
-    "destacado": false,
-    "ofertaEspecial": false,
-    "badge": "te",
-    "stockBajo": true
-  },
-  {
     "id": "producto-1777129531995",
     "nombre": "4x3",
     "descripcion": "Descripción del producto.",
@@ -94,7 +52,7 @@ export const productos: Producto[] = [
   },
   {
     "id": "cacerola-24cm",
-    "nombre": "prueba",
+    "nombre": "ni idea",
     "categoria": "contemporanea",
     "descripcion": "Pieza ideal para familia de 4. Base de aluminio fundido y revestimiento antiadherente.",
     "tags": [
@@ -110,11 +68,11 @@ export const productos: Producto[] = [
       {
         "color": "Terra",
         "hex": "#808080",
-        "imagen": "/images/products/cacerola-24cm-terra.webp"
+        "imagen": ""
       },
       {
-        "color": "Cera Forte",
-        "hex": "#B5A89A",
+        "color": "Rosa",
+        "hex": "#FFB6C1",
         "imagen": "/images/products/cacerola-24cm-capri.webp"
       }
     ],
