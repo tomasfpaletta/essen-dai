@@ -164,17 +164,6 @@ export default function Hero() {
               </a>
             </div>
 
-            {/* Stats */}
-            <div className="flex items-center justify-center gap-3 sm:gap-6 mt-12 flex-wrap">
-              {Cliente.hero.stats.map((stat, i) => (
-                <span key={i} className="flex items-center gap-3 sm:gap-6">
-                  <span className="text-sm font-medium" style={{ color: "rgba(255,255,255,0.65)" }}>{stat}</span>
-                  {i < Cliente.hero.stats.length - 1 && (
-                    <span className="w-1 h-1 rounded-full flex-shrink-0" style={{ background: "rgba(187,158,197,0.4)" }} />
-                  )}
-                </span>
-              ))}
-            </div>
           </div>
 
           {/* ── Columna derecha: imágenes rotantes ── */}
