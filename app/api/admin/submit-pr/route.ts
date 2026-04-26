@@ -1,13 +1,17 @@
 import { NextResponse } from 'next/server'
 import { publishFiles } from '@/lib/github'
-import { generateClienteTs, generateProductsTs, generateDescuentosTs, generatePromocionesTs, generateVideosTs, generateTestimoniosTs, generateFaqTs } from '@/lib/generators'
+import {
+  generateClienteTs, generateProductsTs, generateDescuentosTs,
+  generatePromocionesTs, generateVideosTs, generateTestimoniosTs,
+  generateFaqTs, generateCosasImportantesTs,
+} from '@/lib/generators'
 
 export const maxDuration = 60
 
 export async function POST(req: Request) {
-  const { cliente, productos, hex, categorias, descuentos, promociones, videos, testimonios, faq } = await req.json()
+  const { cliente, productos, hex, categorias, descuentos, promociones, videos, testimonios, faq, cosasImportantes } = await req.json()
 
-  if (!cliente && !productos && !descuentos && !promociones && !videos && !testimonios && !faq) {
+  if (!cliente && !productos && !descuentos && !promociones && !videos && !testimonios && !faq && !cosasImportantes) {
     return NextResponse.json({ error: 'No hay cambios para publicar' }, { status: 400 })
   }
 
@@ -42,6 +46,10 @@ export async function POST(req: Request) {
 
     if (faq) {
       files.push({ path: 'config/faq.ts', content: generateFaqTs(faq) })
+    }
+
+    if (cosasImportantes) {
+      files.push({ path: 'config/cosas-importantes.ts', content: generateCosasImportantesTs(cosasImportantes) })
     }
 
     await publishFiles(files, 'admin: publicar cambios del sitio')

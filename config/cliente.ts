@@ -61,7 +61,14 @@ export const Cliente = {
       "Envío gratis a todo el país",
       "2 años de garantía oficial"
     ],
-    "imagen": ""
+    "imagen": "",
+    "imagenIzquierda": "",
+    "imagenesHero": [] as unknown as readonly string[],
+    "heroBadges": [
+      { "linea1": "Certificada", "linea2": "Demostradora oficial", "icono": "shield" },
+      { "linea1": "200+", "linea2": "Clientes felices", "icono": "users" },
+      { "linea1": "Siempre", "linea2": "Envío gratis", "icono": "truck" }
+    ] as unknown as readonly { linea1: string; linea2: string; icono: string }[]
   },
   "imagenes": {
     "og": "",

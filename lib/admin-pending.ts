@@ -9,10 +9,11 @@ export const PENDING_KEY = 'admin_pending'
 
 /** Claves de borrador por sección (para restauración al recargar) */
 export const DRAFT_KEYS: Record<string, string> = {
-  contenido:   'admin_contenido_draft',
-  productos:   'admin_productos_draft',
-  descuentos:  'admin_descuentos_draft',
-  promociones: 'admin_promociones_draft',
+  contenido:        'admin_contenido_draft',
+  productos:        'admin_productos_draft',
+  descuentos:       'admin_descuentos_draft',
+  promociones:      'admin_promociones_draft',
+  cosasImportantes: 'admin_cosas_importantes_draft',
 }
 
 /**

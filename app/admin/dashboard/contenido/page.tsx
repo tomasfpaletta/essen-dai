@@ -8,6 +8,8 @@ import { writePendingSection, DRAFT_KEYS, PUBLISHED_EVENT } from '@/lib/admin-pe
 
 const STORAGE_KEY = DRAFT_KEYS.contenido
 
+const initialHeroRaw = Cliente.hero as Record<string, unknown>
+
 const FONT_OPTIONS = [
   { id: 'moderna',    label: 'Moderna',     heading: 'Fredoka One',        body: 'Plus Jakarta Sans' },
   { id: 'elegante',   label: 'Elegante',    heading: 'Playfair Display',   body: 'Lato' },
@@ -17,9 +19,13 @@ const FONT_OPTIONS = [
   { id: 'manuscrita', label: 'Manuscrita',  heading: 'Dancing Script',     body: 'Plus Jakarta Sans' },
 ]
 
+type HeroBadge = { linea1: string; linea2: string; icono: string }
+
 type HeroData = {
   badge: string; titulo1: string; titulo2: string; subtitulo: string
   descripcion: string; cta1Texto: string; cta2Texto: string; stats: string[]
+  imagen: string; imagenIzquierda: string; imagenesHero: string[]
+  heroBadges: HeroBadge[]
 }
 
 type SumateData = {
@@ -104,7 +110,18 @@ export default function ContenidoPage() {
   const currentSumate = (Cliente as Record<string, unknown>).sumateEquipo as SumateData | undefined
   const currentEditorial = (Cliente as Record<string, unknown>).editorial as EditorialData | undefined
 
-  const [hero, setHero] = useState<HeroData>({ ...Cliente.hero, stats: [...Cliente.hero.stats] })
+  const [hero, setHero] = useState<HeroData>({
+    ...Cliente.hero,
+    stats: [...Cliente.hero.stats],
+    imagen: (initialHeroRaw.imagen as string) ?? '',
+    imagenIzquierda: (initialHeroRaw.imagenIzquierda as string) ?? '',
+    imagenesHero: (initialHeroRaw.imagenesHero as string[]) ?? [],
+    heroBadges: (initialHeroRaw.heroBadges as HeroBadge[]) ?? [
+      { linea1: 'Certificada', linea2: 'Demostradora oficial', icono: 'shield' },
+      { linea1: '200+',        linea2: 'Clientes felices',     icono: 'users'  },
+      { linea1: 'Siempre',     linea2: 'Envío gratis',         icono: 'truck'  },
+    ],
+  })
   const [fuente, setFuente] = useState(currentFuente)
   const [sumate, setSumate] = useState<SumateData>(currentSumate ?? {
     visible: true,
@@ -153,6 +170,12 @@ export default function ContenidoPage() {
   const [dirtyFaq, setDirtyFaq] = useState(false)
   const hasChanges = dirtyCliente || dirtyVideos || dirtyTestimonios || dirtyFaq
 
+
+  // Imágenes del Hero
+  const heroIzqRef      = useRef<HTMLInputElement>(null)
+  const heroRotanteRef  = useRef<HTMLInputElement>(null)
+  const [heroIzqUploading, setHeroIzqUploading]         = useState(false)
+  const [heroRotanteUploading, setHeroRotanteUploading] = useState(false)
 
   // Imagen Sumate al Equipo
   const sumateImgRef = useRef<HTMLInputElement>(null)
@@ -300,6 +323,51 @@ export default function ContenidoPage() {
     }); markFaq()
   }
 
+  // Badges del hero
+  function patchBadge(idx: number, k: keyof HeroBadge, v: string) {
+    setHero(prev => {
+      const badges = [...prev.heroBadges]
+      badges[idx] = { ...badges[idx], [k]: v }
+      return { ...prev, heroBadges: badges }
+    }); markCliente()
+  }
+
+  async function uploadHeroIzq(file: File) {
+    setHeroIzqUploading(true)
+    try {
+      const fd = new FormData()
+      fd.append('file', file)
+      fd.append('filename', 'hero-izquierda')
+      fd.append('folder', 'hero')
+      const res = await fetch('/api/admin/upload', { method: 'POST', body: fd })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error)
+      setHero(prev => ({ ...prev, imagenIzquierda: data.path })); markCliente()
+    } catch (e: unknown) {
+      alert(e instanceof Error ? e.message : 'Error al subir imagen')
+    } finally { setHeroIzqUploading(false) }
+  }
+
+  async function uploadHeroRotante(file: File) {
+    setHeroRotanteUploading(true)
+    try {
+      const fd = new FormData()
+      fd.append('file', file)
+      fd.append('filename', `hero-rotante-${Date.now()}`)
+      fd.append('folder', 'hero')
+      const res = await fetch('/api/admin/upload', { method: 'POST', body: fd })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error)
+      setHero(prev => ({ ...prev, imagenesHero: [...prev.imagenesHero, data.path] })); markCliente()
+    } catch (e: unknown) {
+      alert(e instanceof Error ? e.message : 'Error al subir imagen')
+    } finally { setHeroRotanteUploading(false) }
+  }
+
+  function removeHeroRotante(idx: number) {
+    setHero(prev => ({ ...prev, imagenesHero: prev.imagenesHero.filter((_, i) => i !== idx) })); markCliente()
+  }
+
   async function uploadSumateImg(file: File) {
     setSumateImgUploading(true)
     try {
@@ -423,6 +491,97 @@ export default function ContenidoPage() {
           ))}
         </div>
         <button onClick={addStat} className="text-xs text-teal hover:text-teal-dark font-medium">+ Agregar estadística</button>
+      </Seccion>
+
+      {/* ── Imágenes del Hero ── */}
+      <Seccion title="Fotos del Hero — Imágenes de Daisy">
+        <p className="text-xs text-texto-muted -mt-1">Foto fija (izquierda) y galería rotante (derecha) que se muestran a los costados del texto principal en desktop.</p>
+
+        {/* Foto izquierda — fija */}
+        <div>
+          <label className="block text-xs font-semibold text-texto mb-2">📸 Foto izquierda (fija)</label>
+          <div className="flex items-start gap-4">
+            <div
+              className="w-24 h-32 rounded-xl border-2 border-dashed border-teal/20 overflow-hidden flex-shrink-0 cursor-pointer hover:border-teal/40 transition-colors bg-fondo flex items-center justify-center relative"
+              onClick={() => heroIzqRef.current?.click()}
+            >
+              {hero.imagenIzquierda
+                ? <img src={hero.imagenIzquierda} alt="hero izq" className="w-full h-full object-cover" /> // eslint-disable-line @next/next/no-img-element
+                : <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-8 h-8 text-gray-300"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4.418 3.582-8 8-8s8 3.582 8 8"/></svg>
+              }
+              {heroIzqUploading && (
+                <div className="absolute inset-0 bg-white/80 flex items-center justify-center">
+                  <svg className="animate-spin w-5 h-5 text-teal" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v4m0 12v4"/></svg>
+                </div>
+              )}
+            </div>
+            <div className="flex flex-col gap-2 pt-1">
+              <button onClick={() => heroIzqRef.current?.click()} disabled={heroIzqUploading}
+                className="text-xs text-teal border border-teal/30 font-semibold px-4 py-2 rounded-xl hover:bg-teal/5 transition-colors disabled:opacity-50">
+                {hero.imagenIzquierda ? 'Cambiar foto' : 'Subir foto'}
+              </button>
+              {hero.imagenIzquierda && (
+                <button onClick={() => { setHero(prev => ({ ...prev, imagenIzquierda: '' })); markCliente() }}
+                  className="text-xs text-red-400 hover:text-red-600 transition-colors">Quitar foto</button>
+              )}
+              <p className="text-xs text-texto-muted">Recomendado: formato 3:4 o similar</p>
+            </div>
+          </div>
+          <input ref={heroIzqRef} type="file" accept="image/*" className="hidden"
+            onChange={e => { const f = e.target.files?.[0]; if (f) uploadHeroIzq(f); e.target.value = '' }} />
+        </div>
+
+        {/* Fotos rotantes — derecha */}
+        <div>
+          <label className="block text-xs font-semibold text-texto mb-2">🔄 Fotos rotantes (derecha)</label>
+          <div className="flex flex-wrap gap-3 mb-3">
+            {hero.imagenesHero.map((src, i) => (
+              <div key={src} className="relative w-20 h-28 rounded-xl overflow-hidden border border-teal/15 flex-shrink-0 group">
+                <img src={src} alt={`hero ${i+1}`} className="w-full h-full object-cover" /> {/* eslint-disable-line @next/next/no-img-element */}
+                <button
+                  onClick={() => removeHeroRotante(i)}
+                  className="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                >✕</button>
+                <span className="absolute bottom-1 left-1 text-[10px] text-white bg-black/50 rounded px-1">{i+1}</span>
+              </div>
+            ))}
+            <button
+              onClick={() => heroRotanteRef.current?.click()}
+              disabled={heroRotanteUploading}
+              className="w-20 h-28 rounded-xl border-2 border-dashed border-teal/20 hover:border-teal/40 flex flex-col items-center justify-center gap-1 text-texto-muted hover:text-teal transition-colors flex-shrink-0 text-xs font-medium"
+            >
+              {heroRotanteUploading
+                ? <svg className="animate-spin w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v4m0 12v4"/></svg>
+                : <><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span>Agregar</span></>
+              }
+            </button>
+          </div>
+          <input ref={heroRotanteRef} type="file" accept="image/*" className="hidden"
+            onChange={e => { const f = e.target.files?.[0]; if (f) uploadHeroRotante(f); e.target.value = '' }} />
+          <p className="text-xs text-texto-muted">Las fotos rotan automáticamente cada 5 segundos. Podés agregar varias.</p>
+        </div>
+
+        {/* Badges del hero */}
+        <div>
+          <label className="block text-xs font-semibold text-texto mb-2">🏷️ Badges flotantes (3 tarjetitas)</label>
+          <div className="space-y-3">
+            {(['shield','users','truck'] as const).map((icono, i) => {
+              const labels = ['Badge izquierdo (Certificada)', 'Badge derecho superior (clientes)', 'Badge derecho inferior (envío)']
+              const badge = hero.heroBadges[i] ?? { linea1: '', linea2: '', icono }
+              return (
+                <div key={icono} className="flex gap-3 items-center">
+                  <span className="text-xs text-texto-muted w-40 flex-shrink-0">{labels[i]}</span>
+                  <input value={badge.linea1} onChange={e => patchBadge(i, 'linea1', e.target.value)}
+                    placeholder="Línea 1"
+                    className="flex-1 px-3 py-1.5 rounded-xl border border-teal/20 focus:outline-none focus:border-teal text-sm bg-white text-texto" />
+                  <input value={badge.linea2} onChange={e => patchBadge(i, 'linea2', e.target.value)}
+                    placeholder="Línea 2"
+                    className="flex-1 px-3 py-1.5 rounded-xl border border-teal/20 focus:outline-none focus:border-teal text-sm bg-white text-texto" />
+                </div>
+              )
+            })}
+          </div>
+        </div>
       </Seccion>
 
       {/* ── Videos ── */}
