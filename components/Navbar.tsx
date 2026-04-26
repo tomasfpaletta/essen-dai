@@ -13,11 +13,19 @@ const LINKS = [
 
 function IgIcon() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
       strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
-      <circle cx="12" cy="12" r="4"/>
-      <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none"/>
+      <defs>
+        <linearGradient id="ig-nav" x1="0%" y1="100%" x2="100%" y2="0%">
+          <stop offset="0%"   stopColor="#FCAF45"/>
+          <stop offset="35%"  stopColor="#FD1D1D"/>
+          <stop offset="70%"  stopColor="#E1306C"/>
+          <stop offset="100%" stopColor="#833AB4"/>
+        </linearGradient>
+      </defs>
+      <rect x="2" y="2" width="20" height="20" rx="5" ry="5" stroke="url(#ig-nav)"/>
+      <circle cx="12" cy="12" r="4" stroke="url(#ig-nav)"/>
+      <circle cx="17.5" cy="6.5" r="0.5" fill="url(#ig-nav)" stroke="none"/>
     </svg>
   );
 }
@@ -80,17 +88,10 @@ export default function Navbar() {
 
         {/* Instagram */}
         <a href={Cliente.instagram.url} target="_blank" rel="noopener noreferrer"
-          className="flex-shrink-0 p-1.5 rounded-lg transition-all"
-          style={{ color: scrolled ? "rgba(26,51,48,0.65)" : "rgba(255,255,255,0.7)" }}
+          className="flex-shrink-0 p-1.5 rounded-lg transition-all hover:scale-110"
           title={`@${Cliente.instagram.usuario}`}
-          onMouseEnter={e => {
-            (e.currentTarget as HTMLAnchorElement).style.color = "#58A39D";
-            (e.currentTarget as HTMLAnchorElement).style.background = scrolled ? "rgba(88,163,157,0.1)" : "rgba(255,255,255,0.1)";
-          }}
-          onMouseLeave={e => {
-            (e.currentTarget as HTMLAnchorElement).style.color = scrolled ? "rgba(26,51,48,0.65)" : "rgba(255,255,255,0.7)";
-            (e.currentTarget as HTMLAnchorElement).style.background = "";
-          }}
+          onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background = scrolled ? "rgba(131,58,180,0.08)" : "rgba(255,255,255,0.1)" }}
+          onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background = "" }}
         >
           <IgIcon />
         </a>

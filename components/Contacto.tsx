@@ -2,11 +2,19 @@ import { Cliente } from "@/config/cliente";
 
 function IgIcon({ size = 20 }: { size?: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
       strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
-      <circle cx="12" cy="12" r="4"/>
-      <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none"/>
+      <defs>
+        <linearGradient id="ig-contact" x1="0%" y1="100%" x2="100%" y2="0%">
+          <stop offset="0%"   stopColor="#FCAF45"/>
+          <stop offset="35%"  stopColor="#FD1D1D"/>
+          <stop offset="70%"  stopColor="#E1306C"/>
+          <stop offset="100%" stopColor="#833AB4"/>
+        </linearGradient>
+      </defs>
+      <rect x="2" y="2" width="20" height="20" rx="5" ry="5" stroke="url(#ig-contact)"/>
+      <circle cx="12" cy="12" r="4" stroke="url(#ig-contact)"/>
+      <circle cx="17.5" cy="6.5" r="0.5" fill="url(#ig-contact)" stroke="none"/>
     </svg>
   );
 }
@@ -44,7 +52,7 @@ export default function Contacto() {
             <a href={Cliente.instagram.url} target="_blank" rel="noopener noreferrer"
               className="group flex items-center justify-between w-full bg-lila/10 hover:bg-lila/20 border border-lila/20 hover:border-lila/50 px-8 py-6 rounded-2xl transition-all">
               <div className="flex items-center gap-3">
-                <span className="text-lila/80 group-hover:text-lila transition-colors"><IgIcon size={20} /></span>
+                <span><IgIcon size={20} /></span>
                 <div>
                   <p className="font-bold text-white text-lg">Instagram</p>
                   <p className="text-white/40 text-sm">@{Cliente.instagram.usuario}</p>
