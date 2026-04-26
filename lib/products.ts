@@ -52,7 +52,7 @@ export const productos: Producto[] = [
   },
   {
     "id": "cacerola-24cm",
-    "nombre": "ni idea",
+    "nombre": "hola",
     "categoria": "contemporanea",
     "descripcion": "Pieza ideal para familia de 4. Base de aluminio fundido y revestimiento antiadherente.",
     "tags": [

@@ -64,14 +64,26 @@ export const Cliente = {
     "imagen": "",
     "imagenIzquierda": "/images/hero/hero-izquierda.webp",
     "imagenesHero": [
-      "/images/hero/hero-rotante-1777239507088.webp",
-      "/images/hero/hero-rotante-1777239511800.webp"
-    ] as unknown as readonly string[],
+      "/images/hero/hero-rotante-1777240220828.webp",
+      "/images/hero/hero-rotante-1777240227187.webp"
+    ],
     "heroBadges": [
-      { "linea1": "Certificada", "linea2": "Demostradora oficial", "icono": "shield" },
-      { "linea1": "200+", "linea2": "Clientes felices", "icono": "users" },
-      { "linea1": "Siempre", "linea2": "Envío gratis", "icono": "truck" }
-    ] as unknown as readonly { linea1: string; linea2: string; icono: string }[]
+      {
+        "linea1": "Certificada",
+        "linea2": "Demostradora oficial",
+        "icono": "shield"
+      },
+      {
+        "linea1": "200+",
+        "linea2": "Clientes felices",
+        "icono": "users"
+      },
+      {
+        "linea1": "Siempre",
+        "linea2": "Envío gratis",
+        "icono": "truck"
+      }
+    ]
   },
   "imagenes": {
     "og": "",

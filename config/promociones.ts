@@ -43,16 +43,6 @@ export const promocionesBanner: PromocionesConfig = {
 
 export const promocionesItems: PromoItem[] = [
   {
-    "id": "promo-nuit",
-    "titulo": "Línea Nuit",
-    "descripcion": "Elegancia en negro mate. Antiadherente premium de triple capa.",
-    "badge": "Edición Limitada",
-    "colorFondo": "#1C1C1E",
-    "colorTexto": "#FFFFFF",
-    "imagen": "/images/promociones/promo-promo-nuit-combo-4x3-terra.webp",
-    "activo": true
-  },
-  {
     "id": "promo-4x3",
     "titulo": "4 x 3 en Cacerolas",
     "descripcion": "Llevá 4 cacerolas y pagás solo 3. Hasta fin de stock.",
@@ -60,6 +50,16 @@ export const promocionesItems: PromoItem[] = [
     "colorFondo": "#58A39D",
     "colorTexto": "#FFFFFF",
     "imagen": "/images/promociones/promo-promo-4x3-a40d1d1b-fb8b-4f5f-b7d3-d7a81b35b2f1.webp",
+    "activo": true
+  },
+  {
+    "id": "promo-nuit",
+    "titulo": "Línea Nuit",
+    "descripcion": "Elegancia en negro mate. Antiadherente premium de triple capa.",
+    "badge": "Edición Limitada",
+    "colorFondo": "#1C1C1E",
+    "colorTexto": "#FFFFFF",
+    "imagen": "/images/promociones/promo-promo-nuit-combo-4x3-terra.webp",
     "activo": true
   },
   {
