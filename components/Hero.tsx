@@ -85,9 +85,9 @@ export default function Hero() {
           {/* ── Columna izquierda: foto Dai ── */}
           {(tieneIzq || tieneImagenes) && (
             <div className="hidden lg:block relative">
-              <div className="relative rounded-3xl overflow-hidden w-64 xl:w-72 aspect-[3/4] shadow-2xl shadow-black/40">
+              <div className="relative rounded-3xl overflow-hidden w-56 xl:w-64 aspect-[3/5] shadow-2xl shadow-black/40">
                 {tieneIzq ? (
-                  <Image src={imagenIzquierda} alt="Daisy Benítez" fill className="object-cover object-top" sizes="300px" priority />
+                  <Image src={imagenIzquierda} alt="Daisy Benítez" fill className="object-cover object-top" sizes="280px" priority />
                 ) : (
                   /* Placeholder elegante si no hay imagen */
                   <div className="absolute inset-0 flex items-center justify-center"
