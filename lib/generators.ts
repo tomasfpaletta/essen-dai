@@ -179,3 +179,42 @@ export type FaqItem = {
 export const faqItems: FaqItem[] = ${JSON.stringify(list, null, 2)};
 `
 }
+
+/** Genera el contenido de config/cosas-importantes.ts */
+export function generateCosasImportantesTs(data: {
+  config: Record<string, unknown>
+  secciones: unknown[]
+}): string {
+  return `// ─────────────────────────────────────────────────────────────────────────────
+//  COSAS IMPORTANTES — Guías, consejos y recursos sobre productos Essen
+//  Editable desde el panel de administración
+// ─────────────────────────────────────────────────────────────────────────────
+
+export type CosaItem = {
+  id: string
+  tipo: 'texto' | 'video' | 'consejo'
+  titulo?: string
+  contenido: string
+}
+
+export type SeccionImportante = {
+  id: string
+  titulo: string
+  descripcion?: string
+  emoji?: string
+  items: CosaItem[]
+  activo: boolean
+}
+
+export type CosasImportantesConfig = {
+  visible: boolean
+  titulo: string
+  descripcion: string
+  urlSlug: string
+}
+
+export const cosasImportantesConfig: CosasImportantesConfig = ${JSON.stringify(data.config, null, 2)};
+
+export const cosasImportantes: SeccionImportante[] = ${JSON.stringify(data.secciones, null, 2)};
+`
+}

@@ -1,9 +1,12 @@
 "use client";
 import { useState } from "react";
+import Link from "next/link";
 import { faqItems, type FaqItem } from "@/config/faq";
+import { cosasImportantesConfig } from "@/config/cosas-importantes";
 
 export default function FAQ() {
   const [open, setOpen] = useState<string | null>(null);
+  const cosasVisible = cosasImportantesConfig.visible;
 
   return (
     <section id="faq" className="py-24 bg-fondo px-6 sm:px-12 lg:px-20">
@@ -53,6 +56,30 @@ export default function FAQ() {
             </div>
           ))}
         </div>
+
+        {/* ── Banner Cosas importantes ── */}
+        {cosasVisible && (
+          <div className="mt-12 rounded-3xl overflow-hidden"
+            style={{ background: "linear-gradient(135deg,#1A3330 0%,#0d2622 100%)" }}>
+            <div className="flex flex-col sm:flex-row items-center gap-5 p-7">
+              <div className="text-5xl flex-shrink-0">📋</div>
+              <div className="flex-1 text-center sm:text-left">
+                <p className="text-teal text-xs font-bold uppercase tracking-widest mb-1">Recursos</p>
+                <h3 className="font-heading text-xl text-white mb-1.5">{cosasImportantesConfig.titulo}</h3>
+                <p className="text-white/55 text-sm leading-relaxed">{cosasImportantesConfig.descripcion}</p>
+              </div>
+              <Link
+                href="/cosas-importantes"
+                className="flex-shrink-0 inline-flex items-center gap-2 bg-teal text-white font-bold px-5 py-3 rounded-xl text-sm hover:bg-teal/90 transition-colors shadow-lg shadow-teal/20"
+              >
+                Ver guías
+                <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+                  <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd"/>
+                </svg>
+              </Link>
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );
