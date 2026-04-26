@@ -37,5 +37,42 @@ export function clearAllPending() {
   Object.values(DRAFT_KEYS).forEach(k => localStorage.removeItem(k))
 }
 
+/** Claves de payload que cada sección escribe en PENDING_KEY */
+const SECTION_PAYLOAD_KEYS: Record<string, string[]> = {
+  contenido:        ['cliente', 'videos', 'testimonios', 'faq'],
+  productos:        ['productos', 'hex', 'categorias'],
+  descuentos:       ['descuentos'],
+  promociones:      ['promociones'],
+  cosasImportantes: ['cosasImportantes'],
+}
+
+/**
+ * Revierte una sección específica: elimina su borrador local
+ * y la quita del payload pendiente global.
+ */
+export function clearPendingSection(section: string) {
+  // Borrar draft de esa sección
+  const draftKey = DRAFT_KEYS[section]
+  if (draftKey) localStorage.removeItem(draftKey)
+
+  // Quitar del pending global
+  try {
+    const raw = localStorage.getItem(PENDING_KEY)
+    if (!raw) return
+    const data = JSON.parse(raw) as Record<string, unknown>
+    const sections = ((data._sections as string[]) ?? []).filter(s => s !== section)
+    // Eliminar las claves de payload de esa sección
+    ;(SECTION_PAYLOAD_KEYS[section] ?? []).forEach(k => delete data[k])
+    data._sections = sections
+    if (sections.length === 0) {
+      localStorage.removeItem(PENDING_KEY)
+    } else {
+      localStorage.setItem(PENDING_KEY, JSON.stringify(data))
+    }
+  } catch {
+    localStorage.removeItem(PENDING_KEY)
+  }
+}
+
 /** Evento que dispara el PublishBar al terminar correctamente */
 export const PUBLISHED_EVENT = 'admin-published'

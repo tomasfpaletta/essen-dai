@@ -4,7 +4,7 @@ import { Cliente } from '@/config/cliente'
 import { videos as initialVideos, type Video } from '@/config/videos'
 import { testimonios as initialTestimonios, type Testimonio } from '@/config/testimonios'
 import { faqItems as initialFaq, type FaqItem } from '@/config/faq'
-import { writePendingSection, DRAFT_KEYS, PUBLISHED_EVENT } from '@/lib/admin-pending'
+import { writePendingSection, clearPendingSection, DRAFT_KEYS, PUBLISHED_EVENT } from '@/lib/admin-pending'
 
 const STORAGE_KEY = DRAFT_KEYS.contenido
 
@@ -434,7 +434,39 @@ export default function ContenidoPage() {
           <p className="text-texto-muted text-sm mt-1">Textos, estilo, videos y sección de equipo.</p>
         </div>
         {hasChanges && (
-          <span className="text-xs bg-amber-100 text-amber-700 px-3 py-1.5 rounded-full font-medium flex-shrink-0">Sin publicar</span>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <button
+              onClick={() => {
+                if (!confirm('¿Revertir todos los cambios? Perderás las modificaciones sin publicar.')) return
+                clearPendingSection('contenido')
+                setHero({
+                  ...Cliente.hero,
+                  stats: [...Cliente.hero.stats],
+                  imagen: (initialHeroRaw.imagen as string) ?? '',
+                  imagenIzquierda: (initialHeroRaw.imagenIzquierda as string) ?? '',
+                  imagenesHero: (initialHeroRaw.imagenesHero as string[]) ?? [],
+                  heroBadges: (initialHeroRaw.heroBadges as HeroBadge[]) ?? [],
+                })
+                setFuente(currentFuente)
+                setSumate(currentSumate ?? {
+                  visible: true, badge: '', titulo: '', descripcion: '',
+                  beneficios: [], ctaTexto: '', imagenEquipo: '', badgeNumero: '', badgeTexto: '',
+                })
+                setEditorial(currentEditorial ?? {
+                  bio1: '', bio2: '', stats: [], bullets: [],
+                })
+                setVideosList(initialVideos.map(v => ({ ...v })))
+                setTestimoniosList(initialTestimonios.map(t => ({ ...t })))
+                setFaqList(initialFaq.map(f => ({ ...f })))
+                setDirtyCliente(false); setDirtyVideos(false)
+                setDirtyTestimonios(false); setDirtyFaq(false)
+              }}
+              className="text-xs text-red-400 hover:text-red-600 hover:bg-red-50 border border-red-200 px-3 py-1.5 rounded-full font-medium transition-colors"
+            >
+              Revertir cambios
+            </button>
+            <span className="text-xs bg-amber-100 text-amber-700 px-3 py-1.5 rounded-full font-medium">Sin publicar</span>
+          </div>
         )}
       </div>
 

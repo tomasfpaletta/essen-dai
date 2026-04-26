@@ -1,7 +1,7 @@
 'use client'
 import { useState, useRef, useEffect } from 'react'
 import { promocionesBanner, promocionesItems, type PromoItem, type PromocionesConfig } from '@/config/promociones'
-import { writePendingSection, PUBLISHED_EVENT } from '@/lib/admin-pending'
+import { writePendingSection, clearPendingSection, DRAFT_KEYS, PUBLISHED_EVENT } from '@/lib/admin-pending'
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 function uid() {
@@ -468,7 +468,23 @@ export default function PromocionesPage() {
           </p>
         </div>
         {hasChanges && (
-          <span className="text-xs bg-amber-100 text-amber-700 px-3 py-1.5 rounded-full font-medium flex-shrink-0">Sin publicar</span>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <button
+              onClick={() => {
+                if (!confirm('¿Revertir todos los cambios? Perderás las modificaciones sin publicar.')) return
+                clearPendingSection('promociones')
+                localStorage.removeItem(DRAFT_KEYS.promociones)
+                setBanner({ ...promocionesBanner })
+                setItems(promocionesItems.map(i => ({ ...i })))
+                setDirtyIds(new Set())
+                setHasChanges(false)
+              }}
+              className="text-xs text-red-400 hover:text-red-600 hover:bg-red-50 border border-red-200 px-3 py-1.5 rounded-full font-medium transition-colors"
+            >
+              Revertir cambios
+            </button>
+            <span className="text-xs bg-amber-100 text-amber-700 px-3 py-1.5 rounded-full font-medium">Sin publicar</span>
+          </div>
         )}
       </div>
 
