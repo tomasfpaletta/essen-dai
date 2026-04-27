@@ -5,7 +5,7 @@ export default function FloatingWA() {
   const waHref = `${Cliente.whatsapp.link}?text=${encodeURIComponent(Cliente.whatsapp.mensajeDefecto)}`;
 
   return (
-    <div className="fixed bottom-6 right-6 z-40">
+    <div className="fixed bottom-6 right-5 z-40">
       {/* Pulse ring */}
       <span className="absolute inset-0 rounded-full bg-teal/30 animate-pulse-ring" />
       <a href={waHref} target="_blank" rel="noopener noreferrer"

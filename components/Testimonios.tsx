@@ -27,7 +27,7 @@ export default function Testimonios() {
         <div className="text-center mb-10">
           <p className="text-teal text-xs font-semibold uppercase tracking-[0.2em] mb-2">Opiniones</p>
           <h2 className="font-heading text-texto text-2xl sm:text-3xl">
-            Lo que dicen las clientas
+            Lo que dicen nuestros clientes
           </h2>
         </div>
 

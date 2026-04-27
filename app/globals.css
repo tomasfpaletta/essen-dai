@@ -2,8 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Dancing+Script:wght@700&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Playfair+Display:wght@400;700&family=Cormorant+Garamond:wght@400;600;700&family=Bebas+Neue&family=Nunito:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&family=Lato:wght@300;400;700&display=swap');
-
 :root {
   --color-teal:   #58A39D;
   --color-aqua:   #89BCAF;

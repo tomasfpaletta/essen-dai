@@ -3,10 +3,10 @@ import { useState, useEffect, useCallback } from 'react'
 import { PENDING_KEY, clearAllPending, PUBLISHED_EVENT } from '@/lib/admin-pending'
 
 const SECTION_LABELS: Record<string, string> = {
-  contenido:   'Contenido web',
-  productos:   'Productos',
-  promociones: 'Promociones',
-  descuentos:  'Descuentos',
+  contenido:        'Contenido web',
+  productos:        'Productos',
+  promociones:      'Promociones',
+  cosasImportantes: 'Cosas importantes',
 }
 
 export default function PublishBar() {

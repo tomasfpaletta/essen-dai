@@ -10,12 +10,23 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: { params: { id: string } }) {
   const p = getProductoById(params.id)
   if (!p) return {}
+  const base = Cliente.seo.baseUrl
+  // Imagen OG: primera variante con foto, si no la OG general del sitio
+  const primeraFoto = p.variantes.find(v => v.imagen)?.imagen
+  const ogImage = primeraFoto
+    ? `${base}${primeraFoto}`
+    : `${base}${Cliente.seo.ogImage}`
   return {
     title: `${p.nombre} | ${Cliente.marca}`,
     description: p.descripcion,
     openGraph: {
       title: `${p.nombre} | ${Cliente.marca}`,
       description: p.descripcion,
+      url: `${base}/productos/${p.id}`,
+      siteName: Cliente.marca,
+      locale: 'es_AR',
+      type: 'website',
+      images: [{ url: ogImage, width: 1200, height: 630, alt: p.nombre }],
     },
   }
 }

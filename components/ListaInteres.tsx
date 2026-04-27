@@ -23,7 +23,7 @@ export default function ListaInteres() {
       {/* ── Botón flotante ── */}
       <button
         onClick={() => setOpen(true)}
-        className="fixed bottom-24 right-5 z-40 flex items-center gap-2 bg-teal text-white font-bold px-4 py-3 rounded-2xl shadow-lg shadow-teal/30 hover:bg-teal-dark transition-colors text-sm"
+        className="fixed bottom-[5.5rem] right-5 z-40 flex items-center gap-2 bg-teal text-white font-bold px-4 py-3 rounded-2xl shadow-lg shadow-teal/30 hover:bg-teal-dark transition-colors text-sm"
         style={{ backdropFilter: 'blur(8px)' }}
       >
         <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">

@@ -11,7 +11,6 @@ export const PENDING_KEY = 'admin_pending'
 export const DRAFT_KEYS: Record<string, string> = {
   contenido:        'admin_contenido_draft',
   productos:        'admin_productos_draft',
-  descuentos:       'admin_descuentos_draft',
   promociones:      'admin_promociones_draft',
   cosasImportantes: 'admin_cosas_importantes_draft',
 }
@@ -41,7 +40,6 @@ export function clearAllPending() {
 const SECTION_PAYLOAD_KEYS: Record<string, string[]> = {
   contenido:        ['cliente', 'videos', 'testimonios', 'faq'],
   productos:        ['productos', 'hex', 'categorias'],
-  descuentos:       ['descuentos'],
   promociones:      ['promociones'],
   cosasImportantes: ['cosasImportantes'],
 }

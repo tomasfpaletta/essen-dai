@@ -56,30 +56,6 @@ export const promocionesItems: PromoItem[] = ${JSON.stringify(data.items, null, 
 `
 }
 
-/** Genera el contenido de config/descuentos.ts */
-export function generateDescuentosTs(data: {
-  descuentos: unknown[]
-  config: Record<string, unknown>
-}): string {
-  return `// ─────────────────────────────────────────────────────────────────────────────
-//  DESCUENTOS BANCARIOS — editable desde el panel admin
-//  Actualizar cada mes con las promos vigentes
-// ─────────────────────────────────────────────────────────────────────────────
-export type Descuento = {
-  banco: string
-  logo: string
-  descuento: string
-  detalle: string
-  condicion: string
-  color: string
-  activo: boolean
-}
-
-export const descuentos: Descuento[] = ${JSON.stringify(data.descuentos, null, 2)};
-
-export const descuentosConfig = ${JSON.stringify(data.config, null, 2)};
-`
-}
 
 /** Genera el contenido de lib/products.ts */
 export function generateProductsTs(

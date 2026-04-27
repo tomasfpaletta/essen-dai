@@ -164,6 +164,32 @@ export default function Hero() {
               </a>
             </div>
 
+            {/* ── Imagen mobile (solo visible en < lg) ── */}
+            {tieneImagenes && (
+              <div className="block lg:hidden mt-8 relative rounded-3xl overflow-hidden mx-auto shadow-2xl shadow-black/40"
+                style={{ width: "min(260px, 72vw)", aspectRatio: "3/4" }}>
+                {imagenesHero.map((src, i) => (
+                  <Image
+                    key={src}
+                    src={src}
+                    alt={`Essen Dai ${i + 1}`}
+                    fill
+                    className={`object-cover object-top transition-opacity duration-700 ${i === imgIdx ? "opacity-100" : "opacity-0"}`}
+                    sizes="260px"
+                    priority={i === 0}
+                  />
+                ))}
+                <div className="absolute bottom-0 inset-x-0 h-1/3 bg-gradient-to-t from-black/50 to-transparent" />
+                {imagenesHero.length > 1 && (
+                  <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+                    {imagenesHero.map((_, i) => (
+                      <span key={i} className={`rounded-full transition-all ${i === imgIdx ? "w-4 h-1.5 bg-white" : "w-1.5 h-1.5 bg-white/40"}`} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
           </div>
 
           {/* ── Columna derecha: imágenes rotantes ── */}

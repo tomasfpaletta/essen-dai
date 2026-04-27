@@ -68,7 +68,7 @@ export default function Contacto() {
               </svg>
               <div>
                 <p className="text-white/70 font-medium text-sm">{Cliente.ciudad}</p>
-                <p className="text-white/30 text-xs">Lunes a sábado · 9 a 20 hs</p>
+                <p className="text-white/30 text-xs">{Cliente.provincia}, Argentina</p>
               </div>
             </div>
           </div>

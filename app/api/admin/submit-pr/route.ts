@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { publishFiles } from '@/lib/github'
 import {
-  generateClienteTs, generateProductsTs, generateDescuentosTs,
+  generateClienteTs, generateProductsTs,
   generatePromocionesTs, generateVideosTs, generateTestimoniosTs,
   generateFaqTs, generateCosasImportantesTs,
 } from '@/lib/generators'
@@ -9,9 +9,9 @@ import {
 export const maxDuration = 60
 
 export async function POST(req: Request) {
-  const { cliente, productos, hex, categorias, descuentos, promociones, videos, testimonios, faq, cosasImportantes } = await req.json()
+  const { cliente, productos, hex, categorias, promociones, videos, testimonios, faq, cosasImportantes } = await req.json()
 
-  if (!cliente && !productos && !descuentos && !promociones && !videos && !testimonios && !faq && !cosasImportantes) {
+  if (!cliente && !productos && !promociones && !videos && !testimonios && !faq && !cosasImportantes) {
     return NextResponse.json({ error: 'No hay cambios para publicar' }, { status: 400 })
   }
 
@@ -26,10 +26,6 @@ export async function POST(req: Request) {
 
     if (productos) {
       files.push({ path: 'lib/products.ts', content: generateProductsTs(hex, productos, categorias) })
-    }
-
-    if (descuentos) {
-      files.push({ path: 'config/descuentos.ts', content: generateDescuentosTs(descuentos) })
     }
 
     if (promociones) {
