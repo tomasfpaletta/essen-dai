@@ -25,7 +25,7 @@ export const Cliente = {
     "url": "https://www.instagram.com/master_essen"
   },
   "seo": {
-    "baseUrl": "https://essendai.com",
+    "baseUrl": "https://masteressen.com",
     "titulo": "Essen Dai | Productos Essen en Buenos Aires — Daisy Benítez",
     "descripcion": "Comprá productos Essen originales con tu distribuidora oficial en Buenos Aires. Cacerolas, sartenes y sets con envío a todo Argentina. Consultá por WhatsApp.",
     "keywords": [
