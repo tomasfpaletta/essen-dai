@@ -11,7 +11,7 @@ export default function AdminLogin() {
   // En desarrollo, redirigir directo al dashboard sin contraseña
   useEffect(() => {
     if (process.env.NODE_ENV === 'development') {
-      router.replace('/admin/dashboard')
+      router.replace('/panel-dai/dashboard')
     }
   }, [router])
 
@@ -28,7 +28,7 @@ export default function AdminLogin() {
       })
 
       if (res.ok) {
-        router.push('/admin/dashboard')
+        router.push('/panel-dai/dashboard')
       } else {
         const data = await res.json()
         setError(data.error || 'Error al iniciar sesión')
