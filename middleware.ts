@@ -21,14 +21,14 @@ export function middleware(request: NextRequest) {
   }
 
   // Si ya está logueado y va al login, redirigir al dashboard
-  if (pathname === '/admin') {
-    if (isAuth) return NextResponse.redirect(new URL('/admin/dashboard', request.url))
+  if (pathname === '/panel-dai') {
+    if (isAuth) return NextResponse.redirect(new URL('/panel-dai/dashboard', request.url))
     return NextResponse.next()
   }
 
   // Proteger todas las rutas del dashboard
-  if (pathname.startsWith('/admin/')) {
-    if (!isAuth) return NextResponse.redirect(new URL('/admin', request.url))
+  if (pathname.startsWith('/panel-dai/')) {
+    if (!isAuth) return NextResponse.redirect(new URL('/panel-dai', request.url))
     return NextResponse.next()
   }
 
@@ -36,5 +36,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin', '/admin/:path*', '/api/admin/:path*'],
+  matcher: ['/panel-dai', '/panel-dai/:path*', '/api/admin/:path*'],
 }
