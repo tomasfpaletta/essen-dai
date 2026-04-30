@@ -26,18 +26,15 @@ export const HEX: Record<string, string> = {
 export const productos: Producto[] = [
   {
     "id": "producto-1777129531995",
-    "nombre": "4x3",
-    "descripcion": "Descripción del producto.",
-    "categoria": "nuit",
-    "tags": [
-      "2.1lts",
-      "Linea economica"
-    ],
+    "nombre": "SET COMPLETO",
+    "descripcion": "Un combo para equipar toda tu cocina ",
+    "categoria": "contemporanea",
+    "tags": [],
     "variantes": [
       {
         "color": "Rosa",
         "hex": "#FFB6C1",
-        "imagen": "/images/products/producto-1777129531995-negro.webp"
+        "imagen": "/images/products/producto-1777129531995-rosa.webp"
       },
       {
         "color": "Terra",
@@ -46,9 +43,7 @@ export const productos: Producto[] = [
       }
     ],
     "destacado": true,
-    "ofertaEspecial": false,
-    "badge": "30% OFF",
-    "descuento": 30
+    "ofertaEspecial": false
   },
   {
     "id": "cacerola-24cm",
