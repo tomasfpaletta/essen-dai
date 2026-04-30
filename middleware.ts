@@ -8,7 +8,7 @@ export function middleware(request: NextRequest) {
   if (process.env.NODE_ENV === 'development') return NextResponse.next()
 
   const token = request.cookies.get('admin_token')?.value
-  const validToken = process.env.ADMIN_TOKEN
+  const validToken = process.env.ADMIN_TOKEN || process.env.ADMIN_PASSWORD
   const isAuth = !!(token && validToken && token === validToken)
 
   // Siempre permitir la API de login
