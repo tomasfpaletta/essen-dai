@@ -15,29 +15,84 @@ const GRADIENT_DIRECTIONS = [
   { label: '↙ Diagonal inv.', value: '225deg' },
 ]
 
+// ── Paletas de colores predefinidas ───────────────────────────────────────────
+const PALETTE_FONDO: { label: string; hex: string }[] = [
+  // Colores del sitio
+  { label: 'Teal',    hex: '#58A39D' },
+  { label: 'Verde',   hex: '#89BCAF' },
+  { label: 'Lila',    hex: '#BB9EC5' },
+  { label: 'Oscuro',  hex: '#1A3330' },
+  // Colores de las cacerolas
+  { label: 'Rosa',    hex: '#FFB6C1' },
+  { label: 'Capri',   hex: '#1A9EC0' },
+  { label: 'Terra',   hex: '#A0785A' },
+  { label: 'Cera',    hex: '#B5A89A' },
+  { label: 'Nuit',    hex: '#2D2D2D' },
+  { label: 'Coral',   hex: '#C17A5A' },
+  { label: 'Aqua',    hex: '#7EC8C8' },
+]
+
+const PALETTE_TEXTO: { label: string; hex: string }[] = [
+  { label: 'Blanco',  hex: '#FFFFFF' },
+  { label: 'Oscuro',  hex: '#1A3330' },
+  { label: 'Teal',    hex: '#58A39D' },
+  { label: 'Gris',    hex: '#555555' },
+]
+
 // ── Subcomponents ─────────────────────────────────────────────────────────────
-function ColorSwatch({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+function ColorPalette({
+  value, onChange, palette,
+}: {
+  value: string
+  onChange: (v: string) => void
+  palette: { label: string; hex: string }[]
+}) {
+  const isCustom = !palette.some(c => c.hex.toLowerCase() === value.toLowerCase())
+  const cpId = `cp-${palette[0].hex}`
   return (
-    <div className="flex items-center gap-2">
-      <div
-        className="w-7 h-7 rounded-lg border border-gray-200 flex-shrink-0 cursor-pointer"
-        style={{ background: value }}
-        onClick={() => (document.getElementById('__cp__' + value) as HTMLInputElement)?.click()}
-      />
-      <input
-        id={'__cp__' + value}
-        type="color"
-        value={value}
-        onChange={e => onChange(e.target.value)}
-        className="sr-only"
-      />
-      <input
-        type="text"
-        value={value}
-        onChange={e => onChange(e.target.value)}
-        className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm font-mono"
-        placeholder="#000000"
-      />
+    <div className="space-y-2">
+      <div className="flex flex-wrap gap-2">
+        {palette.map(c => {
+          const active = c.hex.toLowerCase() === value.toLowerCase()
+          return (
+            <button
+              key={c.hex}
+              type="button"
+              title={c.label}
+              onClick={() => onChange(c.hex)}
+              className="relative w-8 h-8 rounded-xl border-2 transition-all flex-shrink-0"
+              style={{
+                background: c.hex,
+                borderColor: active ? '#1A3330' : 'transparent',
+                boxShadow: active ? '0 0 0 2px white inset' : 'none',
+              }}
+            >
+              {active && (
+                <svg className="absolute inset-0 m-auto w-3.5 h-3.5" viewBox="0 0 20 20" fill="white" style={{ filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.4))' }}>
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
+                </svg>
+              )}
+            </button>
+          )
+        })}
+        {/* Otro */}
+        <label
+          title="Color personalizado"
+          className="relative w-8 h-8 rounded-xl border-2 cursor-pointer flex-shrink-0 overflow-hidden flex items-center justify-center bg-gray-100"
+          style={{ borderColor: isCustom ? '#1A3330' : '#E5E7EB' }}
+        >
+          <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 text-gray-400">
+            <path fillRule="evenodd" d="M4 2a2 2 0 00-2 2v11a3 3 0 106 0V4a2 2 0 00-2-2H4zm1 14a1 1 0 100-2 1 1 0 000 2zm5-1.757l4.9-4.9a2 2 0 000-2.828L13.485 5.1a2 2 0 00-2.828 0L10 5.757v8.486zM16 18H9.071l6-6H16a2 2 0 012 2v2a2 2 0 01-2 2z" clipRule="evenodd"/>
+          </svg>
+          <input id={cpId} type="color" value={isCustom ? value : '#58A39D'}
+            onChange={e => onChange(e.target.value)} className="absolute inset-0 opacity-0 cursor-pointer w-full h-full" />
+        </label>
+      </div>
+      {/* Hex actual */}
+      <div className="flex items-center gap-2">
+        <div className="w-4 h-4 rounded flex-shrink-0 border border-gray-200" style={{ background: value }} />
+        <span className="text-xs font-mono text-gray-500">{value}</span>
+      </div>
     </div>
   )
 }
@@ -536,10 +591,10 @@ export default function PromocionesPage() {
           <p className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-4">Gradiente del fondo</p>
           <div className="grid sm:grid-cols-3 gap-4">
             <Field label="Color inicio">
-              <ColorSwatch value={banner.gradienteDesde} onChange={v => patchBanner('gradienteDesde', v)} />
+              <ColorPalette value={banner.gradienteDesde} onChange={v => patchBanner('gradienteDesde', v)} palette={PALETTE_FONDO} />
             </Field>
             <Field label="Color final">
-              <ColorSwatch value={banner.gradienteHasta} onChange={v => patchBanner('gradienteHasta', v)} />
+              <ColorPalette value={banner.gradienteHasta} onChange={v => patchBanner('gradienteHasta', v)} palette={PALETTE_FONDO} />
             </Field>
             <Field label="Dirección">
               <select
@@ -687,10 +742,10 @@ export default function PromocionesPage() {
                   </Field>
                   <div className="space-y-4">
                     <Field label="Color de fondo">
-                      <ColorSwatch value={item.colorFondo} onChange={v => patchItem(item.id, 'colorFondo', v)} />
+                      <ColorPalette value={item.colorFondo} onChange={v => patchItem(item.id, 'colorFondo', v)} palette={PALETTE_FONDO} />
                     </Field>
                     <Field label="Color de texto">
-                      <ColorSwatch value={item.colorTexto} onChange={v => patchItem(item.id, 'colorTexto', v)} />
+                      <ColorPalette value={item.colorTexto} onChange={v => patchItem(item.id, 'colorTexto', v)} palette={PALETTE_TEXTO} />
                     </Field>
                   </div>
                   {/* Mini preview */}
