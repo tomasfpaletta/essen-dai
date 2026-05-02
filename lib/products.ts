@@ -86,10 +86,10 @@ export const productos: Producto[] = [
     categoria: "contemporanea",
     tags: ["2.2 lts", "Doble función", "Antiadherente", "Todas las cocinas"],
     variantes: [
-      { color: "Capri",     hex: "#1A9EC0", imagen: "/images/products/flip2-2-capri.webp"     },
-      { color: "Rosa",      hex: "#FFB6C1", imagen: "/images/products/flip2-2-rosa.webp"      },
-      { color: "Terra",     hex: "#A0785A", imagen: "/images/products/flip2-2-terra.webp"     },
-      { color: "Cera Forte",hex: "#B5A89A", imagen: "/images/products/flip2-2-cera-forte.webp"},
+      { color: "Capri",     hex: "#1A9EC0", imagen: "/images/products/flip2.2-capri.webp"     },
+      { color: "Rosa",      hex: "#FFB6C1", imagen: "/images/products/flip2.2-rosa.webp"      },
+      { color: "Terra",     hex: "#A0785A", imagen: "/images/products/flip2.2-terra.webp"     },
+      { color: "Cera Forte",hex: "#B5A89A", imagen: "/images/products/flip2.2-cera-forte.webp"},
     ],
     destacado: true,
     badge: "Favorita",
@@ -242,7 +242,7 @@ export const productos: Producto[] = [
     categoria: "combos",
     tags: ["5 piezas", "Ahorro en combo", "Incluye Flip"],
     variantes: [
-      { color: "Rosa", hex: "#FFB6C1", imagen: "/images/products/combo-flip2-2+-cacerola24+-cacerola18+-sarten24+-savarin24-rosa.webp" },
+      { color: "Rosa", hex: "#FFB6C1", imagen: "/images/products/combo-flip2.2+-cacerola24+-cacerola18+-sarten24+-savarin24-rosa.webp" },
     ],
     destacado: true,
     badge: "Combo premium",
@@ -278,7 +278,7 @@ export const productos: Producto[] = [
     categoria: "combos",
     tags: ["2 piezas", "Ahorro en combo", "Incluye Flip"],
     variantes: [
-      { color: "Terra", hex: "#A0785A", imagen: "/images/products/combo-sarten24+-flip2-2-terra.webp" },
+      { color: "Terra", hex: "#A0785A", imagen: "/images/products/combo-sarten24+-flip2.2-terra.webp" },
     ],
   },
 
