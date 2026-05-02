@@ -20,7 +20,8 @@ export const HEX: Record<string, string> = {
   "Terra": "#A0785A",
   "Cera Forte": "#B5A89A",
   "Nuit": "#2D2D2D",
-  "Unico": "#C17A5A"
+  "Unico": "#C17A5A",
+  "Aqua": "#89BCAF"
 };
 
 export const productos: Producto[] = [
@@ -151,6 +152,63 @@ export const productos: Producto[] = [
     ],
   },
 
+  {
+    id: "biferas-33x23",
+    nombre: "Biferas 33x23",
+    descripcion: "Plancha biferas de aluminio fundido con estrías para marcar carnes, vegetales y más. Distribución de calor uniforme y antiadherente de alta durabilidad.",
+    categoria: "contemporanea",
+    tags: ["33x23 cm", "Plancha", "Antiadherente", "Todas las cocinas"],
+    variantes: [
+      { color: "Unico", hex: "#C17A5A", imagen: "/images/products/biferas33x23.webp" },
+    ],
+  },
+
+  {
+    id: "pucherona-8.8lts",
+    nombre: "Pucherona 8.8lts",
+    descripcion: "La cacerola más grande de Essen. Ideal para cocinar para muchas personas: caldos, guisos y pucheros en grandes cantidades.",
+    categoria: "contemporanea",
+    tags: ["8.8 lts", "Gran capacidad", "Tapa vidrio", "Todas las cocinas"],
+    variantes: [
+      { color: "Aqua",  hex: "#89BCAF", imagen: "/images/products/pucherona8.8-lts-aqua.webp"  },
+      { color: "Terra", hex: "#A0785A", imagen: "/images/products/pucherona8.8-lts-terra.webp" },
+    ],
+  },
+
+  {
+    id: "sarten-baby-18",
+    nombre: "Sartén Baby 18",
+    descripcion: "Edición Limitada. Sartén pequeña con diseño exclusivo, perfecta para porciones individuales, huevos o para regalar.",
+    categoria: "contemporanea",
+    tags: ["18 cm", "Antiadherente", "Todas las cocinas"],
+    variantes: [
+      { color: "Unico", hex: "#C17A5A", imagen: "/images/products/sarten-baby18-edicion-limitada.webp" },
+    ],
+    badge: "Edición Limitada",
+  },
+
+  {
+    id: "jarro-quick",
+    nombre: "Jarro Quick",
+    descripcion: "Jarro de aluminio antiadherente con asa ergonómica. Ideal para leche, té, caldos y cualquier preparación líquida del día a día.",
+    categoria: "contemporanea",
+    tags: ["Antiadherente", "Todas las cocinas"],
+    variantes: [
+      { color: "Terra", hex: "#A0785A", imagen: "/images/products/jarro-quick-terra.webp" },
+    ],
+  },
+
+  {
+    id: "kamado",
+    nombre: "Kamado",
+    descripcion: "Cocción lenta y sabores profundos. El Kamado Essen combina la técnica ancestral de la cerámica con la tecnología antiadherente moderna.",
+    categoria: "contemporanea",
+    tags: ["Cocción lenta", "Antiadherente", "Todas las cocinas"],
+    variantes: [
+      { color: "Unico", hex: "#C17A5A", imagen: "/images/products/kamado.webp" },
+    ],
+  },
+
   // ── LÍNEA NUIT (económica) ───────────────────────────────────────────────────
 
   {
@@ -172,6 +230,41 @@ export const productos: Producto[] = [
     tags: ["29 cm", "Línea económica", "Tapa vidrio", "Todas las cocinas"],
     variantes: [
       { color: "Nuit", hex: "#2D2D2D", imagen: "/images/products/set-nuit29+-tapa-vidrio.webp" },
+    ],
+  },
+
+  // ── BAZAR ────────────────────────────────────────────────────────────────────
+
+  {
+    id: "multi-procesador-vegetales",
+    nombre: "Multi Procesador de Vegetales",
+    descripcion: "Procesador manual de vegetales Essen. Corta, pica y ralla en segundos sin electricidad. Práctico, fácil de limpiar y de guardar.",
+    categoria: "bazar",
+    tags: ["Sin electricidad", "Verduras y frutas"],
+    variantes: [
+      { color: "Unico", hex: "#C17A5A", imagen: "/images/products/multi-procesador-vegetales.webp" },
+    ],
+  },
+
+  {
+    id: "set-bowls",
+    nombre: "Set Bowls",
+    descripcion: "Set de bowls Essen apilables. Ideales para servir, preparar y guardar. Diseño moderno que va de la heladera a la mesa.",
+    categoria: "bazar",
+    tags: ["Set", "Apilables"],
+    variantes: [
+      { color: "Unico", hex: "#C17A5A", imagen: "/images/products/set-bowls.webp" },
+    ],
+  },
+
+  {
+    id: "set-utensillos",
+    nombre: "Set Utensillos Uso General",
+    descripcion: "Set completo de utensilios de cocina Essen. Espátulas, cucharones y más, diseñados para proteger las superficies antiadherentes.",
+    categoria: "bazar",
+    tags: ["Set", "Utensilios"],
+    variantes: [
+      { color: "Unico", hex: "#C17A5A", imagen: "/images/products/set-utensillos-uso-general.webp" },
     ],
   },
 
