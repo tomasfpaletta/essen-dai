@@ -104,7 +104,7 @@ export const Cliente = {
       "Respaldo de una marca con 30 años de historia"
     ],
     "ctaTexto": "Quiero ser emprendedora",
-    "imagenEquipo": "",
+    "imagenEquipo": "/images/equipo/equipo.webp",
     "badgeNumero": "30+",
     "badgeTexto": "años de marca"
   },
