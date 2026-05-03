@@ -40,13 +40,6 @@ type SumateData = {
   badgeTexto: string
 }
 
-type EditorialData = {
-  bio1: string
-  bio2: string
-  stats: Array<{ n: string; label: string }>
-  bullets: string[]
-}
-
 // ── Helpers de UI ─────────────────────────────────────────────────────────────
 function ChevronDown() {
   return <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 text-texto-light"><path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd"/></svg>
@@ -108,7 +101,6 @@ function uidItem() {
 export default function ContenidoPage() {
   const currentFuente = (Cliente as Record<string, unknown>).fuente as string || 'moderna'
   const currentSumate = (Cliente as Record<string, unknown>).sumateEquipo as SumateData | undefined
-  const currentEditorial = (Cliente as Record<string, unknown>).editorial as EditorialData | undefined
 
   const [hero, setHero] = useState<HeroData>({
     ...Cliente.hero,
@@ -133,23 +125,6 @@ export default function ContenidoPage() {
     imagenEquipo: '',
     badgeNumero: '30+',
     badgeTexto: 'años de marca',
-  })
-  const [editorial, setEditorial] = useState<EditorialData>(currentEditorial ?? {
-    bio1: 'Soy distribuidora oficial de Essen en Buenos Aires.',
-    bio2: 'Cada producto que ofrezco es 100% original.',
-    stats: [
-      { n: '200+', label: 'familias equipadas' },
-      { n: '30', label: 'años de la marca Essen' },
-      { n: '2', label: 'años de garantía oficial' },
-      { n: '100%', label: 'productos originales' },
-    ],
-    bullets: [
-      'Entrega a todo Argentina con Andreani',
-      'Pago en cuotas sin interés',
-      'Asesoramiento personalizado por WhatsApp',
-      'Garantía oficial de 2 años en todos los productos',
-      'Stock permanente disponible',
-    ],
   })
   const [testimoniosList, setTestimoniosList] = useState<Testimonio[]>(
     initialTestimonios.map(t => ({ ...t }))
@@ -189,7 +164,6 @@ export default function ContenidoPage() {
         if (d.hero)        { setHero(prev => ({ ...prev, ...d.hero, stats: Array.isArray(d.hero.stats) ? d.hero.stats : prev.stats })); setDirtyCliente(true) }
         if (d.fuente)      { setFuente(d.fuente); setDirtyCliente(true) }
         if (d.sumate)      { setSumate(prev => ({ ...prev, ...d.sumate })); setDirtyCliente(true) }
-        if (d.editorial)   { setEditorial(prev => ({ ...prev, ...d.editorial })); setDirtyCliente(true) }
         if (d.videos)      { setVideosList(d.videos); setDirtyVideos(true) }
         if (d.testimonios) { setTestimoniosList(d.testimonios); setDirtyTestimonios(true) }
         if (d.faq)         { setFaqList(d.faq); setDirtyFaq(true) }
@@ -205,9 +179,10 @@ export default function ContenidoPage() {
     const draft: Record<string, unknown> = {}
     const pending: Record<string, unknown> = {}
     if (dirtyCliente) {
-      draft.hero = hero; draft.fuente = fuente; draft.sumate = sumate; draft.editorial = editorial
+      draft.hero = hero; draft.fuente = fuente; draft.sumate = sumate
       pending.cliente = {
-        ...Cliente, hero, fuente, sumateEquipo: sumate, editorial,
+        ...Cliente, hero, fuente, sumateEquipo: sumate,
+        editorial: (Cliente as Record<string, unknown>).editorial,
         whatsapp: { ...Cliente.whatsapp }, instagram: { ...Cliente.instagram },
         seo: { ...Cliente.seo, keywords: [...Cliente.seo.keywords] },
         colores: { ...Cliente.colores }, coordenadas: { ...Cliente.coordenadas },
@@ -219,7 +194,7 @@ export default function ContenidoPage() {
     if (dirtyFaq)         { draft.faq = faqList;                 pending.faq = faqList }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(draft))
     writePendingSection('contenido', pending)
-  }, [hero, fuente, sumate, editorial, videosList, testimoniosList, faqList,
+  }, [hero, fuente, sumate, videosList, testimoniosList, faqList,
       dirtyCliente, dirtyVideos, dirtyTestimonios, dirtyFaq, hasChanges])
 
   // Limpia estado al publicar desde el PublishBar global
@@ -257,31 +232,6 @@ export default function ContenidoPage() {
   }
   function removeBeneficio(idx: number) {
     setSumate(prev => ({ ...prev, beneficios: prev.beneficios.filter((_, i) => i !== idx) })); markCliente()
-  }
-
-  // Editorial helpers
-  function patchEditorial(key: keyof EditorialData, val: unknown) {
-    setEditorial(prev => ({ ...prev, [key]: val })); markCliente()
-  }
-  function patchEditorialStat(idx: number, key: 'n' | 'label', val: string) {
-    setEditorial(prev => {
-      const s = [...prev.stats]; s[idx] = { ...s[idx], [key]: val }; return { ...prev, stats: s }
-    }); markCliente()
-  }
-  function addEditorialStat() {
-    setEditorial(prev => ({ ...prev, stats: [...prev.stats, { n: '', label: '' }] })); markCliente()
-  }
-  function removeEditorialStat(idx: number) {
-    setEditorial(prev => ({ ...prev, stats: prev.stats.filter((_, i) => i !== idx) })); markCliente()
-  }
-  function patchEditorialBullet(idx: number, val: string) {
-    setEditorial(prev => { const b = [...prev.bullets]; b[idx] = val; return { ...prev, bullets: b } }); markCliente()
-  }
-  function addEditorialBullet() {
-    setEditorial(prev => ({ ...prev, bullets: [...prev.bullets, ''] })); markCliente()
-  }
-  function removeEditorialBullet(idx: number) {
-    setEditorial(prev => ({ ...prev, bullets: prev.bullets.filter((_, i) => i !== idx) })); markCliente()
   }
 
   // Testimonios helpers
@@ -451,9 +401,6 @@ export default function ContenidoPage() {
                 setSumate(currentSumate ?? {
                   visible: true, badge: '', titulo: '', descripcion: '',
                   beneficios: [], ctaTexto: '', imagenEquipo: '', badgeNumero: '', badgeTexto: '',
-                })
-                setEditorial(currentEditorial ?? {
-                  bio1: '', bio2: '', stats: [], bullets: [],
                 })
                 setVideosList(initialVideos.map(v => ({ ...v })))
                 setTestimoniosList(initialTestimonios.map(t => ({ ...t })))
@@ -742,48 +689,6 @@ export default function ContenidoPage() {
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             Agregar video
           </button>
-        </div>
-      </Seccion>
-
-      {/* ── Editorial: Quién soy ── */}
-      <Seccion title="Quién soy — Sección &quot;Daisy Benítez&quot;">
-        <Field label="Párrafo bio 1" value={editorial.bio1} onChange={v => patchEditorial('bio1', v)} textarea />
-        <Field label="Párrafo bio 2" value={editorial.bio2} onChange={v => patchEditorial('bio2', v)} textarea />
-
-        {/* Stats */}
-        <div>
-          <label className="block text-xs font-medium text-texto mb-2">Números destacados</label>
-          <div className="space-y-2">
-            {editorial.stats.map((s, i) => (
-              <div key={i} className="flex gap-2 items-center">
-                <input value={s.n} onChange={e => patchEditorialStat(i, 'n', e.target.value)}
-                  placeholder="200+"
-                  className="w-20 px-3 py-2 rounded-xl border border-teal/20 focus:outline-none focus:border-teal text-sm bg-white text-texto font-bold text-center" />
-                <input value={s.label} onChange={e => patchEditorialStat(i, 'label', e.target.value)}
-                  placeholder="familias equipadas"
-                  className="flex-1 px-3 py-2 rounded-xl border border-teal/20 focus:outline-none focus:border-teal text-sm bg-white text-texto" />
-                <button onClick={() => removeEditorialStat(i)}
-                  className="px-2.5 py-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors text-sm">✕</button>
-              </div>
-            ))}
-          </div>
-          <button onClick={addEditorialStat} className="text-xs text-teal hover:text-teal-dark font-medium mt-2">+ Agregar número</button>
-        </div>
-
-        {/* Bullets */}
-        <div>
-          <label className="block text-xs font-medium text-texto mb-2">Puntos destacados</label>
-          <div className="space-y-2">
-            {editorial.bullets.map((b, i) => (
-              <div key={i} className="flex gap-2">
-                <input value={b} onChange={e => patchEditorialBullet(i, e.target.value)}
-                  className="flex-1 px-3 py-2 rounded-xl border border-teal/20 focus:outline-none focus:border-teal text-sm bg-white text-texto" />
-                <button onClick={() => removeEditorialBullet(i)}
-                  className="px-3 py-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors text-sm">✕</button>
-              </div>
-            ))}
-          </div>
-          <button onClick={addEditorialBullet} className="text-xs text-teal hover:text-teal-dark font-medium mt-2">+ Agregar punto</button>
         </div>
       </Seccion>
 
