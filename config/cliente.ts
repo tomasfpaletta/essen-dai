@@ -64,8 +64,9 @@ export const Cliente = {
     "imagen": "",
     "imagenIzquierda": "/images/hero/hero-izquierda.webp",
     "imagenesHero": [
-      "/images/hero/hero-rotante-1777240220828.webp",
-      "/images/hero/hero-rotante-1777240227187.webp"
+      "/images/hero/hero-rotante-1777240227187.webp",
+      "/images/hero/hero-rotante-1777840722370.webp",
+      "/images/hero/hero-rotante-1777840756160.webp"
     ],
     "heroBadges": [
       {
