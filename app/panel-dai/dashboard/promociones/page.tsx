@@ -2,6 +2,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { promocionesBanner, promocionesItems, type PromoItem, type PromocionesConfig } from '@/config/promociones'
 import { writePendingSection, clearPendingSection, DRAFT_KEYS, PUBLISHED_EVENT } from '@/lib/admin-pending'
+import { productos } from '@/lib/products'
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 function uid() {
@@ -434,6 +435,141 @@ function BancosImageUploader() {
   )
 }
 
+// ── Links rápidos del sitio ───────────────────────────────────────────────────
+const QUICK_LINKS = [
+  { label: 'Sección Productos',   value: '#productos'   },
+  { label: 'Sección Promociones', value: '#promociones' },
+  { label: 'Sección Sumate',      value: '#equipo'      },
+  { label: 'Sección Contacto',    value: '#contacto'    },
+]
+
+// ── Selector de producto / link ───────────────────────────────────────────────
+function ProductLinkPicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const [query, setQuery]     = useState('')
+  const [open, setOpen]       = useState(false)
+  const ref                   = useRef<HTMLDivElement>(null)
+
+  // Cerrar al hacer click fuera
+  useEffect(() => {
+    function handler(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+
+  // Label que se muestra en el campo cuando hay un valor seleccionado
+  const selectedProduct = value.startsWith('/productos/')
+    ? productos.find(p => `/productos/${p.id}` === value)
+    : null
+  const selectedQuick = QUICK_LINKS.find(l => l.value === value)
+  const displayLabel = selectedProduct?.nombre ?? selectedQuick?.label ?? value
+
+  const q = query.toLowerCase()
+  const filteredProductos = q
+    ? productos.filter(p => p.nombre.toLowerCase().includes(q) || p.categoria.toLowerCase().includes(q))
+    : productos
+
+  function select(v: string) {
+    onChange(v)
+    setQuery('')
+    setOpen(false)
+  }
+
+  function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setQuery(e.target.value)
+    onChange(e.target.value)   // también permite escribir un link manual
+    if (!open) setOpen(true)
+  }
+
+  const inputDisplay = open ? query : displayLabel
+
+  return (
+    <div ref={ref} className="relative">
+      <div className="flex items-center gap-2 border border-gray-200 rounded-xl px-3 py-2 focus-within:border-teal/50 bg-white">
+        <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 text-gray-400 flex-shrink-0">
+          <path fillRule="evenodd" d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 11-2.828-2.828l3-3z" clipRule="evenodd"/>
+        </svg>
+        <input
+          type="text"
+          value={inputDisplay}
+          onChange={handleInputChange}
+          onFocus={() => { setQuery(''); setOpen(true) }}
+          placeholder="Buscar producto o escribir link…"
+          className="flex-1 text-sm focus:outline-none bg-transparent"
+        />
+        {value && (
+          <button type="button" onClick={() => { onChange(''); setQuery(''); setOpen(false) }}
+            className="text-gray-300 hover:text-gray-500 transition-colors flex-shrink-0">
+            <svg viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5">
+              <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd"/>
+            </svg>
+          </button>
+        )}
+        <button type="button" onClick={() => setOpen(v => !v)}
+          className="text-gray-300 hover:text-gray-500 transition-colors flex-shrink-0">
+          <svg viewBox="0 0 20 20" fill="currentColor" className={`w-4 h-4 transition-transform ${open ? 'rotate-180' : ''}`}>
+            <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd"/>
+          </svg>
+        </button>
+      </div>
+
+      {open && (
+        <div className="absolute z-50 left-0 right-0 mt-1.5 bg-white border border-gray-100 rounded-2xl shadow-xl overflow-hidden max-h-72 overflow-y-auto">
+          {/* Links rápidos — solo si no hay búsqueda */}
+          {!query && (
+            <>
+              <p className="px-3 pt-3 pb-1 text-[10px] font-semibold text-gray-400 uppercase tracking-widest">Secciones</p>
+              {QUICK_LINKS.map(l => (
+                <button key={l.value} type="button" onClick={() => select(l.value)}
+                  className={`w-full flex items-center gap-2.5 px-3 py-2 text-sm text-left hover:bg-teal/5 transition-colors ${value === l.value ? 'text-teal font-semibold' : 'text-texto'}`}>
+                  <span className="w-5 h-5 rounded-md bg-teal/10 flex items-center justify-center flex-shrink-0">
+                    <svg viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3 text-teal">
+                      <path fillRule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd"/>
+                    </svg>
+                  </span>
+                  {l.label}
+                </button>
+              ))}
+              <div className="border-t border-gray-100 mx-3 my-1" />
+              <p className="px-3 pt-1 pb-1 text-[10px] font-semibold text-gray-400 uppercase tracking-widest">Productos</p>
+            </>
+          )}
+
+          {filteredProductos.length === 0 && (
+            <p className="px-4 py-6 text-sm text-center text-gray-400">Sin resultados para &ldquo;{query}&rdquo;</p>
+          )}
+
+          {filteredProductos.map(p => {
+            const link = `/productos/${p.id}`
+            const foto = p.variantes.find(v => v.imagen)?.imagen
+            return (
+              <button key={p.id} type="button" onClick={() => select(link)}
+                className={`w-full flex items-center gap-3 px-3 py-2 text-left hover:bg-teal/5 transition-colors ${value === link ? 'bg-teal/5' : ''}`}>
+                {foto ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={foto} alt={p.nombre} className="w-8 h-8 rounded-lg object-cover flex-shrink-0 border border-gray-100" />
+                ) : (
+                  <div className="w-8 h-8 rounded-lg bg-gray-100 flex-shrink-0" />
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className={`text-sm font-medium truncate ${value === link ? 'text-teal' : 'text-texto'}`}>{p.nombre}</p>
+                  <p className="text-[11px] text-gray-400 capitalize">{p.categoria}</p>
+                </div>
+                {value === link && (
+                  <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 text-teal flex-shrink-0">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
+                  </svg>
+                )}
+              </button>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ── Main page ─────────────────────────────────────────────────────────────────
 export default function PromocionesPage() {
   const [banner, setBanner] = useState<PromocionesConfig>({ ...promocionesBanner })
@@ -582,7 +718,7 @@ export default function PromocionesPage() {
             <Input value={banner.ctaTexto} onChange={v => patchBanner('ctaTexto', v)} placeholder="Ver ofertas" />
           </Field>
           <Field label="Link del CTA">
-            <Input value={banner.ctaLink} onChange={v => patchBanner('ctaLink', v)} placeholder="#productos" />
+            <ProductLinkPicker value={banner.ctaLink} onChange={v => patchBanner('ctaLink', v)} />
           </Field>
         </div>
 
