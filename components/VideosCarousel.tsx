@@ -111,7 +111,7 @@ export default function VideosCarousel() {
   // Estado vacío — maqueta
   if (activos.length === 0) {
     return (
-      <section className="py-20 bg-white px-6 sm:px-12 lg:px-20">
+      <section id="nosotros" className="py-20 bg-white px-6 sm:px-12 lg:px-20">
         <div className="max-w-5xl mx-auto">
           <p className="text-teal text-xs font-semibold uppercase tracking-[0.2em] mb-3">Videos</p>
           <h2 className="font-heading text-texto text-3xl sm:text-4xl mb-10">Conocé más sobre Essen</h2>
@@ -145,7 +145,7 @@ export default function VideosCarousel() {
   const next = () => setIdx((idx + 1) % activos.length);
 
   return (
-    <section className="py-20 bg-white px-6 sm:px-12 lg:px-20">
+    <section id="nosotros" className="py-20 bg-white px-6 sm:px-12 lg:px-20">
       <div className="max-w-5xl mx-auto">
 
         {/* Header */}
