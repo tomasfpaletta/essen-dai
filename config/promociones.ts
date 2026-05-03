@@ -13,6 +13,7 @@ export type PromoItem = {
   imagen: string
   activo: boolean
   fechaFin?: string
+  ctaLink?: string
 }
 
 export type PromocionesConfig = {

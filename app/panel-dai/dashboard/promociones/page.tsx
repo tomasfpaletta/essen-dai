@@ -717,9 +717,6 @@ export default function PromocionesPage() {
           <Field label="Texto del CTA">
             <Input value={banner.ctaTexto} onChange={v => patchBanner('ctaTexto', v)} placeholder="Ver ofertas" />
           </Field>
-          <Field label="Link del CTA">
-            <ProductLinkPicker value={banner.ctaLink} onChange={v => patchBanner('ctaLink', v)} />
-          </Field>
         </div>
 
         {/* Gradiente */}
@@ -854,6 +851,12 @@ export default function PromocionesPage() {
                   <Field label="Badge">
                     <Input value={item.badge} onChange={v => patchItem(item.id, 'badge', v)} />
                   </Field>
+                  <div className="sm:col-span-2">
+                    <Field label="Link del botón (opcional)">
+                      <ProductLinkPicker value={item.ctaLink ?? ''} onChange={v => patchItem(item.id, 'ctaLink', v)} />
+                    </Field>
+                    <p className="text-xs text-gray-400 mt-1.5">Si no seleccionás un link, el botón abre WhatsApp.</p>
+                  </div>
                   <Field label="Descripción">
                     <Textarea value={item.descripcion} onChange={v => patchItem(item.id, 'descripcion', v)} rows={2} />
                   </Field>

@@ -193,8 +193,8 @@ export default function Promociones() {
                         </div>
                         <div className="mt-4">
                           <a
-                            href={`${Cliente.whatsapp.link}?text=${waMsg(item.titulo)}`}
-                            target="_blank"
+                            href={item.ctaLink || `${Cliente.whatsapp.link}?text=${waMsg(item.titulo)}`}
+                            target={item.ctaLink ? "_self" : "_blank"}
                             rel="noopener noreferrer"
                             className="inline-block bg-white text-sm font-bold px-4 py-2 rounded-xl hover:bg-white/90 transition-colors"
                             style={{ color: config.gradienteDesde }}
